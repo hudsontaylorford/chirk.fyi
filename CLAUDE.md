@@ -10,4 +10,4 @@ Ponytail (above) is on for every session in this repo, at the **full** level.
 - **Phone first.** Test every screen at iPhone size. Big tap targets, short forms, no hover-only UI.
 - **The design isn't decided yet.** Keep the look plain (tokens in `src/app/globals.css`) and don't make bold visual choices until Hudson brings direction.
 - **The owner (Hudson) isn't a developer.** Explain setup and deploy steps one at a time in plain language, and keep `SETUP.md` up to date.
-- Stack: Next.js App Router + Tailwind on Vercel, Postgres on Supabase via `DATABASE_URL`. Schema is `db/schema.sql` (paste into the Supabase SQL editor; keep it re-runnable).
+- Stack: Next.js App Router + Tailwind on Vercel, Postgres on Neon (created through Vercel) via `DATABASE_URL`. Schema is `db/schema.sql` (paste into the Neon SQL editor; keep it re-runnable).

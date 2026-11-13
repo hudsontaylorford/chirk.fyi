@@ -1,10 +1,8 @@
 # Getting the site live
 
-About 30 minutes. You'll make three free accounts: GitHub (stores the code), Supabase (stores the RSVPs), and Vercel (runs the website). Do them in this order.
+About 20 minutes. Everything happens in **Vercel**, which runs the website and also creates the database (Neon, free) for you. No separate database account to manage.
 
-You'll come out of this with two secrets. Keep them in your password manager:
-- **Database password** (from step 2)
-- **Host password** (you pick it in step 3; it's what you and Molly type to open the host view)
+You'll pick one secret: the **host password** that you and Molly type to open the host page. Keep it in your password manager.
 
 ---
 
@@ -12,32 +10,25 @@ You'll come out of this with two secrets. Keep them in your password manager:
 
 Done: the code lives in `hudsontaylorford/chirk.fyi`.
 
-## 2. Supabase: the database
+## 2. Vercel: the website
 
-1. Go to **supabase.com**, click **Start your project**, and sign in with GitHub.
-2. Click **New project**.
-   - Name: `chirk`
-   - Database password: click **Generate a password**, then **copy it into your password manager now**.
-   - Region: **East US (North Virginia)**
-   - Click **Create new project** and wait about 2 minutes.
-3. In the left sidebar, open **SQL Editor**.
-4. Open `db/schema.sql` from the code on GitHub. Copy the whole file, paste it into the editor, and click **Run**. You should see "Success. No rows returned."
-5. Click **+ New query**. Paste the whole of `db/thanksgiving-2026.sql` and click **Run**. This creates Thanksgiving 2026.
-6. Click the **Connect** button at the top of the page. Under **Transaction pooler**, copy the connection string. It starts with `postgresql://postgres.` and ends with `:6543/postgres`.
-7. In that string, replace `[YOUR-PASSWORD]` with the database password from step 2 (remove the square brackets too). This is your **DATABASE_URL**. Keep it handy for the next section.
-
-## 3. Vercel: the website
-
-1. Go to **vercel.com** and sign up with GitHub. Pick the free **Hobby** plan.
-2. Click **Add New… → Project**. Find `chirk.fyi` and click **Import**. (If it's not listed, click "Adjust GitHub App Permissions" and give Vercel access to that repository.)
-3. Before deploying, open **Environment Variables** and add two:
+1. Go to **vercel.com** and sign in with GitHub (the free **Hobby** plan is all you need).
+2. Click **Add New… → Project**. Find `chirk.fyi` and click **Import**. (Not listed? Click "Adjust GitHub App Permissions" and give Vercel access to that repository.)
+3. Open **Environment Variables** and add one:
    | Name | Value |
    |---|---|
-   | `DATABASE_URL` | the string from Supabase step 7 |
-   | `ADMIN_PASSWORD` | a password you choose for the host view |
-4. Click **Deploy** and wait about a minute.
-5. You'll get an address like `event-kit-xyz.vercel.app`. Open `/thanksgiving-2026` on it from your phone.
-6. Open `/thanksgiving-2026/host`, enter your host password, and you're in.
+   | `ADMIN_PASSWORD` | a password you choose for the host page |
+4. Click **Deploy** and wait about a minute. The site won't work yet (it has no database), and that's expected.
+
+## 3. Neon: the database (created from inside Vercel)
+
+1. In your Vercel project, open the **Storage** tab, click **Create Database**, choose **Neon**, and accept the defaults. Free plan; pick the **US East** region if asked.
+2. When it asks which project to connect, choose `chirk.fyi`. Vercel adds the database address (`DATABASE_URL`) to your project automatically.
+3. Still in Storage, click **Open in Neon**, then **SQL Editor** in Neon's sidebar.
+4. Open `db/schema.sql` on GitHub, copy the whole file, paste it into the editor, and click **Run**.
+5. Clear the editor, paste the whole of `db/thanksgiving-2026.sql`, and click **Run**. This creates Thanksgiving 2026.
+6. Back in Vercel: **Deployments** tab → the **⋯** menu on the latest one → **Redeploy**.
+7. Open `your-project.vercel.app/thanksgiving-2026` on your phone. Then try `/thanksgiving-2026/host` with your host password.
 
 From then on, whenever Claude pushes changes to GitHub, Vercel updates the live site automatically within a minute or two.
 

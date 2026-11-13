@@ -1,4 +1,4 @@
--- Creates Thanksgiving 2026. Paste into Supabase → SQL Editor → Run (after schema.sql).
+-- Creates Thanksgiving 2026. Paste into Neon → SQL Editor → Run (after schema.sql).
 with e as (
   insert into events (slug, title, date, time, place, address, rsvp_by, bring_prompt, details)
   values (

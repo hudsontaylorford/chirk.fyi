@@ -1,4 +1,4 @@
--- chirk: database schema. Paste into Supabase → SQL Editor → Run. Safe to re-run.
+-- chirk: database schema. Paste into Neon → SQL Editor → Run. Safe to re-run.
 -- Three tables: an event, the households who reply, and the things people bring.
 
 create extension if not exists pgcrypto;
@@ -46,7 +46,7 @@ create table if not exists items (
 create index if not exists items_event on items(event_id);
 create index if not exists households_event on households(event_id);
 
--- Only the site's server reads the database; this shuts Supabase's public API out.
+-- Only the site's server reads the database. (Row-level security also blocks any auto-generated public API.)
 alter table events enable row level security;
 alter table households enable row level security;
 alter table items enable row level security;

@@ -9,7 +9,7 @@ A tiny, phone-first invite + RSVP site. Day one of a DIY Partiful. First event: 
 To get it live, see **[SETUP.md](SETUP.md)**.
 
 ## How it's built
-- Next.js + Tailwind on Vercel. Postgres on Supabase, reached directly through `DATABASE_URL`.
+- Next.js + Tailwind on Vercel. Postgres on Neon (free, created through Vercel), reached directly through `DATABASE_URL`.
 - Three tables (`db/schema.sql`): `events`, `households` (one reply each, with a private `token`), `items` (needed list + what people bring).
 - An event with no `bring_prompt` is a plain invite + RSVP (birthdays, dinners, anything).
 - The look is intentionally plain until it's designed. Colors live in `src/app/globals.css`.
