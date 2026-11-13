@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { Details } from "@/components/Details";
 import { joinNames } from "@/lib/data";
 import { clock, longDate, mapsUrl, shortDate } from "@/lib/format";
 import type { EventData } from "@/lib/types";
@@ -43,14 +44,14 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
 
       {event.details && (
         <section className="mt-6 space-y-3 px-5 text-[17px] leading-relaxed">
-          {event.details.split(/\n\s*\n/).map((p, i) => <p key={i}>{p}</p>)}
+          <Details text={event.details} />
           {event.rsvp_by && <p className="text-soft">Please reply by {shortDate(event.rsvp_by)}.</p>}
         </section>
       )}
 
       {event.bring_prompt && (
         <section className="mt-8 px-5">
-          <h2 className="text-[20px] font-bold">The menu</h2>
+          <h2 className="text-[20px] font-bold">Who&apos;s bringing what</h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
             {needed.map((i) => (
               <li key={i.id} className="flex items-baseline justify-between gap-3 py-3 text-[17px]">

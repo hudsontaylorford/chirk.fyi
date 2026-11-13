@@ -59,6 +59,19 @@ What generalizes, in the order we'd actually need it:
 
 What we should **not** build: a form builder, custom question types, per-event schemas, or JSON blobs of "settings". They feel flexible but turn the host's 1-minute setup into a 10-minute one, and that's exactly the complexity we're avoiding.
 
+## Gaps found by pasting a real group text (Jets vs Bills tailgate, Nov 14)
+
+Fits today: title, date, place + address, a bring list (chairs, snacks, ice), RSVP, and since Nov 14 the details keep headings, bullets, bold labels and tappable links.
+
+Missing, roughly in order of value:
+1. **End time + several times in a day.** "Car leaves 7:45, kickoff 1:00, ends ~4:00." Today there's one time, and the calendar guesses 3 hours. Add an end time; the schedule itself is fine as a bulleted list.
+2. **Rides / spots.** "My car departs 7:45", "if driving separately…". This is the "spots per item" idea (Car: 4 seats).
+3. **Cost per person and who's paid.** "$163 per person." A cost line plus a paid ✓ the host ticks. No payments in-app, just a Venmo/Zelle link.
+4. **Host updates.** "We'll coordinate in the group Sunday morning." A short "Update from Hudson" at the top of the page (no chat).
+5. **Per-event switches.** Kids, couples and reply-by don't apply to a tailgate. Let the host turn them off.
+6. **Weather.** Automatic for the date and place, shown a few days before.
+7. **Several photos.** Later.
+
 ## What carries over from the Post Up brief and mockups (Nov 14)
 
 The original brief (Post Up: "tell people where you'll be, when, and whether they're welcome") is the same product as chirk. Its rules still hold:
