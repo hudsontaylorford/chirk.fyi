@@ -101,6 +101,6 @@ export const KITCHEN_NEEDS: { value: KitchenNeed; label: string }[] = [
 
 export const ARRIVALS: { value: Arrival; label: string; hint: string }[] = [
   { value: "morning", label: "Morning", hint: "for bagels" },
-  { value: "afternoon", label: "Afternoon", hint: "for apps & the game" },
+  { value: "afternoon", label: "Afternoon", hint: "for apps" },
   { value: "dinner", label: "Just for dinner", hint: "" },
 ];
