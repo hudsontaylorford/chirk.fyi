@@ -3,7 +3,7 @@
 // Locally, EMAIL_FAKE=true prints what would have been sent; otherwise nothing is sent.
 import { headers } from "next/headers";
 
-export type Email = { to: string; subject: string; html: string; text: string; idempotencyKey: string };
+export type Email = { to: string; subject: string; html: string; text: string; idempotencyKey: string; replyTo?: string | null };
 
 export async function sendEmail(e: Email): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
@@ -18,7 +18,7 @@ export async function sendEmail(e: Email): Promise<boolean> {
       body: JSON.stringify({
         from: "chirk <invites@chirk.fyi>",
         to: [e.to],
-        reply_to: process.env.EMAIL_REPLY_TO || undefined,
+        reply_to: e.replyTo || process.env.EMAIL_REPLY_TO || undefined,
         subject: e.subject, html: e.html, text: e.text,
       }),
       signal: AbortSignal.timeout(15_000),

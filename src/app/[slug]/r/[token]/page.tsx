@@ -53,6 +53,8 @@ export default async function YourRsvp({
           slug={slug}
           bringPrompt={data.event.bring_prompt}
           askKids={data.event.ask_kids}
+          notePrompt={data.event.note_prompt}
+          noteHint={data.event.note_hint}
           openItems={open}
           initial={{
             token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "", email: h.email ?? "",

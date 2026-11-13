@@ -13,6 +13,9 @@ export interface Event {
   bring_prompt: string | null;
   status: "draft" | "live" | "archived";
   ask_kids: boolean;
+  notify_host: boolean;
+  note_prompt: string | null;
+  note_hint: string | null;
 }
 
 export interface Household {

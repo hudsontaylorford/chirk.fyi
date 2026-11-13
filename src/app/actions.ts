@@ -2,10 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { isHost } from "@/lib/auth";
 import { joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
+import { replyEmail } from "@/lib/reply-email";
 
 export interface RsvpInput {
   slug: string;
@@ -34,7 +36,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const email = (input.email ?? "").trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string }[]>`select id from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean }[]>`select id, notify_host from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
 
   // A second reply under a name that's already here is almost always a mistake.
@@ -99,6 +101,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     revalidatePath(`/${input.slug}`, "layout");
     // A new or changed email gets the private link right away.
     if (emailChanged) await emailLinks(input.slug, { token });
+    // The host's own edits (from the host page) don't email the host.
+    if (event.notify_host && !(await isHost())) await notifyHost(input.slug, token, !!input.token);
     return { ok: true, token };
   } catch (e) {
     if (e instanceof Oops) return { ok: false, error: e.message, refresh: true };
@@ -133,4 +137,20 @@ export async function emailMyLink(slug: string, _prev: string | null, f: FormDat
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";
   await emailLinks(slug, { email });
   return `If ${email} is on a reply, the link is on its way. Check your inbox (and spam).`;
+}
+
+/** Emails the host about a reply. Replying to that email goes straight to the guest when they left an email. */
+async function notifyHost(slug: string, token: string, changed: boolean) {
+  const to = process.env.EMAIL_REPLY_TO;
+  if (!to) return;
+  const [r] = await sql<{ id: string; names: string[]; going: boolean; kids: number; note: string | null; email: string | null; title: string; bringing: string[] }[]>`
+    select h.id, h.names, h.going, h.kids, h.note, h.email, e.title,
+      coalesce((select array_agg(i.name order by i.kind) from items i where i.household_id = h.id), '{}') as bringing
+    from households h join events e on e.id = h.event_id where e.slug = ${slug} and h.token = ${token}`;
+  if (!r) return;
+  const mail = replyEmail({
+    title: r.title, names: joinNames(r.names), going: r.going, adults: r.names.length, kids: r.kids,
+    bringing: r.bringing, note: r.note, changed, hostUrl: `${await siteUrl()}/${slug}/host`,
+  });
+  await sendEmail({ to, ...mail, replyTo: r.email, idempotencyKey: `reply-note-${r.id}-${Math.floor(Date.now() / 60_000)}` });
 }

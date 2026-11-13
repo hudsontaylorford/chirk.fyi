@@ -22,9 +22,17 @@ export function EventFields({ event }: { event?: Event }) {
         label="“What are you bringing?” question (blank = no bring list)"
         name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. Bringing anything?"
       />
+      <div className="grid grid-cols-2 gap-3">
+        <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
+        <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />
+      </div>
       <label className="flex items-center gap-3 py-1 text-[16px]">
         <input type="checkbox" name="ask_kids" defaultChecked={event?.ask_kids ?? true} className="h-5 w-5" />
         Ask how many kids are coming
+      </label>
+      <label className="flex items-center gap-3 py-1 text-[16px]">
+        <input type="checkbox" name="notify_host" defaultChecked={event?.notify_host ?? false} className="h-5 w-5" />
+        Email me when someone replies
       </label>
     </>
   );

@@ -8,6 +8,8 @@ export interface RsvpFormProps {
   slug: string;
   bringPrompt: string | null;
   askKids: boolean;
+  notePrompt: string | null;
+  noteHint: string | null;
   openItems: { id: string; name: string }[]; // still-needed items (plus this household's own pick)
   initial?: {
     token: string;
@@ -24,7 +26,7 @@ export interface RsvpFormProps {
 
 const SUGGESTIONS = ["Drinks", "Dessert", "An appetizer"];
 
-export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, openItems, initial }: RsvpFormProps) {
   const router = useRouter();
   const [busy, start] = useTransition();
   const [error, setError] = useState<{ text: string; sameName?: boolean } | null>(null);
@@ -159,10 +161,10 @@ export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: Rsv
       )}
 
       {going !== null && (
-        <Q label="Anything we should know?" hint="Optional">
+        <Q label={notePrompt || "Anything we should know?"} hint="Optional">
           <textarea
             className="field" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
-            placeholder={going ? "Allergies, needs oven time, arriving late…" : "A note for the hosts"}
+            placeholder={going ? noteHint || "Allergies, arriving late…" : "A note for the hosts"}
           />
         </Q>
       )}

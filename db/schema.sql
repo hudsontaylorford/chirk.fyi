@@ -31,6 +31,9 @@ begin
   alter table events add column if not exists ask_kids boolean not null default true;
   alter table households add column if not exists email text;
   alter table events add column if not exists end_time time; -- at or before the start = the next day
+  alter table events add column if not exists notify_host boolean not null default false; -- email the host about replies
+  alter table events add column if not exists note_prompt text; -- null = "Anything we should know?"
+  alter table events add column if not exists note_hint text;   -- the faded example in that box
 
   create table if not exists households (
     id uuid primary key default gen_random_uuid(),
