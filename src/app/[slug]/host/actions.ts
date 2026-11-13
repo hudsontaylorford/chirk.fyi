@@ -1,5 +1,6 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { checkPassword, clearHostCookie, requireHost, setHostCookie } from "@/lib/auth";
@@ -117,4 +118,27 @@ export async function saveEvent(slug: string, f: FormData) {
   if (!fields.title || !fields.date) return;
   await sql`update events set ${sql(fields)} where slug = ${slug}`;
   revalidatePath(`/${slug}`, "layout");
+}
+
+/**
+ * Stores an already-shrunk cover photo (a JPEG made on the host's phone) and returns its public link,
+ * which the event form then saves like any other cover link.
+ */
+export async function uploadPhoto(f: FormData): Promise<{ url: string } | { error: string }> {
+  await requireHost();
+  const file = f.get("photo");
+  if (!(file instanceof File) || file.type !== "image/jpeg" || file.size > 2 * 1024 * 1024) {
+    return { error: "That photo didn't come through. Try again." };
+  }
+  // Local testing without Blob storage: PHOTOS_FAKE=true keeps the photo inline.
+  if (process.env.PHOTOS_FAKE === "true" && !process.env.BLOB_READ_WRITE_TOKEN) {
+    return { url: `data:image/jpeg;base64,${Buffer.from(await file.arrayBuffer()).toString("base64")}` };
+  }
+  try {
+    const blob = await put("covers/photo.jpg", file, { access: "public", contentType: "image/jpeg", addRandomSuffix: true });
+    return { url: blob.url };
+  } catch (e) {
+    console.error("Photo upload failed:", e);
+    return { error: "The upload didn't work. Try again in a moment." };
+  }
 }

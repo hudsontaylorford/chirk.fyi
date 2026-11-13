@@ -1,4 +1,4 @@
-import { Cover } from "@/components/Cover";
+import { CoverInput } from "@/components/CoverInput";
 import { DetailsInput } from "@/components/DetailsInput";
 import type { Event } from "@/lib/types";
 
@@ -15,8 +15,8 @@ export function EventFields({ event }: { event?: Event }) {
       <Field label="Address" name="address" value={event?.address} />
       <DetailsInput value={event?.details ?? ""} />
       <Field label="Reply by" name="rsvp_by" type="date" value={event?.rsvp_by} />
-      <Field label="Cover image URL (optional)" name="cover_url" value={event?.cover_url} />
-      {event?.cover_url && <Cover src={event.cover_url} host />}
+      {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
+      <CoverInput value={event?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
       <Field
         label="“What are you bringing?” question (blank = no bring list)"
         name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. Bringing anything?"
