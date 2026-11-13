@@ -11,7 +11,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const e = await getEvent((await params).slug);
   if (!e) return {};
   const description = `${longDate(e.date)}${e.time ? ` · ${clock(e.time)}` : ""}${e.place ? ` · ${e.place}` : ""}`;
-  return { title: e.title, description, openGraph: { title: e.title, description } };
+  const images = e.cover_url ? [e.cover_url] : undefined;
+  return {
+    title: e.title, description,
+    openGraph: { title: e.title, description, images },
+    twitter: { card: images ? "summary_large_image" : "summary", title: e.title, description, images },
+  };
 }
 
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {

@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { isHost } from "@/lib/auth";
 import { getEventData, joinNames } from "@/lib/data";
@@ -96,7 +97,7 @@ export default async function HostPage({
           </ul>
           <form action={act.addItem.bind(null, slug)} className="mt-3 flex gap-2">
             <input name="name" className="field" placeholder="Add something needed" />
-            <button className="btn">Add</button>
+            <SaveButton>Add</SaveButton>
           </form>
         </>
       )}
@@ -117,8 +118,10 @@ export default async function HostPage({
           </label>
           <Field label="Reply by" name="rsvp_by" type="date" value={event.rsvp_by} />
           <Field label="Cover image URL (optional)" name="cover_url" value={event.cover_url} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          {event.cover_url && <img src={event.cover_url} alt="Current cover" className="h-auto w-32 rounded-lg" />}
           <Field label="“What are you bringing?” question (blank = turn off)" name="bring_prompt" value={event.bring_prompt} />
-          <button className="btn w-full">Save</button>
+          <SaveButton className="btn w-full">Save</SaveButton>
         </form>
       </details>
     </main>
