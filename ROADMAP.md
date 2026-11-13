@@ -59,6 +59,44 @@ What generalizes, in the order we'd actually need it:
 
 What we should **not** build: a form builder, custom question types, per-event schemas, or JSON blobs of "settings". They feel flexible but turn the host's 1-minute setup into a 10-minute one, and that's exactly the complexity we're avoiding.
 
+## What carries over from the Post Up brief and mockups (Nov 14)
+
+The original brief (Post Up: "tell people where you'll be, when, and whether they're welcome") is the same product as chirk. Its rules still hold:
+- **One object with a URL.** Guests never install or sign up; account creation is an enhancement.
+- **Create in under 30 seconds, respond in under 15.**
+- **Chronological, never ranked. Information is enough.**
+- **"Easier to create than an event, easier to open than an app invite, more intentional than sharing your live location."**
+
+**For the invite page, soon (small):**
+- **Show the host:** "Hudson & Molly are hosting", or Post Up's "Hudson is posted up at…".
+- **End time:** "4:30 → 9 PM" or "until late".
+- **State:** "Starts in 2 days" / "Happening now" / "Ended".
+- **Coming as initials in colored circles** (like the mockups) rather than a plain line of names.
+- **One row of quiet actions:** Directions · Calendar · Share.
+
+**For the feed, when circles exist:** the "schedule" mockup is the right shape. One block per plan:
+- initial or avatar
+- **WHO**
+- **WHERE** (biggest)
+- area · date
+- `1:00 PM → 11:00 PM` with "3H LEFT" or "UNTIL 11PM" on the right
+- friends-going circles
+- one small tag (Ticketed show, Outside, Working)
+
+Group it under **Today / Tomorrow / This week**.
+
+The Craigslist version's *look* is great, but its table columns are what make it hard to read on a 390px phone. Keep the monospace type, blue links and thin rules, and **stack** each plan into two or three lines instead of five columns. Both are the same data rendered differently (brief §18), which is why chirk keeps its look in a few tokens.
+
+**The map comes after the feed.** The brief itself concluded the feed answers the better question ("who's around today?"). Start with "Directions" links to Apple/Google Maps; add a real map view of the same feed only once the feed is used.
+
+**Fields to add when we build plans (not before):** end time, time zone, host account, visibility (public / link / circles / passcode), cancelled/ended, place name + address (map coordinates later), one tag, an optional ticket/external link.
+- **Passcode** is cheap and fits "anyone can join without an account" for semi-private plans.
+- **"Maybe"** stays off unless a plan type needs it.
+
+**Words:** chirk is the app; "post up" can be the verb inside it. "+ Post up" is the create button, and "Hudson is posted up at Citi Field" is the casual plan's headline. Big invites like Thanksgiving keep their own title.
+
+**Design territories** (bulletin board, Cash App/BRAT, Craigslist) all stay open. Today's plain black and white sits closest to Cash App minus the color. Because each event can carry its own look, a themed invite (paper, pegboard) could be a per-event option later without forcing it on the whole app.
+
 ## Postup audit (Nov 13, `main` @ `0eab59a`, plus open PR #5)
 
 **Checks:** lint clean · 6/6 tests pass (PR #5 adds 9 more) · builds on Next 16.2.11.
