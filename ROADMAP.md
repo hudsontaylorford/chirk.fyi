@@ -28,7 +28,7 @@ The feel stays the same at every size: lightweight, web-based, simple, mindless,
 Every layer is **off unless the host turns it on**. A plan stays one screen for guests no matter which layers are on.
 
 ### People
-- **Hosts have accounts** (Postup's sign-in), so they can see their plans in one place.
+- **Hosts have accounts** (sign-in, see "Where it lives"), so they can see their plans in one place.
 - **Guests never need an account.** They get a private link to their reply (chirk's model). That's what makes it work for grandma.
 - Later, a guest who *does* sign up can attach past replies to their account. Optional, never required.
 
