@@ -37,3 +37,30 @@ export function inline(text: string): { bold?: boolean; href?: string; text: str
       : { text: p },
     );
 }
+
+/**
+ * "Auto-format": turns a pasted group text into the explicit marks above, so the host can see and edit them.
+ * - pasted bullets (•, *, "a • b" on one line) become "- " lines
+ * - a block's short first line (≤ 40 chars, no colon or ending punctuation) with more lines under it becomes "# Title"
+ * - a line starting "Label: " becomes "**Label:** "
+ * Running it twice changes nothing.
+ */
+export function autoFormat(text: string): string {
+  return text
+    .replace(/\r/g, "")
+    .split(/\n\s*\n/)
+    .map((chunk) => {
+      const lines = chunk
+        .split("\n")
+        .flatMap((raw) => raw.split(/\s+•\s+/).map((part, i) => (i > 0 ? `- ${part.trim()}` : part.trimEnd())))
+        .map((l) => l.replace(/^\s*[•*]\s+/, "- "))
+        .filter((l) => l.trim());
+      const first = lines[0]?.trim() ?? "";
+      const isTitle = lines.length > 1 && first.length <= 40 && !/^(#|- )/.test(first) && !first.includes(":") && !/[.!?,]$/.test(first);
+      return lines
+        .map((l, i) => (i === 0 && isTitle ? `# ${first}` : l))
+        .map((l) => l.replace(/^(- )?([A-Z][\w &'/]{0,24}):\s+/, (_m, dash = "", label) => `${dash}**${label}:** `))
+        .join("\n");
+    })
+    .join("\n\n");
+}

@@ -20,3 +20,11 @@ test("bold and links", () => {
     { bold: true, text: "Tickets:" }, { text: " $163, see " }, { href: "https://example.com/x/", text: "example.com/x" },
   ]);
 });
+
+test("auto-format writes explicit marks and is stable when run twice", async () => {
+  const { autoFormat } = await import("./details.ts");
+  const pasted = "Intro line.\n\nTickets: Purchased\nKickoff: 1:00 PM\n\nBag policy\n•\tClear bags only.\t•\tNo umbrellas.\n\nSee you there";
+  const once = autoFormat(pasted);
+  assert.equal(once, "Intro line.\n\n**Tickets:** Purchased\n**Kickoff:** 1:00 PM\n\n# Bag policy\n- Clear bags only.\n- No umbrellas.\n\nSee you there");
+  assert.equal(autoFormat(once), once);
+});
