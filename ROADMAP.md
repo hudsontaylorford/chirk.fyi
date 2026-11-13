@@ -127,11 +127,21 @@ What we should **not** build: a form builder, custom question types, per-event s
 
 **Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing or payments, push notifications, ads.
 
+## Migration notes (from the Postup chat, Nov 13)
+- **No data to move.** Postup's Supabase only holds 4 demo plans and Hudson's own test sign-ups. Copy nothing; retire the project after the merge.
+- **Vercel:** Postup is project `postup` on the `post-up100` account (plan unknown). chirk can live on the same account; delete the `postup` project once chirk replaces it.
+- **Supabase extras:** none (no storage, functions or webhooks). Just `postups`, `profiles`, an `updated_at` trigger, and Auth.
+- **Bring over:** the feed and profile *ideas* and the "couldn't load" pattern, not the Supabase code. `host_name` was free text, never tied to an account. In chirk, a plan's host is an account from day one.
+- **Next 16:** Postup's `proxy.ts` is the Next 16 name for middleware. Upgrade chirk to 16 before borrowing it.
+- **Sign-in redirects:** whatever sign-in we pick must work on Vercel's per-build preview URLs (the bug Postup hit). Check this first.
+- **Small UX fix to carry over:** forms should keep what the person typed when a submit fails.
+- **Before archiving Postup:** skim its 5 PR descriptions for reasoning worth keeping.
+- **Design notes found:** "social, immediate, confident, contemporary; avoid hero sections, excessive cards, dashboard styling, overly rounded UI." (Not in Postup's `main` CLAUDE.md; possibly from the chat.) Worth weighing when chirk gets its real design; today's placeholder uses rounded pills.
+
 ## Decided (Nov 13)
 - **Name:** everything is chirk (chirk.fyi). Postup's ideas fold in.
 - **Visibility:** peer to peer first (circles), public/community later.
 - **Hosting:** all on Vercel + Neon; no Supabase.
-
 - **Sign-in:** phone or email link, either is fine. Pick when accounts are built; phone is a good default for a friends app (check per-text cost then).
 - **Friends are two-way** (both agree). Only friends can be put in circles. A one-way "follow" may come much later, only for community posts (venues, organizers), never for circle posts.
 - **Circles work both ways:** pick circles when posting; filter your feed by the same circles when browsing. Any circle can be set to **quiet** (its plans stay out of your feed unless you look), and nobody knows.
