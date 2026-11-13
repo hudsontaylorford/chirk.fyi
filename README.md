@@ -10,7 +10,7 @@ To get it live, see **[SETUP.md](SETUP.md)**.
 
 ## Links
 
-**The site** (until chirk.fyi is connected, use `chirkfyi.vercel.app` in place of `chirk.fyi`)
+**The site** (chirk.fyi; `chirkfyi.vercel.app` also works)
 - Home: https://chirk.fyi
 - Host home (all events + New event): https://chirk.fyi/host
 - Thanksgiving invite (send this): https://chirk.fyi/thanksgiving-2026
