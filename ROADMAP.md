@@ -69,7 +69,7 @@ Missing, roughly in order of value:
 3. **Cost per person and who's paid.** "$163 per person." A cost line plus a paid ✓ the host ticks. No payments in-app, just a Venmo/Zelle link.
 4. **Host updates.** "We'll coordinate in the group Sunday morning." A short "Update from Hudson" at the top of the page (no chat).
 5. **Per-event switches.** Kids, couples and reply-by don't apply to a tailgate. Let the host turn them off.
-6. **Weather.** Automatic for the date and place, shown a few days before.
+6. **Weather (a per-event tick box).** Filled in automatically for the date and place a few days before. The host ticks "Show weather" on events where it matters (tailgates, outdoor plans).
 7. **Several photos.** Later.
 
 ## What carries over from the Post Up brief and mockups (Nov 14)
