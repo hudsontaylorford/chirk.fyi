@@ -13,11 +13,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const e = await getEvent((await params).slug, true);
   if (!e) return {};
   const description = `You're invited · ${longDate(e.date)}${e.time ? ` · ${clock(e.time)}` : ""}${e.place ? ` · ${e.place}` : ""}`;
-  const images = e.cover_url ? [e.cover_url] : undefined;
+  // No cover photo: a generated card with the title, date and place, so text previews never come up blank.
+  const images = [e.cover_url || `/${e.slug}/og`];
   return {
     title: e.title, description,
     openGraph: { title: e.title, description, images },
-    twitter: { card: images ? "summary_large_image" : "summary", title: e.title, description, images },
+    twitter: { card: "summary_large_image", title: e.title, description, images },
   };
 }
 

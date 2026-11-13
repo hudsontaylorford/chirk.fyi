@@ -49,10 +49,10 @@ export default async function HostPage({
         <p className="mt-3 rounded-2xl bg-wash p-4 text-[16px]"><strong>Archived.</strong> The invite still works; it&apos;s just tucked away on your events list.</p>
       )}
 
-      <div className={`mt-4 grid gap-2 text-center ${event.ask_kids ? "grid-cols-3" : "grid-cols-2"}`}>
-        <Stat n={adults} label="adults" />
-        {event.ask_kids && <Stat n={kids} label="kids" />}
-        <Stat n={open} label="still needed" />
+      <div className={`mt-4 grid gap-2 text-center ${event.bring_prompt ? "grid-cols-3" : "grid-cols-2"}`}>
+        <Stat n={adults + kids} label="coming" sub={kids ? `${adults} adult${adults === 1 ? "" : "s"}, ${kids} kid${kids === 1 ? "" : "s"}` : undefined} />
+        <Stat n={households.length} label={households.length === 1 ? "reply" : "replies"} sub={households.length - going.length ? `${households.length - going.length} can't make it` : undefined} />
+        {event.bring_prompt && <Stat n={open} label="still needed" />}
       </div>
 
       {event.status !== "draft" && <div className="mt-6"><CopyInvite event={event} /></div>}
@@ -126,11 +126,12 @@ export default async function HostPage({
   );
 }
 
-function Stat({ n, label }: { n: number; label: string }) {
+function Stat({ n, label, sub }: { n: number; label: string; sub?: string }) {
   return (
-    <div className="rounded-2xl bg-wash py-3">
+    <div className="rounded-2xl bg-wash px-1 py-3">
       <div className="text-[28px] font-bold tabular-nums">{n}</div>
       <div className="text-[14px] text-soft">{label}</div>
+      {sub && <div className="text-[12px] text-soft">{sub}</div>}
     </div>
   );
 }

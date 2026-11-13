@@ -6,8 +6,8 @@ import { imageLoads } from "./Cover";
 import type { Event } from "@/lib/types";
 
 /**
- * "Copy invite for email": puts the formatted invite on the clipboard (HTML plus plain text),
- * so pasting into Gmail or Mail keeps the cover, details and RSVP button. No email service needed.
+ * "Send the invite": Share (the phone's share sheet, for texts) and Copy invite for email
+ * (the formatted invite on the clipboard as HTML plus plain text, for pasting into Gmail or Mail).
  */
 export function CopyInvite({ event }: { event: Event }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
@@ -33,13 +33,27 @@ export function CopyInvite({ event }: { event: Event }) {
     setTimeout(() => setState("idle"), 4000);
   }
 
+  const [shared, setShared] = useState<"idle" | "copied">("idle");
+  async function share() {
+    // Phones open the share sheet (Messages, WhatsApp, AirDrop…); the link preview shows the invite.
+    if (navigator.share) return navigator.share({ title: event.title, url: url() }).catch(() => {});
+    await navigator.clipboard.writeText(url()).catch(() => {});
+    setShared("copied");
+    setTimeout(() => setShared("idle"), 3000);
+  }
+
   return (
     <div className="rounded-2xl bg-wash p-4">
-      <p className="text-[17px] font-semibold">Send the invite by email</p>
-      <p className="text-[15px] text-soft">Copy it, then paste it into a new email. The photo, details and RSVP button come along.</p>
-      <button type="button" onClick={copy} className="btn mt-3 w-full text-[16px]">
-        {state === "copied" ? "Copied ✓ Now paste it into an email" : state === "failed" ? "Couldn't copy" : "Copy invite for email"}
-      </button>
+      <p className="text-[17px] font-semibold">Send the invite</p>
+      <p className="text-[15px] text-soft">Text it to a group, or copy it into an email (the photo, details and RSVP button come along).</p>
+      <div className="mt-3 grid gap-2">
+        <button type="button" onClick={share} className="btn w-full text-[16px]">
+          {shared === "copied" ? "Link copied ✓" : "Share invite (text, WhatsApp…)"}
+        </button>
+        <button type="button" onClick={copy} className="btn btn-quiet w-full border border-line bg-white text-[16px]">
+          {state === "copied" ? "Copied ✓ Now paste it into an email" : state === "failed" ? "Couldn't copy" : "Copy invite for email"}
+        </button>
+      </div>
     </div>
   );
 }
