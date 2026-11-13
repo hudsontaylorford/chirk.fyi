@@ -41,16 +41,46 @@ const eventFields = (f: FormData) => ({
 // Static routes that an event's web address must not shadow.
 const RESERVED = new Set(["host"]);
 
+/** "Thanksgiving 2026" → "thanksgiving-2026"; if taken, "thanksgiving-2026-2", and so on. */
+async function freeSlug(text: string) {
+  const base = text.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "event";
+  let slug = RESERVED.has(base) ? `${base}-event` : base;
+  for (let n = 2; (await sql`select 1 from events where slug = ${slug}`).length; n++) slug = `${base}-${n}`;
+  return slug;
+}
+
+/**
+ * Copy an event to next year as a draft: same details and needed list, nobody's replies.
+ * Dates move 52 weeks so the weekday holds (Thu Nov 26 2026 → Thu Nov 25 2027, next Thanksgiving).
+ */
+export async function copyToNextYear(slug: string) {
+  await requireHost();
+  const [e] = await sql`
+    select id, title, (date + 364)::text as date, time, place, address, details,
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt
+    from events where slug = ${slug}`;
+  if (!e) return;
+  const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));
+  const newSlug = await freeSlug(title);
+  const { id: oldId, ...fields } = e;
+  const [copy] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, title, slug: newSlug, status: "draft" })} returning id`;
+  await sql`insert into items (event_id, kind, name, sort)
+    select ${copy.id}, 'needed', name, sort from items where event_id = ${oldId} and kind = 'needed'`;
+  redirect(`/${newSlug}/host`);
+}
+
+export async function setStatus(slug: string, status: "draft" | "live" | "archived") {
+  await eventId(slug);
+  await sql`update events set status = ${status} where slug = ${slug}`;
+  revalidatePath("/host");
+  revalidatePath(`/${slug}`, "layout");
+}
+
 export async function createEvent(f: FormData) {
   await requireHost();
   const fields = eventFields(f);
   if (!fields.title || !fields.date) return;
-  // "Thanksgiving 2026" → "thanksgiving-2026"; if taken, "thanksgiving-2026-2", and so on.
-  const base = (val(f, "slug") || fields.title).toLowerCase().normalize("NFKD")
-    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "event";
-  let slug = RESERVED.has(base) ? `${base}-event` : base;
-  for (let n = 2; (await sql`select 1 from events where slug = ${slug}`).length; n++) slug = `${base}-${n}`;
-
+  const slug = await freeSlug(val(f, "slug") || fields.title);
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
   const needed = val(f, "needed").split("\n").map((s) => s.trim()).filter(Boolean).slice(0, 50);
   if (fields.bring_prompt && needed.length) {

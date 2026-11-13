@@ -3,7 +3,7 @@ import { getEvent } from "@/lib/data";
 // "Add to calendar": a tiny .ics file the phone opens straight into Calendar.
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const e = await getEvent(slug);
+  const e = await getEvent(slug, true);
   if (!e) return new Response("Not found", { status: 404 });
   const day = e.date.replaceAll("-", "");
   const [h, m] = (e.time ?? "00:00").split(":").map(Number);

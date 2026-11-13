@@ -14,7 +14,7 @@ export default async function YourRsvp({
 }) {
   const { slug, token } = await params;
   const isNew = !!(await searchParams).new;
-  const data = await getEventData(slug);
+  const data = await getEventData(slug, true);
   const h = data?.households.find((x) => x.token === token);
   if (!data || !h) notFound();
 

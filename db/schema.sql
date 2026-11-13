@@ -21,8 +21,11 @@ begin
     rsvp_by date,
     cover_url text,
     bring_prompt text,
+    status text not null default 'live' check (status in ('draft', 'live', 'archived')),
     created_at timestamptz not null default now()
   );
+  -- Added Nov 14 for databases created before it existed.
+  alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
 
   create table if not exists households (
     id uuid primary key default gen_random_uuid(),

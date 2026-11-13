@@ -1,15 +1,18 @@
+import { isHost } from "./auth";
 import { sql } from "./db";
 import type { Event, EventData, Household, Item } from "./types";
 
-export async function getEvent(slug: string) {
+/** `forGuest`: drafts stay hidden from everyone but the host. */
+export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt
+    select id, slug, title, date::text, time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status
     from events where slug = ${slug}`;
-  return e ?? null;
+  if (!e || (forGuest && e.status === "draft" && !(await isHost()))) return null;
+  return e;
 }
 
-export async function getEventData(slug: string): Promise<EventData | null> {
-  const event = await getEvent(slug);
+export async function getEventData(slug: string, forGuest = false): Promise<EventData | null> {
+  const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items] = await Promise.all([
     sql<Household[]>`select id, token, names, going, kids, note, updated_by from households where event_id = ${event.id} order by created_at`,

@@ -7,7 +7,7 @@ export const metadata = { title: "RSVP" };
 
 export default async function RsvpPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getEventData(slug);
+  const data = await getEventData(slug, true);
   if (!data) notFound();
   const open = data.items.filter((i) => i.kind === "needed" && !i.household_id);
   return (

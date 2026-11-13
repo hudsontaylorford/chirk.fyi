@@ -28,8 +28,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const names = input.names.map((n) => tidy(n, 60)).filter(Boolean).slice(0, 8);
   if (!names.length) return { ok: false, error: "Add your name." };
 
-  const [event] = await sql<{ id: string }[]>`select id from events where slug = ${input.slug}`;
-  if (!event) return { ok: false, error: "This event doesn't exist anymore." };
+  const [event] = await sql<{ id: string }[]>`select id from events where slug = ${input.slug} and status <> 'draft'`;
+  if (!event) return { ok: false, error: "This event isn't open for replies." };
 
   // A second reply under a name that's already here is almost always a mistake.
   if (!input.token && !input.sameNameOk) {

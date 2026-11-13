@@ -10,6 +10,7 @@ export interface Event {
   rsvp_by: string | null;
   cover_url: string | null;
   bring_prompt: string | null;
+  status: "draft" | "live" | "archived";
 }
 
 export interface Household {

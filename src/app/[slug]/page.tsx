@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 // What iMessage / WhatsApp show when the link is pasted into a group text.
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const e = await getEvent((await params).slug);
+  const e = await getEvent((await params).slug, true);
   if (!e) return {};
   const description = `${longDate(e.date)}${e.time ? ` · ${clock(e.time)}` : ""}${e.place ? ` · ${e.place}` : ""}`;
   const images = e.cover_url ? [e.cover_url] : undefined;
@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await getEventData(slug);
+  const data = await getEventData(slug, true);
   if (!data) notFound();
   // If this phone already replied, the button opens their reply instead of a new one.
   const saved = (await cookies()).get(`chirk_${slug}`)?.value;

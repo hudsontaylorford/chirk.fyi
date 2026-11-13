@@ -49,5 +49,20 @@ await h.click("text=Create event");
 await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
 
+// The guest's phone lists the plan on the home page.
+await a.goto(B.replace("/thanksgiving-2026", "/"));
+assert.match(await a.textContent("main"), /Your plans[\s\S]*Thanksgiving 2026[\s\S]*Going/);
+
+// Copy to next year: a draft one year (52 weeks) on, hidden from guests until published.
+await h.goto(B + "/host");
+await h.click("text=Copy to next year");
+await h.waitForURL(/\/thanksgiving-2027(-\d+)?\/host$/);
+assert.match(await h.textContent("main"), /Draft\./);
+const draftUrl = h.url().replace(/\/host$/, "");
+assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
+await h.click("button:has-text('Publish')");
+await h.waitForSelector("text=Draft.", { state: "detached" });
+assert.equal((await (await phone()).goto(draftUrl)).status(), 200);
+
 await browser.close();
 console.log("✓ RSVP checks passed (delete the 'Check' guests and the extra event afterwards)");

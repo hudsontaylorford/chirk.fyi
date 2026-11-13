@@ -38,6 +38,15 @@ export default async function HostPage({
         <a href={`/${slug}`} className="font-semibold text-ink">View invite</a>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
+      {event.status === "draft" && (
+        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 text-[16px]">
+          <span><strong>Draft.</strong> Only you can see it. Check the details, then publish.</span>
+          <form action={act.setStatus.bind(null, slug, "live")}><SaveButton>Publish</SaveButton></form>
+        </div>
+      )}
+      {event.status === "archived" && (
+        <p className="mt-3 rounded-2xl bg-wash p-4 text-[16px]"><strong>Archived.</strong> The invite still works; it&apos;s just tucked away on your events list.</p>
+      )}
 
       <div className="mt-4 grid grid-cols-3 gap-2 text-center">
         <Stat n={adults} label="adults" />
@@ -100,6 +109,15 @@ export default async function HostPage({
           <SaveButton className="btn w-full">Save</SaveButton>
         </form>
       </details>
+
+      <div className="mt-6 space-y-2">
+        <form action={act.copyToNextYear.bind(null, slug)}>
+          <SaveButton className="btn btn-quiet w-full">Copy to next year (as a draft)</SaveButton>
+        </form>
+        <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
+          <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
+        </form>
+      </div>
     </main>
   );
 }
