@@ -35,8 +35,8 @@ Every layer is **off unless the host turns it on**. A plan stays one screen for 
 ### Circles
 Today: the group text is the circle. You paste a private link, and that already works.
 Later, in this order:
-1. **Friends**: two people with accounts connect, either by mutual add or by one person accepting the other.
-2. **Circles**: the poster's private, named lists of friends.
+1. **Friends**: two-way. One person asks, the other accepts.
+2. **Circles**: your private, named lists of friends, used to pick who sees a plan *and* to filter (or quiet) your own feed.
 3. **Feed**: you see plans from people who put you in a circle they posted to, soonest first, never ranked.
 4. **Community**: nearby or open plans, with a monthly cap.
 
@@ -132,6 +132,6 @@ What we should **not** build: a form builder, custom question types, per-event s
 - **Visibility:** peer to peer first (circles), public/community later.
 - **Hosting:** all on Vercel + Neon; no Supabase.
 
-## Open questions
-1. Sign-in: email links (no passwords) OK as the default? Or phone number?
-2. Friends: mutual add (both agree) or follow-style (one-way)?
+- **Sign-in:** phone or email link, either is fine. Pick when accounts are built; phone is a good default for a friends app (check per-text cost then).
+- **Friends are two-way** (both agree). Only friends can be put in circles. A one-way "follow" may come much later, only for community posts (venues, organizers), never for circle posts.
+- **Circles work both ways:** pick circles when posting; filter your feed by the same circles when browsing. Any circle can be set to **quiet** (its plans stay out of your feed unless you look), and nobody knows.
