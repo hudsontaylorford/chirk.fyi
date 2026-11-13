@@ -16,6 +16,7 @@ export interface Event {
   notify_host: boolean;
   note_prompt: string | null;
   note_hint: string | null;
+  allow_doubles: boolean;
 }
 
 export interface Household {
@@ -36,8 +37,14 @@ export interface Item {
   household_id: string | null;
 }
 
+export interface Claim {
+  item_id: string;
+  household_id: string;
+}
+
 export interface EventData {
   event: Event;
   households: Household[];
-  items: Item[];
+  items: Item[]; // household_id = who added it (guest-added items only)
+  claims: Claim[]; // who's bringing what, oldest first
 }

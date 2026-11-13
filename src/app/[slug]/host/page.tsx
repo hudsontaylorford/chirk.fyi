@@ -6,7 +6,7 @@ import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { isHost } from "@/lib/auth";
-import { getEventData, joinNames } from "@/lib/data";
+import { bringList, getEventData, joinNames } from "@/lib/data";
 import * as act from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -25,12 +25,13 @@ export default async function HostPage({
   if (!(await isHost())) return <HostSignIn next={`/${slug}/host`} wrong={!!(await searchParams).wrong} />;
 
   const { event, households, items } = data;
+  const list = bringList(data);
+  const whoHas = new Map(list.claimed.map((r) => [r.item.id, r.who]));
   const going = households.filter((h) => h.going);
   const adults = going.reduce((n, h) => n + h.names.length, 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
-  const who = new Map(households.map((h) => [h.id, joinNames(h.names)]));
   const needed = items.filter((i) => i.kind === "needed");
-  const open = needed.filter((i) => !i.household_id).length;
+  const open = list.open.length;
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
@@ -61,7 +62,7 @@ export default async function HostPage({
       <ul className="mt-2 divide-y divide-line border-y border-line">
         {households.length === 0 && <li className="py-3 text-soft">Nobody yet.</li>}
         {households.map((h) => {
-          const bringing = items.filter((i) => i.household_id === h.id).map((i) => i.name);
+          const bringing = list.claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
           return (
             <li key={h.id} className="py-3 text-[16px]">
               <div className="flex items-baseline justify-between gap-2">
@@ -93,7 +94,7 @@ export default async function HostPage({
               <li key={i.id} className="flex items-baseline justify-between gap-3 py-3 text-[16px]">
                 <span>{i.name}</span>
                 <span className="flex items-baseline gap-3">
-                  {i.household_id ? <span className="text-soft">{who.get(i.household_id)}</span> : <span className="font-semibold">Open</span>}
+                  {whoHas.get(i.id) ? <span className="text-right text-soft">{whoHas.get(i.id)}</span> : <span className="font-semibold">Open</span>}
                   <Confirm label="✕" action={act.removeItem.bind(null, slug, i.id)} />
                 </span>
               </li>

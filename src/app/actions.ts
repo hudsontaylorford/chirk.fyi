@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type postgres from "postgres";
 import { cookies } from "next/headers";
 import { isHost } from "@/lib/auth";
 import { joinNames } from "@/lib/data";
@@ -17,8 +18,8 @@ export interface RsvpInput {
   kids: number;
   note: string;
   email?: string; // optional: we email them their private link
-  main: { itemId: string } | { name: string } | null; // one main dish
-  extra: string; // optional "anything else?"
+  picks: string[]; // items they tapped (from the list, or doubling up on someone else's)
+  own: string[]; // things they typed in themselves
   answeringAs?: string;
   sameNameOk?: boolean;
 }
@@ -36,7 +37,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const email = (input.email ?? "").trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string; notify_host: boolean }[]>`select id, notify_host from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean }[]>`
+    select id, notify_host, allow_doubles from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
 
   // A second reply under a name that's already here is almost always a mistake.
@@ -71,24 +73,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
             insert into households ${tx({ ...row, event_id: event.id })} returning id, token`;
       if (!h) throw new Oops("We couldn't find your RSVP. Is the link right?");
 
-      // Start clean: let go of anything previously claimed or added, then record the new picks.
-      await tx`update items set household_id = null where household_id = ${h.id} and kind = 'needed'`;
-      await tx`delete from items where household_id = ${h.id} and kind <> 'needed'`;
-      if (!input.going) return h.token;
-
-      const main = input.main;
-      if (main && "itemId" in main) {
-        const [claimed] = await tx`
-          update items set household_id = ${h.id}
-          where id = ${main.itemId} and event_id = ${event.id} and kind = 'needed' and household_id is null
-          returning id`;
-        if (!claimed) throw new Oops("Someone just grabbed that one! Pick another?");
-      } else if (main && tidy(main.name)) {
-        await tx`insert into items (event_id, kind, name, household_id) values (${event.id}, 'main', ${tidy(main.name)}, ${h.id})`;
-      }
-      if (tidy(input.extra)) {
-        await tx`insert into items (event_id, kind, name, household_id) values (${event.id}, 'extra', ${tidy(input.extra)}, ${h.id})`;
-      }
+      await saveBringing(tx, event, h.id, input.going ? input.picks : [], input.going ? input.own : []);
       return h.token;
     });
     // Remember this phone's reply. Server-set so Safari keeps it (it can wipe localStorage after 7 idle days).
@@ -111,6 +96,48 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   }
 }
 
+type Tx = postgres.TransactionSql;
+
+/**
+ * Records what one reply is bringing. Claims they keep stay put (so the list keeps its order);
+ * dropped ones go, and so do things they added that nobody else is bringing.
+ * With doubling up off, an item someone else already has can't be picked (the item row is locked
+ * while checking, so two people can't grab the last one at once).
+ */
+async function saveBringing(tx: Tx, event: { id: string; allow_doubles: boolean }, householdId: string, picks: string[], own: string[]) {
+  const wanted = new Set(picks.slice(0, 20));
+  const typed = [...new Set(own.map((n) => tidy(n)).filter(Boolean))].slice(0, 10);
+  const create: string[] = [];
+  for (const name of typed) {
+    // Typed something already on the list (theirs, still needed, or doubling is on)? Use that item.
+    const [same] = await tx<{ id: string }[]>`
+      select i.id from items i where i.event_id = ${event.id} and lower(i.name) = lower(${name})
+        and (i.household_id = ${householdId} or ${event.allow_doubles}
+             or (i.kind = 'needed' and not exists (select 1 from claims c where c.item_id = i.id and c.household_id <> ${householdId})))
+      order by (i.household_id = ${householdId}) desc nulls last limit 1`;
+    if (same) wanted.add(same.id);
+    else create.push(name);
+  }
+  const keep = [...wanted];
+  await tx`delete from claims where household_id = ${householdId} and not (item_id = any(${keep}::uuid[]))`;
+  await tx`delete from items i where i.household_id = ${householdId} and i.kind <> 'needed'
+    and not exists (select 1 from claims c where c.item_id = i.id)`;
+  for (const id of keep) {
+    const [item] = await tx<{ name: string }[]>`select name from items where id = ${id} and event_id = ${event.id} for update`;
+    if (!item) throw new Oops("Something on the list changed. Pick again?");
+    if (!event.allow_doubles) {
+      const [taken] = await tx`select 1 from claims where item_id = ${id} and household_id <> ${householdId}`;
+      if (taken) throw new Oops(`Someone just grabbed ${item.name}! Pick something else?`);
+    }
+    await tx`insert into claims (item_id, household_id) values (${id}, ${householdId}) on conflict do nothing`;
+  }
+  for (const name of create) {
+    const [item] = await tx<{ id: string }[]>`
+      insert into items (event_id, kind, name, household_id) values (${event.id}, 'extra', ${name}, ${householdId}) returning id`;
+    await tx`insert into claims (item_id, household_id) values (${item.id}, ${householdId})`;
+  }
+}
+
 /**
  * Emails a reply's private link. `by` is the reply's token (right after saving)
  * or an email address ("Email me my link": every reply on this event with that address).
@@ -119,7 +146,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
 async function emailLinks(slug: string, by: { token: string } | { email: string }) {
   const rows = await sql<{ id: string; token: string; names: string[]; going: boolean; email: string; title: string; bringing: string[] }[]>`
     select h.id, h.token, h.names, h.going, h.email, e.title,
-      coalesce((select array_agg(i.name order by i.kind) from items i where i.household_id = h.id), '{}') as bringing
+      coalesce((select array_agg(i.name order by c.created_at) from claims c join items i on i.id = c.item_id where c.household_id = h.id), '{}') as bringing
     from households h join events e on e.id = h.event_id
     where e.slug = ${slug} and h.email is not null
       and ${"token" in by ? sql`h.token = ${by.token}` : sql`h.email = ${by.email}`}`;
@@ -145,7 +172,7 @@ async function notifyHost(slug: string, token: string, changed: boolean) {
   if (!to) return;
   const [r] = await sql<{ id: string; names: string[]; going: boolean; kids: number; note: string | null; email: string | null; title: string; bringing: string[] }[]>`
     select h.id, h.names, h.going, h.kids, h.note, h.email, e.title,
-      coalesce((select array_agg(i.name order by i.kind) from items i where i.household_id = h.id), '{}') as bringing
+      coalesce((select array_agg(i.name order by c.created_at) from claims c join items i on i.id = c.item_id where c.household_id = h.id), '{}') as bringing
     from households h join events e on e.id = h.event_id where e.slug = ${slug} and h.token = ${token}`;
   if (!r) return;
   const mail = replyEmail({

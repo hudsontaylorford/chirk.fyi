@@ -22,7 +22,7 @@ await rsvp(b, "Check B", "Rolls");
 await a.click("text=Send RSVP");
 await a.waitForURL(/\/r\//);
 await b.click("text=Send RSVP");
-await b.waitForSelector("text=Someone just grabbed that one");
+await b.waitForSelector("text=Someone just grabbed Rolls");
 
 // The emailed link (…/remember) makes a fresh device remember the reply.
 const tokenA = a.url().match(/\/r\/([a-f0-9]+)/)[1];
@@ -52,7 +52,8 @@ await h.fill("input[name=title]", "Thanksgiving 2026");
 await h.fill("input[name=date]", "2027-11-25");
 await h.fill("input[name=bring_prompt]", "Bring?");
 await h.fill("textarea[name=needed]", "Pie\nCider");
-await h.uncheck("input[name=ask_kids]");
+await h.click("summary:has-text('More options')");
+await h.check("input[name=allow_doubles]");
 await h.click("text=Create event");
 await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
@@ -64,7 +65,29 @@ const kidless = h.url().replace(/\/host$/, "/rsvp");
 const g = await phone();
 await g.goto(kidless);
 await g.click("text=Going");
-assert.equal(await g.locator("text=Kids coming").count(), 0); // the host turned the kids question off
+assert.equal(await g.locator("text=Kids coming").count(), 0); // kids question is off by default
+
+// Several things at once: two from the list, plus "Wine, Pie" typed in (two items).
+await g.fill('input[aria-label="Your name"]', "Picker");
+await g.click('button.pill:has-text("Pie")');
+await g.click('button.pill:has-text("Cider")');
+await g.fill('input[aria-label="Add your own"]', "Wine, Pie");
+await g.click('button:text-is("Add")');
+await g.click("text=Send RSVP");
+await g.waitForURL(/\/r\//);
+assert.match(await g.textContent("main"), /Bringing: Pie, Cider, Wine/);
+
+// Doubling up is on for this event: someone else can bring Wine too (after confirming).
+const d2 = await phone();
+await d2.goto(kidless);
+await d2.click("text=Going");
+await d2.fill('input[aria-label="Your name"]', "Doubler");
+d2.once("dialog", (dlg) => dlg.accept());
+await d2.click('button.pill:has-text("Wine")');
+await d2.click("text=Send RSVP");
+await d2.waitForURL(/\/r\//);
+await d2.goto(kidless.replace(/\/rsvp$/, ""));
+assert.match(await d2.textContent("main"), /Wine\s*Picker, Doubler/);
 
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));

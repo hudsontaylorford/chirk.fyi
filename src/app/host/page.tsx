@@ -36,15 +36,20 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
       <details className="mt-8 rounded-2xl bg-wash p-4" open={events.length === 0}>
         <summary className="text-[17px] font-semibold">+ New event</summary>
         <form action={createEvent} className="mt-4 space-y-3">
-          <EventFields />
-          <label className="block">
-            <span className="text-[15px] text-soft">Things still needed, separated by commas (only if there&apos;s a bring list)</span>
-            <textarea name="needed" rows={2} className="field mt-1" placeholder="Chairs, grill, picnic blankets" />
-          </label>
-          <label className="block">
-            <span className="text-[15px] text-soft">Web address (optional; made from the title)</span>
-            <input name="slug" className="field mt-1" placeholder="e.g. molly-birthday" />
-          </label>
+          <EventFields
+            afterBring={
+              <label className="block">
+                <span className="text-[15px] text-soft">Things still needed, separated by commas (only if there&apos;s a bring list)</span>
+                <textarea name="needed" rows={2} className="field mt-1" placeholder="Chairs, grill, picnic blankets" />
+              </label>
+            }
+            moreOptions={
+              <label className="block">
+                <span className="text-[15px] text-soft">Web address (made from the title if blank)</span>
+                <input name="slug" className="field mt-1" placeholder="e.g. molly-birthday" />
+              </label>
+            }
+          />
           <SaveButton className="btn w-full">Create event</SaveButton>
         </form>
       </details>

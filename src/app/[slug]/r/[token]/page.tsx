@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { YourLink } from "@/components/YourLink";
-import { getEventData, joinNames } from "@/lib/data";
+import { bringChoices, getEventData, joinNames } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your RSVP", robots: { index: false } };
@@ -18,12 +18,7 @@ export default async function YourRsvp({
   const h = data?.households.find((x) => x.token === token);
   if (!data || !h) notFound();
 
-  const mine = data.items.filter((i) => i.household_id === h.id);
-  const picked = mine.find((i) => i.kind === "needed");
-  const own = mine.find((i) => i.kind === "main");
-  const extra = mine.find((i) => i.kind === "extra");
-  const open = data.items.filter((i) => i.kind === "needed" && (!i.household_id || i.household_id === h.id));
-  const bringing = [picked ?? own, extra].filter(Boolean).map((i) => i!.name);
+  const { choices, picks, own, bringing } = bringChoices(data, h.id);
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
@@ -38,7 +33,7 @@ export default async function YourRsvp({
       </p>
       {h.going && (
         <p className="mt-3 text-[17px]">
-          {bringing.length ? <>Bringing: <strong>{bringing.join(" and ")}</strong></> : "Not bringing anything yet."}
+          {bringing.length ? <>Bringing: <strong>{bringing.join(", ")}</strong></> : "Not bringing anything yet."}
         </p>
       )}
 
@@ -55,10 +50,10 @@ export default async function YourRsvp({
           askKids={data.event.ask_kids}
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
-          openItems={open}
+          choices={choices}
           initial={{
             token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "", email: h.email ?? "",
-            mainItemId: picked?.id ?? null, mainName: own?.name ?? "", extra: extra?.name ?? "",
+            picks, own,
           }}
         />
         </div>

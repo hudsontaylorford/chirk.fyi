@@ -40,6 +40,7 @@ const eventFields = (f: FormData) => ({
   bring_prompt: val(f, "bring_prompt") || null,
   ask_kids: f.get("ask_kids") === "on",
   notify_host: f.get("notify_host") === "on",
+  allow_doubles: f.get("allow_doubles") === "on",
   note_prompt: val(f, "note_prompt") || null,
   note_hint: val(f, "note_hint") || null,
 });
@@ -63,7 +64,7 @@ export async function copyToNextYear(slug: string) {
   await requireHost();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));
@@ -111,8 +112,10 @@ export async function removeItem(slug: string, id: string) {
 
 export async function removeHousehold(slug: string, id: string) {
   const ev = await eventId(slug);
-  await sql`delete from items where household_id = ${id} and kind <> 'needed'`;
-  await sql`delete from households where id = ${id} and event_id = ${ev}`; // their list picks reopen
+  // Things they added go too, unless someone else is also bringing them; their list picks reopen.
+  await sql`delete from items i where i.household_id = ${id} and i.kind <> 'needed'
+    and not exists (select 1 from claims c where c.item_id = i.id and c.household_id <> ${id})`;
+  await sql`delete from households where id = ${id} and event_id = ${ev}`;
   revalidatePath(`/${slug}`, "layout");
 }
 

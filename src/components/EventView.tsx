@@ -1,17 +1,15 @@
 import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
-import { joinNames } from "@/lib/data";
+import { bringList, joinNames } from "@/lib/data";
 import { mapsUrl, shortDate, when } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
 /** The invite: what, when, where, who's coming, who's bringing what. */
 export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactNode }) {
-  const { event, households, items } = data;
+  const { event, households } = data;
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
-  const who = new Map(households.map((h) => [h.id, joinNames(h.names)]));
-  const needed = items.filter((i) => i.kind === "needed");
-  const theirs = items.filter((i) => i.kind !== "needed" && i.household_id);
+  const { claimed, open } = bringList(data);
 
   return (
     <article className="pb-28">
@@ -50,25 +48,29 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
 
       {event.bring_prompt && (
         <section className="mt-8 px-5">
-          <h2 className="text-[20px] font-bold">Who&apos;s bringing what</h2>
-          <ul className="mt-3 divide-y divide-line border-y border-line">
-            {needed.map((i) => (
-              <li key={i.id} className="flex items-baseline justify-between gap-3 py-3 text-[17px]">
-                <span>{i.name}</span>
-                {i.household_id ? (
-                  <span className="text-right text-soft">{who.get(i.household_id)}</span>
-                ) : (
-                  <span className="shrink-0 rounded-full bg-wash px-2.5 py-0.5 text-[14px] font-semibold">Still needed</span>
-                )}
-              </li>
-            ))}
-            {theirs.map((i) => (
-              <li key={i.id} className="flex items-baseline justify-between gap-3 py-3 text-[17px]">
-                <span>{i.name}</span>
-                <span className="text-right text-soft">{who.get(i.household_id!)}</span>
-              </li>
-            ))}
-          </ul>
+          {open.length > 0 && (
+            <>
+              <h2 className="text-[20px] font-bold">Still needed</h2>
+              <div className="mt-3 flex flex-wrap gap-2">
+                {open.map((i) => (
+                  <span key={i.id} className="rounded-full border-[1.5px] border-dashed border-line px-3 py-1.5 text-[16px]">{i.name}</span>
+                ))}
+              </div>
+            </>
+          )}
+          {claimed.length > 0 && (
+            <>
+              <h2 className={`text-[20px] font-bold ${open.length ? "mt-8" : ""}`}>Who&apos;s bringing what</h2>
+              <ul className="mt-3 divide-y divide-line border-y border-line">
+                {claimed.map((r) => (
+                  <li key={r.item.id} className="flex items-baseline justify-between gap-3 py-3 text-[17px]">
+                    <span>{r.item.name}</span>
+                    <span className="text-right text-soft">{r.who}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
         </section>
       )}
 

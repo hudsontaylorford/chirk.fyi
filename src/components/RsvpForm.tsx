@@ -10,7 +10,8 @@ export interface RsvpFormProps {
   askKids: boolean;
   notePrompt: string | null;
   noteHint: string | null;
-  openItems: { id: string; name: string }[]; // still-needed items (plus this household's own pick)
+  // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
+  choices: { id: string; name: string; by: string | null }[];
   initial?: {
     token: string;
     names: string[];
@@ -18,15 +19,14 @@ export interface RsvpFormProps {
     kids: number;
     note: string;
     email: string;
-    mainItemId: string | null;
-    mainName: string;
-    extra: string;
+    picks: string[];
+    own: string[];
   };
 }
 
-const SUGGESTIONS = ["Drinks", "Dessert", "An appetizer"];
+const QUICK = ["Drinks", "Dessert", "An appetizer"];
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, openItems, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, choices, initial }: RsvpFormProps) {
   const router = useRouter();
   const [busy, start] = useTransition();
   const [error, setError] = useState<{ text: string; sameName?: boolean } | null>(null);
@@ -34,16 +34,25 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, ope
   const [going, setGoing] = useState<boolean | null>(initial?.going ?? null);
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
-  const [mainId, setMainId] = useState<string | null>(initial?.mainItemId ?? null);
-  const [ownMain, setOwnMain] = useState(initial?.mainName ?? "");
-  const [writingOwn, setWritingOwn] = useState(!!initial?.mainName);
-  const [extra, setExtra] = useState(initial?.extra ?? "");
+  const [picks, setPicks] = useState<string[]>(initial?.picks ?? []);
+  const [own, setOwn] = useState<string[]>(initial?.own ?? []);
+  const [typing, setTyping] = useState("");
   const [note, setNote] = useState(initial?.note ?? "");
   const [email, setEmail] = useState(initial?.email ?? "");
   const [me, setMe] = useState<string | null>(null);
 
-  // If the dish they picked got taken in the meantime, it's no longer selected.
-  const stillOpen = openItems.some((i) => i.id === mainId);
+  // Something they picked that got taken in the meantime drops out of their picks.
+  const livePicks = picks.filter((id) => choices.some((c) => c.id === id));
+  function togglePick(c: { id: string; name: string; by: string | null }) {
+    if (livePicks.includes(c.id)) return setPicks(picks.filter((id) => id !== c.id));
+    if (c.by && !window.confirm(`${c.by} ${c.by.includes("&") || c.by.includes(",") ? "are" : "is"} already bringing ${c.name}. Bring it too?`)) return;
+    setPicks([...picks, c.id]);
+  }
+  function addOwn(text: string) {
+    const fresh = text.split(",").map((t) => t.trim()).filter((t) => t && !own.some((o) => o.toLowerCase() === t.toLowerCase()));
+    if (fresh.length) setOwn([...own, ...fresh]);
+    setTyping("");
+  }
   const setName = (i: number, v: string) => setNames((ns) => ns.map((n, j) => (j === i ? v : n)));
 
   function submit(sameNameOk = false) {
@@ -51,8 +60,8 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, ope
     if (going === null) return setError({ text: "Are you coming?" });
     if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, extra, email,
-      main: mainId && stillOpen ? { itemId: mainId } : writingOwn && ownMain.trim() ? { name: ownMain } : null,
+      slug, token: initial?.token, names, going, kids, note, email,
+      picks: livePicks, own: typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
     start(async () => {
@@ -124,38 +133,34 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, ope
           </div>}
 
           {bringPrompt && (
-            <>
-              <Q label={bringPrompt} hint={openItems.length ? "These are still needed. Or bring your own thing." : undefined}>
-                <div className="flex flex-wrap gap-2">
-                  {openItems.map((it) => (
-                    <button
-                      key={it.id} type="button" className="pill" aria-pressed={stillOpen && mainId === it.id}
-                      onClick={() => { setMainId(mainId === it.id ? null : it.id); setWritingOwn(false); }}
-                    >
-                      {it.name}
-                    </button>
-                  ))}
-                  <button
-                    type="button" className="pill" aria-pressed={writingOwn}
-                    onClick={() => { setWritingOwn(!writingOwn); setMainId(null); }}
-                  >
-                    Something else
+            <Q label={bringPrompt} hint="Tap one or two, or add your own.">
+              <div className="flex flex-wrap gap-2">
+                {choices.map((c) => (
+                  <button key={c.id} type="button" className="pill" aria-pressed={livePicks.includes(c.id)} onClick={() => togglePick(c)}>
+                    {c.name}
+                    {c.by && !livePicks.includes(c.id) && <span className="text-soft"> · {c.by}</span>}
                   </button>
-                </div>
-                {writingOwn && (
-                  <input className="field mt-3" value={ownMain} onChange={(e) => setOwnMain(e.target.value)} placeholder="What are you bringing?" autoFocus />
-                )}
-              </Q>
-
-              <Q label="Anything else?" hint="Optional. One thing is plenty.">
-                <input className="field" value={extra} onChange={(e) => setExtra(e.target.value)} placeholder="e.g. a bottle of wine" />
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {SUGGESTIONS.map((s) => (
-                    <button key={s} type="button" className="pill py-1.5 text-[15px]" aria-pressed={extra === s} onClick={() => setExtra(extra === s ? "" : s)}>{s}</button>
-                  ))}
-                </div>
-              </Q>
-            </>
+                ))}
+                {own.map((o) => (
+                  <button key={o} type="button" className="pill" aria-pressed onClick={() => setOwn(own.filter((x) => x !== o))} aria-label={`Remove ${o}`}>
+                    {o} <span aria-hidden>✕</span>
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 flex gap-2">
+                <input
+                  className="field" value={typing} placeholder="Add your own (e.g. wine)" aria-label="Add your own"
+                  onChange={(e) => setTyping(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
+                />
+                <button type="button" className="btn btn-quiet shrink-0 px-4" disabled={!typing.trim()} onClick={() => addOwn(typing)}>Add</button>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {QUICK.filter((q) => !own.includes(q)).map((q) => (
+                  <button key={q} type="button" className="pill py-1.5 text-[15px]" onClick={() => addOwn(q)}>+ {q}</button>
+                ))}
+              </div>
+            </Q>
           )}
         </>
       )}
