@@ -27,6 +27,9 @@ begin
     note_prompt text,                    -- null = "Anything we should know?"
     note_hint text,                      -- the faded example in that box
     allow_doubles boolean not null default false, -- several people can bring the same thing
+    allow_own boolean not null default true,      -- guests can add things that aren't on the list
+    notes_public boolean not null default false,  -- show notes on the invite
+    max_guests int,                      -- extra people per reply: null = no limit, 0 = just them
     created_at timestamptz not null default now()
   );
 
@@ -79,6 +82,9 @@ begin
   alter table events add column if not exists note_prompt text;
   alter table events add column if not exists note_hint text;
   alter table events add column if not exists allow_doubles boolean not null default false;
+  alter table events add column if not exists allow_own boolean not null default true;
+  alter table events add column if not exists notes_public boolean not null default false;
+  alter table events add column if not exists max_guests int;
   alter table households add column if not exists email text;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,
   -- then clear it on list items so a later re-run can't bring back something a guest un-picked.

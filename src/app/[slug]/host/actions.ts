@@ -37,7 +37,11 @@ const eventFields = (f: FormData) => ({
   details: val(f, "details") || null,
   rsvp_by: val(f, "rsvp_by") || null,
   cover_url: val(f, "cover_url") || null,
-  bring_prompt: val(f, "bring_prompt") || null,
+  // The bring list is switched on or off; on with a blank question uses the default question.
+  bring_prompt: f.get("bring_on") === "on" ? val(f, "bring_prompt") || "What are you bringing?" : null,
+  allow_own: f.get("allow_own") === "on",
+  notes_public: f.get("notes_public") === "on",
+  max_guests: val(f, "max_guests") === "" ? null : Math.max(0, Math.min(10, Number(val(f, "max_guests")) || 0)),
   ask_kids: f.get("ask_kids") === "on",
   notify_host: f.get("notify_host") === "on",
   allow_doubles: f.get("allow_doubles") === "on",
@@ -64,7 +68,7 @@ export async function copyToNextYear(slug: string) {
   await requireHost();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));

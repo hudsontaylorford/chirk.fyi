@@ -1,10 +1,11 @@
+import { BringSection } from "@/components/BringSection";
 import { CoverInput } from "@/components/CoverInput";
 import { DetailsInput } from "@/components/DetailsInput";
 import type { Event } from "@/lib/types";
 
 /** The fields that describe an event. Shared by "New event" and "Edit event". */
-/** `afterBring` sits under the bring question; `moreOptions` goes inside "More options". */
-export function EventFields({ event, afterBring, moreOptions }: { event?: Event; afterBring?: React.ReactNode; moreOptions?: React.ReactNode }) {
+/** `moreOptions` goes inside "More options" (the New event form adds the web address there). */
+export function EventFields({ event, moreOptions }: { event?: Event; moreOptions?: React.ReactNode }) {
   return (
     <>
       <Field label="Title" name="title" value={event?.title} required />
@@ -18,11 +19,7 @@ export function EventFields({ event, afterBring, moreOptions }: { event?: Event;
       <DetailsInput value={event?.details ?? ""} />
       {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
       <CoverInput value={event?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
-      <Field
-        label="“What are you bringing?” question (blank = no bring list)"
-        name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. Bringing anything?"
-      />
-      {afterBring}
+      <BringSection prompt={event?.bring_prompt ?? null} allowOwn={event?.allow_own ?? true} allowDoubles={event?.allow_doubles ?? false} newEvent={!event} />
       <details className="rounded-2xl border border-line bg-white px-4 py-3">
         <summary className="text-[16px] font-semibold">More options</summary>
         <div className="mt-3 space-y-3">
@@ -31,7 +28,18 @@ export function EventFields({ event, afterBring, moreOptions }: { event?: Event;
             <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
             <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />
           </div>
-          <Check name="allow_doubles" checked={event?.allow_doubles ?? false} label="Let people bring the same thing" />
+          <Check name="notes_public" checked={event?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
+          <label className="block">
+            <span className="text-[15px] text-soft">Extra guests per reply</span>
+            <select name="max_guests" defaultValue={event?.max_guests ?? ""} className="field mt-1">
+              <option value="">No limit</option>
+              <option value="0">None (just the person replying)</option>
+              <option value="1">Up to 1 (a plus-one)</option>
+              <option value="2">Up to 2</option>
+              <option value="3">Up to 3</option>
+              <option value="4">Up to 4</option>
+            </select>
+          </label>
           <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
           <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
           {moreOptions}

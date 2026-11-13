@@ -86,6 +86,21 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
           </p>
         )}
       </section>
+
+      {event.notes_public && households.some((h) => h.note) && (
+        <section className="mt-8 px-5">
+          <h2 className="text-[20px] font-bold">Notes</h2>
+          {/* Message bubbles: set apart from the bring list, newest last like a chat. */}
+          <ul className="mt-3 space-y-3">
+            {households.filter((h) => h.note).map((h) => (
+              <li key={h.id} className="max-w-[85%]">
+                <p className="mb-1 ml-3 text-[13px] text-soft">{joinNames(h.names)}</p>
+                <p className="rounded-[20px] rounded-bl-md bg-wash px-4 py-2.5 text-[16px] leading-snug whitespace-pre-line">{h.note}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </article>
   );
 }

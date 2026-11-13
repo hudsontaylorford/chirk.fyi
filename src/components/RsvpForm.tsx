@@ -10,6 +10,9 @@ export interface RsvpFormProps {
   askKids: boolean;
   notePrompt: string | null;
   noteHint: string | null;
+  allowOwn: boolean;
+  notesPublic: boolean;
+  maxGuests: number | null; // extra people per reply; null = no limit
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
   initial?: {
@@ -18,7 +21,6 @@ export interface RsvpFormProps {
     going: boolean;
     kids: number;
     note: string;
-    email: string;
     picks: string[];
     own: string[];
   };
@@ -26,7 +28,8 @@ export interface RsvpFormProps {
 
 const QUICK = ["Drinks", "Dessert", "An appetizer"];
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, choices, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, choices, initial }: RsvpFormProps) {
+  const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
   const [error, setError] = useState<{ text: string; sameName?: boolean } | null>(null);
@@ -38,7 +41,6 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
   const [note, setNote] = useState(initial?.note ?? "");
-  const [email, setEmail] = useState(initial?.email ?? "");
   const [me, setMe] = useState<string | null>(null);
 
   // Something they picked that got taken in the meantime drops out of their picks.
@@ -60,8 +62,8 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
     if (going === null) return setError({ text: "Are you coming?" });
     if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, email,
-      picks: livePicks, own: typing.trim() ? [...own, ...typing.split(",")] : own,
+      slug, token: initial?.token, names, going, kids, note,
+      picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
     start(async () => {
@@ -99,7 +101,10 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
         </div>
       </Q>
 
-      <Q label={names.length > 1 ? "Names" : "Your name"} hint={names.length === 1 ? "Coming as a couple? Add them too, one reply for both of you." : undefined}>
+      <Q
+        label={names.length > 1 ? "Names" : "Your name"}
+        hint={names.length === 1 && maxNames > 1 ? (maxGuests === 1 ? "Bringing a plus-one? Add them too." : "Bringing someone? Add them too, one reply for everyone.") : undefined}
+      >
         <div className="space-y-2">
           {names.map((n, i) => (
             <div key={i} className="flex gap-2">
@@ -113,7 +118,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
               )}
             </div>
           ))}
-          {names.length < 6 && (
+          {names.length < Math.min(maxNames, 6) && (
             <button type="button" className="py-1 text-[16px] font-semibold" onClick={() => setNames((ns) => [...ns, ""])}>
               + Add someone
             </button>
@@ -133,7 +138,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
           </div>}
 
           {bringPrompt && (
-            <Q label={bringPrompt} hint="Tap one or two, or add your own.">
+            <Q label={bringPrompt} hint={allowOwn ? "Tap one or two, or add your own." : "Tap what you'll bring."}>
               <div className="flex flex-wrap gap-2">
                 {choices.map((c) => (
                   <button key={c.id} type="button" className="pill" aria-pressed={livePicks.includes(c.id)} onClick={() => togglePick(c)}>
@@ -147,6 +152,8 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
                   </button>
                 ))}
               </div>
+              {allowOwn && (
+                <>
               <div className="mt-3 flex gap-2">
                 <input
                   className="field" value={typing} placeholder="Add your own (e.g. wine)" aria-label="Add your own"
@@ -160,13 +167,15 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
                   <button key={q} type="button" className="pill py-1.5 text-[15px]" onClick={() => addOwn(q)}>+ {q}</button>
                 ))}
               </div>
+                </>
+              )}
             </Q>
           )}
         </>
       )}
 
       {going !== null && (
-        <Q label={notePrompt || "Anything we should know?"} hint="Optional">
+        <Q label={notePrompt || "Anything we should know?"} hint={notesPublic ? "Optional. Shows on the invite." : "Optional. Only the host sees this."}>
           <textarea
             className="field" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder={going ? noteHint || "Allergies, arriving late…" : "A note for the hosts"}
@@ -174,11 +183,6 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, cho
         </Q>
       )}
 
-      {going !== null && (
-        <Q label="Email" hint="Optional. We'll send you a link to change your reply from any device.">
-          <input className="field" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-        </Q>
-      )}
 
       {error && (
         <div role="alert" className="rounded-2xl bg-red-50 p-4 text-[16px] text-red-800">

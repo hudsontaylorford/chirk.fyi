@@ -1,28 +1,41 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useActionState, useState } from "react";
+import { emailMyReply } from "@/app/actions";
 
-/** The guest's private edit link, with Share (phone share sheet) and Copy. */
-export function YourLink({ slug, token }: { slug: string; token: string }) {
-  const [url, setUrl] = useState("");
+/**
+ * "Keep your link": one card after replying. With an email on the reply it says where the link went;
+ * without one, it asks for an email (the easiest way back from any device), with copying as the fallback.
+ */
+export function KeepLink({ slug, token, email }: { slug: string; token: string; email: string | null }) {
+  const [message, action, pending] = useActionState(emailMyReply.bind(null, slug, token), null);
   const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    setUrl(`${location.origin}/${slug}/r/${token}`);
-  }, [slug, token]);
-
-  async function share() {
-    if (navigator.share) return navigator.share({ title: "My RSVP", url }).catch(() => {});
-    await navigator.clipboard.writeText(url).catch(() => {});
+  const [editing, setEditing] = useState(!email);
+  async function copy() {
+    await navigator.clipboard.writeText(`${location.origin}/${slug}/r/${token}`).catch(() => {});
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
-
   return (
     <div className="rounded-2xl bg-wash p-4">
-      <p className="font-semibold">This is your link</p>
-      <p className="mt-0.5 text-[15px] text-soft">This phone remembers your reply. On another phone, use this link. It works for everyone in your RSVP.</p>
-      <button type="button" onClick={share} className="btn mt-3 w-full">
-        {copied ? "Copied ✓" : "Save my link"}
+      <p className="font-semibold">Keep your link</p>
+      {email && !editing ? (
+        <p className="mt-0.5 text-[15px] text-soft">
+          It&apos;s in your inbox at {email}. Use it to change your reply from any device.{" "}
+          <button type="button" className="underline underline-offset-2" onClick={() => setEditing(true)}>Use a different email</button>
+        </p>
+      ) : (
+        <>
+          <p className="mt-0.5 text-[15px] text-soft">This phone remembers your reply. For any other device, we&apos;ll email you the link.</p>
+          <form action={action} className="mt-3 flex gap-2">
+            <input name="email" type="email" inputMode="email" autoComplete="email" required defaultValue={email ?? ""} placeholder="you@example.com" className="field" aria-label="Your email" />
+            <button className="btn shrink-0 px-4" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
+          </form>
+        </>
+      )}
+      {message && <p role="status" className="mt-2 text-[15px] text-soft">{message}</p>}
+      <button type="button" onClick={copy} className="mt-2 text-[15px] text-soft underline underline-offset-2">
+        {copied ? "Copied ✓" : "Copy the link instead"}
       </button>
     </div>
   );

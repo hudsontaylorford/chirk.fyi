@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
-import { YourLink } from "@/components/YourLink";
+import { KeepLink } from "@/components/YourLink";
 import { bringChoices, getEventData, joinNames } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +38,7 @@ export default async function YourRsvp({
       )}
 
       <div className="mt-6">
-        <YourLink slug={slug} token={token} />
+        <KeepLink slug={slug} token={token} email={h.email} />
       </div>
 
       <details className="group mt-3">
@@ -50,9 +50,12 @@ export default async function YourRsvp({
           askKids={data.event.ask_kids}
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
+          allowOwn={data.event.allow_own}
+          notesPublic={data.event.notes_public}
+          maxGuests={data.event.max_guests}
           choices={choices}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "", email: h.email ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "",
             picks, own,
           }}
         />

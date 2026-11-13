@@ -50,10 +50,11 @@ await h.click("text=Sign in");
 await h.click("summary:has-text('New event')");
 await h.fill("input[name=title]", "Thanksgiving 2026");
 await h.fill("input[name=date]", "2027-11-25");
-await h.fill("input[name=bring_prompt]", "Bring?");
-await h.fill("textarea[name=needed]", "Pie\nCider");
-await h.click("summary:has-text('More options')");
+await h.check("input[name=bring_on]");
+await h.fill("textarea[name=needed]", "Pie, Cider");
 await h.check("input[name=allow_doubles]");
+await h.click("summary:has-text('More options')");
+await h.check("input[name=notes_public]");
 await h.click("text=Create event");
 await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
@@ -88,6 +89,30 @@ await d2.click("text=Send RSVP");
 await d2.waitForURL(/\/r\//);
 await d2.goto(kidless.replace(/\/rsvp$/, ""));
 assert.match(await d2.textContent("main"), /Wine\s*Picker, Doubler/);
+
+// Public notes show on the invite as bubbles.
+const n1 = await phone();
+await n1.goto(kidless);
+await n1.click("text=Going");
+await n1.fill('input[aria-label="Your name"]', "Noter");
+await n1.fill("textarea", "Can't wait!");
+await n1.click("text=Send RSVP");
+await n1.waitForURL(/\/r\//);
+await n1.goto(kidless.replace(/\/rsvp$/, ""));
+assert.match(await n1.textContent("main"), /Notes\s*Noter\s*Can't wait!/);
+
+// The host turns off "add your own" and allows no extra guests: the RSVP form follows.
+await h.click("summary:has-text('Edit event')");
+await h.uncheck("input[name=allow_own]");
+await h.click("summary:has-text('More options') >> nth=-1");
+await h.selectOption("select[name=max_guests]", "0");
+await h.click("form:has(select[name=max_guests]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const t = await phone();
+await t.goto(kidless);
+await t.click("text=Going");
+assert.equal(await t.locator('input[aria-label="Add your own"]').count(), 0);
+assert.equal(await t.locator("text=+ Add someone").count(), 0);
 
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));

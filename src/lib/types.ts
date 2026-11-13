@@ -17,6 +17,9 @@ export interface Event {
   note_prompt: string | null;
   note_hint: string | null;
   allow_doubles: boolean;
+  allow_own: boolean;
+  notes_public: boolean;
+  max_guests: number | null; // extra people per reply; null = no limit
 }
 
 export interface Household {

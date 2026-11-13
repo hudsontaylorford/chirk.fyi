@@ -17,7 +17,7 @@ export interface RsvpInput {
   going: boolean;
   kids: number;
   note: string;
-  email?: string; // optional: we email them their private link
+  email?: string; // left out = keep the email already on the reply
   picks: string[]; // items they tapped (from the list, or doubling up on someone else's)
   own: string[]; // things they typed in themselves
   answeringAs?: string;
@@ -34,12 +34,15 @@ const tidy = (s: string, max = 120) => s.trim().replace(/\s+/g, " ").slice(0, ma
 export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const names = input.names.map((n) => tidy(n, 60)).filter(Boolean).slice(0, 8);
   if (!names.length) return { ok: false, error: "Add your name." };
-  const email = (input.email ?? "").trim().toLowerCase().slice(0, 200) || null;
+  const email = input.email === undefined ? undefined : input.email.trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean }[]>`
-    select id, notify_host, allow_doubles from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null }[]>`
+    select id, notify_host, allow_doubles, allow_own, max_guests from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
+  if (event.max_guests !== null && names.length > 1 + event.max_guests) {
+    return { ok: false, error: event.max_guests === 0 ? "This invite is just for you, so one name please." : `This invite allows up to ${event.max_guests} extra ${event.max_guests === 1 ? "guest" : "guests"}.` };
+  }
 
   // A second reply under a name that's already here is almost always a mistake.
   if (!input.token && !input.sameNameOk) {
@@ -61,7 +64,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
       const row = {
         names, going: input.going, kids: Math.max(0, Math.min(10, Math.round(input.kids) || 0)),
         note: tidy(input.note ?? "", 500) || null, updated_by: input.answeringAs ? tidy(input.answeringAs, 60) : null,
-        email,
+        ...(email === undefined ? {} : { email }),
       };
       const [before] = input.token ? await tx<{ email: string | null }[]>`select email from households where token = ${input.token}` : [];
       emailChanged = !!email && email !== before?.email;
@@ -73,7 +76,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
             insert into households ${tx({ ...row, event_id: event.id })} returning id, token`;
       if (!h) throw new Oops("We couldn't find your RSVP. Is the link right?");
 
-      await saveBringing(tx, event, h.id, input.going ? input.picks : [], input.going ? input.own : []);
+      await saveBringing(tx, event, h.id, input.going ? input.picks : [], input.going && event.allow_own ? input.own : []);
       return h.token;
     });
     // Remember this phone's reply. Server-set so Safari keeps it (it can wipe localStorage after 7 idle days).
@@ -180,4 +183,16 @@ async function notifyHost(slug: string, token: string, changed: boolean) {
     bringing: r.bringing, note: r.note, changed, hostUrl: `${await siteUrl()}/${slug}/host`,
   });
   await sendEmail({ to, ...mail, replyTo: r.email, idempotencyKey: `reply-note-${r.id}-${Math.floor(Date.now() / 60_000)}` });
+}
+
+/** "Keep your link": saves an email on a reply and sends the link there. */
+export async function emailMyReply(slug: string, token: string, _prev: string | null, f: FormData): Promise<string> {
+  const email = String(f.get("email") ?? "").trim().toLowerCase().slice(0, 200);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";
+  const [h] = await sql`update households h set email = ${email} from events e
+    where e.id = h.event_id and e.slug = ${slug} and h.token = ${token} returning h.id`;
+  if (!h) return "We couldn't find your reply.";
+  await emailLinks(slug, { token });
+  revalidatePath(`/${slug}`, "layout");
+  return `Sent to ${email}. Check your inbox (and spam).`;
 }

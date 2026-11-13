@@ -16,7 +16,7 @@ export default async function RsvpPage({ params }: { params: Promise<{ slug: str
       <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
       <h1 className="mt-4 mb-4 text-[28px] font-bold">RSVP</h1>
       <div className="mb-6"><EmailMyLink slug={slug} /></div>
-      <RsvpForm slug={slug} bringPrompt={data.event.bring_prompt} askKids={data.event.ask_kids} notePrompt={data.event.note_prompt} noteHint={data.event.note_hint} choices={choices} />
+      <RsvpForm slug={slug} bringPrompt={data.event.bring_prompt} askKids={data.event.ask_kids} notePrompt={data.event.note_prompt} noteHint={data.event.note_hint} allowOwn={data.event.allow_own} notesPublic={data.event.notes_public} maxGuests={data.event.max_guests} choices={choices} />
     </main>
   );
 }
