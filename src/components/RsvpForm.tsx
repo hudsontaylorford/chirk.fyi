@@ -13,6 +13,7 @@ export interface RsvpFormProps {
   allowOwn: boolean;
   notesPublic: boolean;
   maxGuests: number | null; // extra people per reply; null = no limit
+  arrivals: string[]; // stages they can say they're coming for; empty = don't ask
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
   initial?: {
@@ -20,6 +21,7 @@ export interface RsvpFormProps {
     names: string[];
     going: boolean;
     kids: number;
+    arrival: string | null;
     note: string;
     picks: string[];
     own: string[];
@@ -28,7 +30,7 @@ export interface RsvpFormProps {
 
 const QUICK = ["Drinks", "Dessert", "An appetizer"];
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, choices, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, choices, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
@@ -37,6 +39,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const [going, setGoing] = useState<boolean | null>(initial?.going ?? null);
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
+  const [arrival, setArrival] = useState<string | null>(initial?.arrival ?? null);
   const [picks, setPicks] = useState<string[]>(initial?.picks ?? []);
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
@@ -62,7 +65,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
     if (going === null) return setError({ text: "Are you coming?" });
     if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note,
+      slug, token: initial?.token, names, going, kids, note, arrival,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
@@ -136,6 +139,16 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
               <button type="button" className="h-11 w-11 rounded-full bg-wash text-xl" onClick={() => setKids(Math.min(10, kids + 1))} aria-label="More kids">+</button>
             </div>
           </div>}
+
+          {arrivals.length > 1 && (
+            <Q label="When are you coming?" hint="Optional.">
+              <div className="flex flex-wrap gap-2">
+                {arrivals.map((a) => (
+                  <button key={a} type="button" className="pill" aria-pressed={arrival === a} onClick={() => setArrival(arrival === a ? null : a)}>{a}</button>
+                ))}
+              </div>
+            </Q>
+          )}
 
           {bringPrompt && (
             <Q label={bringPrompt} hint={allowOwn ? "Tap one or two, or add your own." : "Tap what you'll bring."}>

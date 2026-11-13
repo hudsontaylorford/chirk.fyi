@@ -40,6 +40,13 @@ export function EventFields({ event, moreOptions }: { event?: Event; moreOptions
               <option value="4">Up to 4</option>
             </select>
           </label>
+          <label className="block">
+            <span className="text-[15px] text-soft">Schedule (for all-day events)</span>
+            <textarea name="schedule" defaultValue={event?.schedule ?? ""} rows={4} className="field mt-1"
+              placeholder={"10am Bagels & coffee\n1pm Snacks & wine\n4:30pm Dinner"} />
+            <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
+          </label>
+          <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests when they're arriving (needs a schedule)" />
           <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
           <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
           {moreOptions}

@@ -30,6 +30,8 @@ begin
     allow_own boolean not null default true,      -- guests can add things that aren't on the list
     notes_public boolean not null default false,  -- show notes on the invite
     max_guests int,                      -- extra people per reply: null = no limit, 0 = just them
+    schedule text,                       -- all-day events: one stage per line, time first
+    ask_arrival boolean not null default false,   -- ask guests which stage they're coming for
     created_at timestamptz not null default now()
   );
 
@@ -43,6 +45,7 @@ begin
     note text,
     updated_by text,
     email text,                          -- optional; we email them their private link
+    arrival text,                        -- the stage they're coming for (when the event asks)
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -86,6 +89,9 @@ begin
   alter table events add column if not exists notes_public boolean not null default false;
   alter table events add column if not exists max_guests int;
   alter table households add column if not exists email text;
+  alter table events add column if not exists schedule text;
+  alter table events add column if not exists ask_arrival boolean not null default false;
+  alter table households add column if not exists arrival text;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,
   -- then clear it on list items so a later re-run can't bring back something a guest un-picked.
   insert into claims (item_id, household_id, created_at)

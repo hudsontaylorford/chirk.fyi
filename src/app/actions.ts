@@ -9,6 +9,7 @@ import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
 import { replyEmail } from "@/lib/reply-email";
+import { arrivalChoices, parseSchedule } from "@/lib/schedule";
 
 export interface RsvpInput {
   slug: string;
@@ -20,6 +21,7 @@ export interface RsvpInput {
   email?: string; // left out = keep the email already on the reply
   picks: string[]; // items they tapped (from the list, or doubling up on someone else's)
   own: string[]; // things they typed in themselves
+  arrival?: string | null; // the stage they're coming for
   answeringAs?: string;
   sameNameOk?: boolean;
 }
@@ -37,8 +39,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const email = input.email === undefined ? undefined : input.email.trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null }[]>`
-    select id, notify_host, allow_doubles, allow_own, max_guests from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null; schedule: string | null; time: string | null; ask_arrival: boolean }[]>`
+    select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
   if (event.max_guests !== null && names.length > 1 + event.max_guests) {
     return { ok: false, error: event.max_guests === 0 ? "This invite is just for you, so one name please." : `This invite allows up to ${event.max_guests} extra ${event.max_guests === 1 ? "guest" : "guests"}.` };
@@ -65,6 +67,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
         names, going: input.going, kids: Math.max(0, Math.min(10, Math.round(input.kids) || 0)),
         note: tidy(input.note ?? "", 500) || null, updated_by: input.answeringAs ? tidy(input.answeringAs, 60) : null,
         ...(email === undefined ? {} : { email }),
+        arrival: input.going && event.ask_arrival && arrivalChoices(parseSchedule(event.schedule, event.time)).includes(input.arrival ?? "") ? input.arrival : null,
       };
       const [before] = input.token ? await tx<{ email: string | null }[]>`select email from households where token = ${input.token}` : [];
       emailChanged = !!email && email !== before?.email;

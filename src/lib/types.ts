@@ -20,6 +20,8 @@ export interface Event {
   allow_own: boolean;
   notes_public: boolean;
   max_guests: number | null; // extra people per reply; null = no limit
+  schedule: string | null; // one stage per line, time first
+  ask_arrival: boolean;
 }
 
 export interface Household {
@@ -31,6 +33,7 @@ export interface Household {
   note: string | null;
   updated_by: string | null;
   email: string | null;
+  arrival: string | null; // the stage they're coming for
 }
 
 export interface Item {

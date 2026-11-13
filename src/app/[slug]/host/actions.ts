@@ -47,6 +47,8 @@ const eventFields = (f: FormData) => ({
   allow_doubles: f.get("allow_doubles") === "on",
   note_prompt: val(f, "note_prompt") || null,
   note_hint: val(f, "note_hint") || null,
+  schedule: val(f, "schedule") || null,
+  ask_arrival: f.get("ask_arrival") === "on",
 });
 
 // Static routes that an event's web address must not shadow.
@@ -68,7 +70,7 @@ export async function copyToNextYear(slug: string) {
   await requireHost();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));

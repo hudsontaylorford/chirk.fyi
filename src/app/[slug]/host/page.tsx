@@ -6,7 +6,7 @@ import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { isHost } from "@/lib/auth";
-import { bringList, getEventData, joinNames } from "@/lib/data";
+import { arrivals, bringList, getEventData, joinNames } from "@/lib/data";
 import * as act from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +32,10 @@ export default async function HostPage({
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
   const open = list.open.length;
+  // Who's there by each stage: arriving earlier counts for every later stage; no answer counts from the last.
+  const stages = arrivals(event);
+  const startsAt = (h: (typeof going)[number]) => (stages.includes(h.arrival ?? "") ? stages.indexOf(h.arrival!) : stages.length - 1);
+  const thereBy = stages.map((_, i) => going.filter((h) => startsAt(h) <= i).reduce((n, h) => n + h.names.length + h.kids, 0));
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
@@ -56,6 +60,17 @@ export default async function HostPage({
         {event.bring_prompt && <Stat n={open} label="still needed" />}
       </div>
 
+      {stages.length > 1 && (
+        <div className="mt-4">
+          <p className="text-[15px] text-soft">There by</p>
+          <ul className="mt-1 divide-y divide-line border-y border-line">
+            {stages.map((s, i) => (
+              <li key={s} className="flex justify-between gap-3 py-2 text-[16px]"><span>{s}</span><span className="font-semibold tabular-nums">{thereBy[i]}</span></li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {event.status !== "draft" && <div className="mt-6"><CopyInvite event={event} /></div>}
 
       <h2 className="mt-8 text-[20px] font-bold">Replies</h2>
@@ -72,6 +87,7 @@ export default async function HostPage({
                 </span>
                 <span className={h.going ? "text-green-700" : "text-soft"}>{h.going ? "Going" : "Can't"}</span>
               </div>
+              {h.going && h.arrival && <p className="text-soft">Coming for {h.arrival}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
               {h.note && <p className="mt-1 rounded-lg bg-wash px-3 py-2">“{h.note}”</p>}
               {h.updated_by && <p className="text-[14px] text-soft">Last changed by {h.updated_by}</p>}

@@ -1,11 +1,12 @@
 import { isHost } from "./auth";
 import { sql } from "./db";
 import type { Claim, Event, EventData, Household, Item } from "./types";
+import { arrivalChoices, parseSchedule } from "./schedule.ts";
 
 /** `forGuest`: drafts stay hidden from everyone but the host. */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await isHost()))) return null;
   return e;
@@ -15,7 +16,7 @@ export async function getEventData(slug: string, forGuest = false): Promise<Even
   const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items, claims] = await Promise.all([
-    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email from households where event_id = ${event.id} order by created_at`,
+    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival from households where event_id = ${event.id} order by created_at`,
     sql<Item[]>`select id, kind, name, household_id from items where event_id = ${event.id} order by sort, created_at`,
     sql<Claim[]>`select c.item_id, c.household_id from claims c join items i on i.id = c.item_id
       where i.event_id = ${event.id} order by c.created_at`,
@@ -58,3 +59,6 @@ export function bringChoices(data: EventData, householdId?: string) {
     bringing: mine.map((r) => r.item.name),
   };
 }
+
+/** The stages guests can say they're arriving for; empty when the event doesn't ask. */
+export const arrivals = (e: Event) => (e.ask_arrival ? arrivalChoices(parseSchedule(e.schedule, e.time)) : []);

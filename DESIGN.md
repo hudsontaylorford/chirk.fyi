@@ -56,6 +56,7 @@ The phone's system font (San Francisco on iPhone): nothing to load, feels native
 
 ## Components
 - **Chips (pills):** toggles; selected inverts to ink fill. "Still needed" items are dashed outline chips (open slots).
+- **Schedule (all-day events):** an optional quiet timeline under the place: time left, stage right, soft gray, with the stage at the start time bold. Optional "When are you coming?" chips on the RSVP; the host sees how many are there by each stage.
 - **Bring list on the invite:** "Still needed" chips on top, then "Who's bringing what" as one list (item left, names right in soft), in the order things were claimed.
 - **Stat tiles (host):** three wash tiles: coming, replies, still needed, with an optional tiny sub-line.
 - **Formatting in event details:** `# Title`, `- bullet`, `**bold**`, auto-links; tools: Auto-format, Clear formatting, Preview.
@@ -92,5 +93,5 @@ The phone's system font (San Francisco on iPhone): nothing to load, feels native
 - **Color and type:** a real palette and typeface pairing; dark mode for the app.
 - **Three directions from the original Post Up brief, all still open:** Bulletin board (paper notes, pegboard, vintage Apple warmth); Cash App / BRAT (big confident type, one bold color, huge actions); "Craigslist is beautiful" (HTML-1.0 plainness, blue links, dense lists stacked for phones).
 - **Wrappers (an idea):** optional per-event dressing for the invite only (background color, font pairing, texture) from a short curated set; the RSVP form and host tools stay plain.
-- **Coming soon, needing design:** notes shown as gray message bubbles on the invite; named invitations ("invited vs replied"); an all-day schedule (bagels → snacks → dinner) as a small timeline; later a feed of friends' plans.
+- **Coming soon, needing design:** notes shown as gray message bubbles on the invite; named invitations ("invited vs replied"); later a feed of friends' plans.
 - **Constraints to keep:** works at 390px wide; tap targets ≥44px; inputs ≥16px (iPhone zoom); emails use inline styles and JPEG images; link previews 1200×630.

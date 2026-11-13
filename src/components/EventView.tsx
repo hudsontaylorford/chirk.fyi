@@ -2,6 +2,7 @@ import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
 import { mapsUrl, shortDate, when } from "@/lib/format";
+import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
 /** The invite: what, when, where, who's coming, who's bringing what. */
@@ -10,6 +11,8 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
   const { claimed, open } = bringList(data);
+  const stages = parseSchedule(event.schedule, event.time);
+  const hasMain = stages.some((s) => s.main);
 
   return (
     <article className="pb-28">
@@ -32,6 +35,15 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
               <a href={mapsUrl(event.address)} className="underline underline-offset-2">{event.address}</a>
             )}
           </p>
+        )}
+        {stages.length > 0 && (
+          <ul className="mt-3 space-y-1 text-[17px] tabular-nums">
+            {stages.map((s, i) => (
+              <li key={i} className={`grid grid-cols-[5.5rem_1fr] gap-2 ${s.main ? "font-bold" : hasMain ? "text-soft" : ""}`}>
+                <span>{s.when}</span><span>{s.what}</span>
+              </li>
+            ))}
+          </ul>
         )}
         <a href={`/${event.slug}/calendar.ics`} className="mt-3 inline-block text-[15px] font-medium underline underline-offset-2">
           Add to calendar

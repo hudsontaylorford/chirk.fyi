@@ -114,6 +114,30 @@ await t.click("text=Going");
 assert.equal(await t.locator('input[aria-label="Add your own"]').count(), 0);
 assert.equal(await t.locator("text=+ Add someone").count(), 0);
 
+// A schedule shows on the invite, and guests can say when they're arriving; the host sees who's there by each stage.
+await h.reload();
+await h.click("summary:has-text('Edit event')");
+await h.fill("input[name=time] >> nth=-1", "16:30");
+await h.click("summary:has-text('More options') >> nth=-1");
+await h.fill("textarea[name=schedule] >> nth=-1", "10am Bagels\n1pm Snacks & wine\n4:30pm Dinner\nLate Leftovers");
+await h.check("input[name=ask_arrival] >> nth=-1");
+await h.click("form:has(textarea[name=schedule]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const s1 = await phone();
+await s1.goto(kidless.replace(/\/rsvp$/, ""));
+assert.match(await s1.textContent("header"), /10 am\s*Bagels\s*1 pm\s*Snacks & wine\s*4:30 pm\s*Dinner\s*Late\s*Leftovers/);
+assert.equal(await s1.locator("header li.font-bold").textContent(), "4:30 pmDinner");
+await s1.goto(kidless);
+await s1.click("text=Going");
+await s1.fill('input[aria-label="Your name"]', "Early Bird");
+await s1.click("button.pill:text-is('Snacks & wine')");
+await s1.click("text=Send RSVP");
+await s1.waitForURL(/\/r\//);
+assert.match(await s1.textContent("main"), /Coming for: Snacks & wine/);
+await h.reload();
+assert.match(await h.textContent("main"), /There by\s*Bagels\s*0\s*Snacks & wine\s*1\s*Dinner\s*\d+/);
+assert.match(await h.textContent("main"), /Coming for Snacks & wine/);
+
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));
 assert.match(await a.textContent("main"), /Your plans[\s\S]*Thanksgiving 2026[\s\S]*Going/);
