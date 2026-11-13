@@ -19,6 +19,7 @@ export interface Household {
   going: boolean;
   kids: number;
   note: string | null;
+  updated_by: string | null;
 }
 
 export interface Item {

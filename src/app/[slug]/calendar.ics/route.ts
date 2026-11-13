@@ -8,6 +8,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const day = e.date.replaceAll("-", "");
   const [h, m] = (e.time ?? "00:00").split(":").map(Number);
   const pad = (n: number) => String(n).padStart(2, "0");
+  // shortcut: assumes a 3-hour event in New York with no VTIMEZONE block; add an end time + timezone field if events ever need them.
   const when = e.time
     ? [`DTSTART;TZID=America/New_York:${day}T${pad(h)}${pad(m)}00`, `DTEND;TZID=America/New_York:${day}T${pad(Math.min(h + 3, 23))}${pad(m)}00`]
     : [`DTSTART;VALUE=DATE:${day}`];

@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { EditToggle } from "@/components/EditToggle";
 import { RsvpForm } from "@/components/RsvpForm";
 import { YourLink } from "@/components/YourLink";
 import { getEventData, joinNames } from "@/lib/data";
@@ -47,7 +46,9 @@ export default async function YourRsvp({
         <YourLink slug={slug} token={token} />
       </div>
 
-      <EditToggle>
+      <details className="group mt-3">
+        <summary className="btn btn-quiet list-none group-open:hidden">Change my reply</summary>
+        <div className="mt-8 border-t border-line pt-6">
         <RsvpForm
           slug={slug}
           bringPrompt={data.event.bring_prompt}
@@ -57,7 +58,8 @@ export default async function YourRsvp({
             mainItemId: picked?.id ?? null, mainName: own?.name ?? "", extra: extra?.name ?? "",
           }}
         />
-      </EditToggle>
+        </div>
+      </details>
     </main>
   );
 }
