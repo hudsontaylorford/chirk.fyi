@@ -1,4 +1,7 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { EventFields } from "@/components/EventFields";
+import { HostSignIn } from "@/components/HostSignIn";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { isHost } from "@/lib/auth";
@@ -18,19 +21,7 @@ export default async function HostPage({
   const data = await getEventData(slug);
   if (!data) notFound();
 
-  if (!(await isHost())) {
-    const wrong = !!(await searchParams).wrong;
-    return (
-      <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-5">
-        <h1 className="mb-4 text-[24px] font-bold">Host sign-in</h1>
-        <form action={act.signIn.bind(null, slug)} className="space-y-3">
-          <input name="password" type="password" placeholder="Password" className="field" autoComplete="current-password" autoFocus />
-          {wrong && <p className="text-red-700">That&apos;s not it.</p>}
-          <button className="btn w-full">Sign in</button>
-        </form>
-      </main>
-    );
-  }
+  if (!(await isHost())) return <HostSignIn next={`/${slug}/host`} wrong={!!(await searchParams).wrong} />;
 
   const { event, households, items } = data;
   const going = households.filter((h) => h.going);
@@ -43,8 +34,8 @@ export default async function HostPage({
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <div className="flex justify-between text-[16px] text-soft">
-        <a href={`/${slug}`}>‹ Invite</a>
-        <form action={act.signOut.bind(null, slug)}><button>Sign out</button></form>
+        <Link href="/host">‹ All events</Link>
+        <a href={`/${slug}`} className="font-semibold text-ink">View invite</a>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
 
@@ -105,22 +96,7 @@ export default async function HostPage({
       <details className="mt-8 rounded-2xl bg-wash p-4">
         <summary className="text-[17px] font-semibold">Edit event</summary>
         <form action={act.saveEvent.bind(null, slug)} className="mt-4 space-y-3">
-          <Field label="Title" name="title" value={event.title} />
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Date" name="date" type="date" value={event.date} />
-            <Field label="Time" name="time" type="time" value={event.time?.slice(0, 5)} />
-          </div>
-          <Field label="Place" name="place" value={event.place} />
-          <Field label="Address" name="address" value={event.address} />
-          <label className="block">
-            <span className="text-[15px] text-soft">Details (blank line = new paragraph)</span>
-            <textarea name="details" rows={6} defaultValue={event.details ?? ""} className="field mt-1" />
-          </label>
-          <Field label="Reply by" name="rsvp_by" type="date" value={event.rsvp_by} />
-          <Field label="Cover image URL (optional)" name="cover_url" value={event.cover_url} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          {event.cover_url && <img src={event.cover_url} alt="Current cover" className="h-auto w-32 rounded-lg" />}
-          <Field label="“What are you bringing?” question (blank = turn off)" name="bring_prompt" value={event.bring_prompt} />
+          <EventFields event={event} />
           <SaveButton className="btn w-full">Save</SaveButton>
         </form>
       </details>
@@ -134,15 +110,6 @@ function Stat({ n, label }: { n: number; label: string }) {
       <div className="text-[28px] font-bold tabular-nums">{n}</div>
       <div className="text-[14px] text-soft">{label}</div>
     </div>
-  );
-}
-
-function Field({ label, name, value, type = "text" }: { label: string; name: string; value?: string | null; type?: string }) {
-  return (
-    <label className="block">
-      <span className="text-[15px] text-soft">{label}</span>
-      <input name={name} type={type} defaultValue={value ?? ""} className="field mt-1" />
-    </label>
   );
 }
 

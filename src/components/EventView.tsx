@@ -4,7 +4,7 @@ import { clock, longDate, mapsUrl, shortDate } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
 /** The invite: what, when, where, who's coming, who's bringing what. */
-export function EventView({ data }: { data: EventData }) {
+export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactNode }) {
   const { event, households, items } = data;
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
@@ -13,9 +13,9 @@ export function EventView({ data }: { data: EventData }) {
   const theirs = items.filter((i) => i.kind !== "needed" && i.household_id);
 
   return (
-    <article className="pb-36">
+    <article className="pb-28">
       {event.cover_url ? (
-        <img src={event.cover_url} alt="" className="mx-auto h-auto max-h-[55dvh] w-auto max-w-full" />
+        <img src={event.cover_url} alt="" className="h-auto w-full" />
       ) : (
         <div className="h-6" />
       )}
@@ -38,6 +38,7 @@ export function EventView({ data }: { data: EventData }) {
         <a href={`/${event.slug}/calendar.ics`} className="mt-3 inline-block text-[15px] font-medium underline underline-offset-2">
           Add to calendar
         </a>
+        {rsvp && <div className="mt-5">{rsvp}</div>}
       </header>
 
       {event.details && (

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { EventView } from "@/components/EventView";
+import { RsvpButton } from "@/components/RsvpButton";
 import { getEvent, getEventData } from "@/lib/data";
 import { clock, longDate } from "@/lib/format";
 
@@ -28,12 +29,10 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const mine = data.households.find((h) => h.token === saved);
   return (
     <main className="mx-auto max-w-lg">
-      <EventView data={data} />
-      <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-white via-white to-white/0 px-5 pt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
-        <a href={mine ? `/${slug}/r/${mine.token}` : `/${slug}/rsvp`} className={`btn mx-auto max-w-lg ${mine ? "btn-quiet" : ""}`}>
-          {mine ? "Your RSVP" : "RSVP"}
-        </a>
-      </div>
+      <EventView
+        data={data}
+        rsvp={<RsvpButton href={mine ? `/${slug}/r/${mine.token}` : `/${slug}/rsvp`} label={mine ? "Your RSVP" : "RSVP"} quiet={!!mine} />}
+      />
     </main>
   );
 }

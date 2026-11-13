@@ -33,7 +33,21 @@ await c.waitForSelector("text=Someone with that name already replied");
 // The invite shows the claim.
 await a.goto(B);
 assert.match(await a.textContent("main"), /Rolls\s*Check A/);
-assert.equal((await a.textContent("a.btn")).trim(), "Your RSVP"); // this phone remembers its reply
+assert.equal((await a.locator("a.btn").first().textContent()).trim(), "Your RSVP"); // this phone remembers its reply
+
+// Host makes a new event whose title is already taken: it gets its own web address and its list.
+const h = await phone();
+await h.goto(B.replace("/thanksgiving-2026", "/host"));
+await h.fill("input[name=password]", process.env.ADMIN_PASSWORD ?? "gravy");
+await h.click("text=Sign in");
+await h.click("summary:has-text('New event')");
+await h.fill("input[name=title]", "Thanksgiving 2026");
+await h.fill("input[name=date]", "2027-11-25");
+await h.fill("input[name=bring_prompt]", "Bring?");
+await h.fill("textarea[name=needed]", "Pie\nCider");
+await h.click("text=Create event");
+await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
+assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
 
 await browser.close();
-console.log("✓ RSVP checks passed (delete the 'Check' guests from /host afterwards)");
+console.log("✓ RSVP checks passed (delete the 'Check' guests and the extra event afterwards)");
