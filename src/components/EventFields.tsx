@@ -15,7 +15,7 @@ export function EventFields({ event }: { event?: Event }) {
       <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
       <Field label="Address" name="address" value={event?.address} />
       <DetailsInput value={event?.details ?? ""} />
-      <Field label="Reply by" name="rsvp_by" type="date" value={event?.rsvp_by} />
+      <Field label="RSVP deadline (optional)" name="rsvp_by" type="date" value={event?.rsvp_by} />
       {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
       <CoverInput value={event?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
       <Field
@@ -34,7 +34,7 @@ export function Field({
   label, name, value, type = "text", required, placeholder,
 }: { label: string; name: string; value?: string | null; type?: string; required?: boolean; placeholder?: string }) {
   return (
-    <label className="block">
+    <label className="block min-w-0">
       <span className="text-[15px] text-soft">{label}</span>
       <input name={name} type={type} defaultValue={value ?? ""} required={required} placeholder={placeholder} className="field mt-1" />
     </label>

@@ -21,6 +21,13 @@ body {
 
 input, textarea { font-size: 17px; } /* stops iPhone zooming in on focus */
 
+/* iPhone Safari gives date and time boxes a fixed minimum width, so they spill out of their column. */
+input[type="date"], input[type="time"] {
+  -webkit-appearance: none; appearance: none; display: block;
+  min-width: 0; min-height: 3.2rem; text-align: left;
+}
+input::-webkit-date-and-time-value { text-align: left; }
+
 @utility btn {
   display: flex; align-items: center; justify-content: center;
   min-height: 3.25rem; padding: 0 1.25rem; border-radius: 999px;
