@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import { DetailsInput } from "@/components/DetailsInput";
 import type { Event } from "@/lib/types";
 
 /** The fields that describe an event. Shared by "New event" and "Edit event". */
@@ -12,10 +13,7 @@ export function EventFields({ event }: { event?: Event }) {
       </div>
       <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
       <Field label="Address" name="address" value={event?.address} />
-      <label className="block">
-        <span className="text-[15px] text-soft">Details (blank line = new paragraph)</span>
-        <textarea name="details" rows={5} defaultValue={event?.details ?? ""} className="field mt-1" />
-      </label>
+      <DetailsInput value={event?.details ?? ""} />
       <Field label="Reply by" name="rsvp_by" type="date" value={event?.rsvp_by} />
       <Field label="Cover image URL (optional)" name="cover_url" value={event?.cover_url} />
       {event?.cover_url && <img src={event.cover_url} alt="Current cover" className="h-auto w-32 rounded-lg" />}
@@ -23,6 +21,10 @@ export function EventFields({ event }: { event?: Event }) {
         label="“What are you bringing?” question (blank = no bring list)"
         name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. What's your main dish?"
       />
+      <label className="flex items-center gap-3 py-1 text-[16px]">
+        <input type="checkbox" name="ask_kids" defaultChecked={event?.ask_kids ?? true} className="h-5 w-5" />
+        Ask how many kids are coming
+      </label>
     </>
   );
 }

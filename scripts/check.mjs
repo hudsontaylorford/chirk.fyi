@@ -45,9 +45,15 @@ await h.fill("input[name=title]", "Thanksgiving 2026");
 await h.fill("input[name=date]", "2027-11-25");
 await h.fill("input[name=bring_prompt]", "Bring?");
 await h.fill("textarea[name=needed]", "Pie\nCider");
+await h.uncheck("input[name=ask_kids]");
 await h.click("text=Create event");
 await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
+const kidless = h.url().replace(/\/host$/, "/rsvp");
+const g = await phone();
+await g.goto(kidless);
+await g.click("text=Going");
+assert.equal(await g.locator("text=Kids coming").count(), 0); // the host turned the kids question off
 
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));

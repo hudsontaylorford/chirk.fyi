@@ -48,10 +48,10 @@ export default async function HostPage({
         <p className="mt-3 rounded-2xl bg-wash p-4 text-[16px]"><strong>Archived.</strong> The invite still works; it&apos;s just tucked away on your events list.</p>
       )}
 
-      <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+      <div className={`mt-4 grid gap-2 text-center ${event.ask_kids ? "grid-cols-3" : "grid-cols-2"}`}>
         <Stat n={adults} label="adults" />
-        <Stat n={kids} label="kids" />
-        <Stat n={open} label="dishes open" />
+        {event.ask_kids && <Stat n={kids} label="kids" />}
+        <Stat n={open} label="still needed" />
       </div>
 
       <h2 className="mt-8 text-[20px] font-bold">Replies</h2>

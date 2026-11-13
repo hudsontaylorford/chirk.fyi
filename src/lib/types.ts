@@ -11,6 +11,7 @@ export interface Event {
   cover_url: string | null;
   bring_prompt: string | null;
   status: "draft" | "live" | "archived";
+  ask_kids: boolean;
 }
 
 export interface Household {

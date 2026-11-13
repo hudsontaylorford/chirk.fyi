@@ -7,6 +7,7 @@ import { saveRsvp, type RsvpInput } from "@/app/actions";
 export interface RsvpFormProps {
   slug: string;
   bringPrompt: string | null;
+  askKids: boolean;
   openItems: { id: string; name: string }[]; // still-needed items (plus this household's own pick)
   initial?: {
     token: string;
@@ -22,7 +23,7 @@ export interface RsvpFormProps {
 
 const SUGGESTIONS = ["Drinks", "Dessert", "An appetizer"];
 
-export function RsvpForm({ slug, bringPrompt, openItems, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: RsvpFormProps) {
   const router = useRouter();
   const [busy, start] = useTransition();
   const [error, setError] = useState<{ text: string; sameName?: boolean } | null>(null);
@@ -109,14 +110,14 @@ export function RsvpForm({ slug, bringPrompt, openItems, initial }: RsvpFormProp
 
       {going && (
         <>
-          <div className="flex items-center justify-between">
+          {askKids && <div className="flex items-center justify-between">
             <span className="text-[17px] font-semibold">Kids coming</span>
             <div className="flex items-center gap-1">
               <button type="button" className="h-11 w-11 rounded-full bg-wash text-xl disabled:opacity-30" disabled={kids === 0} onClick={() => setKids(kids - 1)} aria-label="Fewer kids">−</button>
               <span className="w-8 text-center text-[18px] tabular-nums">{kids}</span>
               <button type="button" className="h-11 w-11 rounded-full bg-wash text-xl" onClick={() => setKids(Math.min(10, kids + 1))} aria-label="More kids">+</button>
             </div>
-          </div>
+          </div>}
 
           {bringPrompt && (
             <>
