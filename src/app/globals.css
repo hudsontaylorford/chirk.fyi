@@ -1,26 +1,108 @@
 @import "tailwindcss";
+@import "@fontsource/cinzel/400.css";
+@import "@fontsource/cinzel/600.css";
+@import "@fontsource/eb-garamond/400.css";
+@import "@fontsource/eb-garamond/400-italic.css";
+@import "@fontsource/eb-garamond/500.css";
+@import "@fontsource/eb-garamond/600.css";
+@import "@fontsource/eb-garamond/600-italic.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-maroon: #5c1000;
+  --color-maroon-deep: #420b00;
+  --color-maroon-soft: #74220e;
+  --color-cream: #f6ebd3;
+  --color-paper: #fbf6ea;
+  --color-ink: #2b0a02;
+  --color-muted: #7a5a4e;
+  --color-line: #e6d6b8;
+  --color-gold: #c9a45c;
+  --color-alert: #a8231a;
+  --color-ok: #3f6b3a;
+  --font-display: "Cinzel", Georgia, serif;
+  --font-serif: "EB Garamond", Georgia, "Times New Roman", serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-maroon);
+  color: var(--color-cream);
+  font-family: var(--font-serif);
+  font-size: 18px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* Cream "menu card" panels that sit on the maroon page */
+.paper {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  border-radius: 6px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.15), 0 12px 30px -12px rgba(0, 0, 0, 0.45);
+}
+
+.smallcaps {
+  font-family: var(--font-display);
+  letter-spacing: 0.08em;
+}
+
+.rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold), transparent);
+}
+
+input, textarea, select {
+  font-size: 17px; /* stops iOS zooming on focus */
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--color-line);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  color: var(--color-ink);
+}
+.field:focus {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 1px;
+  border-color: var(--color-gold);
+}
+
+.chip {
+  border: 1px solid var(--color-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 16px;
+  line-height: 1.2;
+  color: var(--color-ink);
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.chip[aria-pressed="true"] {
+  background: var(--color-maroon);
+  border-color: var(--color-maroon);
+  color: var(--color-cream);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  padding: 0.75rem 1.25rem;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  font-size: 15px;
+  font-weight: 600;
+  transition: opacity 0.15s, transform 0.05s;
+}
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; }
+.btn-primary { background: var(--color-maroon); color: var(--color-cream); }
+.btn-cream { background: var(--color-cream); color: var(--color-maroon); }
+.btn-ghost { border: 1px solid currentColor; }
