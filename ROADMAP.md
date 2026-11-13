@@ -104,6 +104,7 @@ Missing, roughly in order of value:
 4. **Host updates.** "We'll coordinate in the group Sunday morning." A short "Update from Hudson" at the top of the page (no chat).
 5. **Per-event switches.** Kids, couples and reply-by don't apply to a tailgate. Let the host turn them off.
 6. **Weather (a per-event tick box).** Filled in automatically for the date and place a few days before. The host ticks "Show weather" on events where it matters (tailgates, outdoor plans).
+8. **Tell the host when someone replies (a per-event switch).** "Notify me about replies": an email to the host for each new or changed RSVP (who, going or not, what they're bringing, their note), sent to the host's address via Resend, which is already set up. A text version comes once phone sending (Twilio) exists. Maybe a daily digest option for big events, so 30 replies aren't 30 emails.
 7. **Several photos.** Later.
 
 ## What carries over from the Post Up brief and mockups (Nov 14)
