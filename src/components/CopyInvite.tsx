@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { inviteEmail } from "@/lib/invite-email";
+import { imageLoads } from "./Cover";
 import type { Event } from "@/lib/types";
 
 /**
@@ -10,10 +11,16 @@ import type { Event } from "@/lib/types";
  */
 export function CopyInvite({ event }: { event: Event }) {
   const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  // Checked when the page opens: Safari only allows copying right at the tap, so nothing slow can happen then.
+  const [coverOk, setCoverOk] = useState(false);
+  useEffect(() => {
+    if (event.cover_url) imageLoads(event.cover_url).then(setCoverOk);
+  }, [event.cover_url]);
   const url = () => `${location.origin}/${event.slug}`;
 
   async function copy() {
-    const { html, text } = inviteEmail(event, url());
+    // A cover that doesn't load is left out, so the email never shows a broken image.
+    const { html, text } = inviteEmail({ ...event, cover_url: coverOk ? event.cover_url : null }, url());
     try {
       await navigator.clipboard.write([
         new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) }),

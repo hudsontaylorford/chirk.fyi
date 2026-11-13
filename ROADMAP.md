@@ -105,6 +105,9 @@ Missing, roughly in order of value:
 5. **Per-event switches.** Kids, couples and reply-by don't apply to a tailgate. Let the host turn them off.
 6. **Weather (a per-event tick box).** Filled in automatically for the date and place a few days before. The host ticks "Show weather" on events where it matters (tailgates, outdoor plans).
 8. **Tell the host when someone replies (a per-event switch).** "Notify me about replies": an email to the host for each new or changed RSVP (who, going or not, what they're bringing, their note), sent to the host's address via Resend, which is already set up. A text version comes once phone sending (Twilio) exists. Maybe a daily digest option for big events, so 30 replies aren't 30 emails.
+9. **Event types as presets.** Picking a type on New event (Dinner/potluck, Party, Game or outing, Trip, Casual hang) only *pre-fills* fields the host can still edit: the bring question, the "Anything we should know?" question and its example text (allergies for dinners, "arriving late?" for a party, "need a ride?" for a game), whether to ask about kids, and a starter details layout. One new editable field: the note question. Nothing is locked to a type.
+10. **Several people per item** (switch "Let people double up", then per-item spots for rides and gear).
+11. **"Your RSVP" email shows the date, place and an add-to-calendar link**, not just the status.
 7. **Several photos.** Later.
 
 ## What carries over from the Post Up brief and mockups (Nov 14)

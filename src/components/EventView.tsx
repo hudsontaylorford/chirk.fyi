@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { joinNames } from "@/lib/data";
 import { clock, longDate, mapsUrl, shortDate } from "@/lib/format";
@@ -16,7 +16,7 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
   return (
     <article className="pb-28">
       {event.cover_url ? (
-        <img src={event.cover_url} alt="" className="h-auto w-full" />
+        <Cover src={event.cover_url} />
       ) : (
         <div className="h-6" />
       )}

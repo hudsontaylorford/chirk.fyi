@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import { Cover } from "@/components/Cover";
 import { DetailsInput } from "@/components/DetailsInput";
 import type { Event } from "@/lib/types";
 
@@ -16,7 +16,7 @@ export function EventFields({ event }: { event?: Event }) {
       <DetailsInput value={event?.details ?? ""} />
       <Field label="Reply by" name="rsvp_by" type="date" value={event?.rsvp_by} />
       <Field label="Cover image URL (optional)" name="cover_url" value={event?.cover_url} />
-      {event?.cover_url && <img src={event.cover_url} alt="Current cover" className="h-auto w-32 rounded-lg" />}
+      {event?.cover_url && <Cover src={event.cover_url} host />}
       <Field
         label="“What are you bringing?” question (blank = no bring list)"
         name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. Bringing anything?"
