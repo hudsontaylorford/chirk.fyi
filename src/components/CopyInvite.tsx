@@ -26,17 +26,13 @@ export function CopyInvite({ event }: { event: Event }) {
     setTimeout(() => setState("idle"), 4000);
   }
 
-  const subject = inviteEmail(event, "").subject;
   return (
     <div className="rounded-2xl bg-wash p-4">
       <p className="text-[17px] font-semibold">Send the invite by email</p>
-      <p className="text-[15px] text-soft">Copy it, start an email, and paste. The photo, details and RSVP button come along.</p>
-      <div className="mt-3 grid grid-cols-2 gap-2">
-        <button type="button" onClick={copy} className="btn px-3 text-[15px]">
-          {state === "copied" ? "Copied ✓" : state === "failed" ? "Couldn't copy" : "1. Copy invite"}
-        </button>
-        <a href={`mailto:?subject=${encodeURIComponent(subject)}`} className="btn btn-quiet bg-white px-3 text-[15px]">2. Start an email</a>
-      </div>
+      <p className="text-[15px] text-soft">Copy it, then paste it into a new email. The photo, details and RSVP button come along.</p>
+      <button type="button" onClick={copy} className="btn mt-3 w-full text-[16px]">
+        {state === "copied" ? "Copied ✓ Now paste it into an email" : state === "failed" ? "Couldn't copy" : "Copy invite for email"}
+      </button>
     </div>
   );
 }
