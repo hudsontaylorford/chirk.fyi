@@ -108,6 +108,7 @@ Missing, roughly in order of value:
 9. **Event types as presets.** Picking a type on New event (Dinner/potluck, Party, Game or outing, Trip, Casual hang) only *pre-fills* fields the host can still edit: the bring question, the "Anything we should know?" question and its example text (allergies for dinners, "arriving late?" for a party, "need a ride?" for a game), whether to ask about kids, and a starter details layout. One new editable field: the note question. Nothing is locked to a type.
 10. **Several people per item** (switch "Let people double up", then per-item spots for rides and gear).
 11. **"Your RSVP" email shows the date, place and an add-to-calendar link**, not just the status.
+12. **Your people (saved guests), Partiful-style.** Everyone who has replied to one of your events becomes someone you can pick next time: tap names instead of typing emails. Before accounts, "people" are past guests (name + email). With accounts, they're chirk users, and replies attach to them. A **circle** is then just a saved group of your people ("Thanksgiving crew"), and "send to a circle" picks the whole group. One list grows into the other; no separate contacts system.
 7. **Several photos.** Later.
 
 ## What carries over from the Post Up brief and mockups (Nov 14)
