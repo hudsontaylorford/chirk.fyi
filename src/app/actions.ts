@@ -2,7 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
+import { sendEmail, siteUrl } from "@/lib/email";
+import { linkEmail } from "@/lib/link-email";
 
 export interface RsvpInput {
   slug: string;
@@ -11,6 +14,7 @@ export interface RsvpInput {
   going: boolean;
   kids: number;
   note: string;
+  email?: string; // optional: we email them their private link
   main: { itemId: string } | { name: string } | null; // one main dish
   extra: string; // optional "anything else?"
   answeringAs?: string;
@@ -27,6 +31,8 @@ const tidy = (s: string, max = 120) => s.trim().replace(/\s+/g, " ").slice(0, ma
 export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const names = input.names.map((n) => tidy(n, 60)).filter(Boolean).slice(0, 8);
   if (!names.length) return { ok: false, error: "Add your name." };
+  const email = (input.email ?? "").trim().toLowerCase().slice(0, 200) || null;
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
   const [event] = await sql<{ id: string }[]>`select id from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
@@ -40,17 +46,21 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     if (dupe) {
       return {
         ok: false, sameName: true,
-        error: "Someone with that name already replied. If it was you, use the link you saved (Hudson or Molly can resend it).",
+        error: "Someone with that name already replied. If it was you, use your saved link, or \"Email me my link\" above (or ask the host to resend it).",
       };
     }
   }
 
+  let emailChanged = false;
   try {
     const token = await sql.begin(async (tx) => {
       const row = {
         names, going: input.going, kids: Math.max(0, Math.min(10, Math.round(input.kids) || 0)),
         note: tidy(input.note ?? "", 500) || null, updated_by: input.answeringAs ? tidy(input.answeringAs, 60) : null,
+        email,
       };
+      const [before] = input.token ? await tx<{ email: string | null }[]>`select email from households where token = ${input.token}` : [];
+      emailChanged = !!email && email !== before?.email;
       const [h] = input.token
         ? await tx<{ id: string; token: string }[]>`
             update households set ${tx(row)}, updated_at = now()
@@ -87,10 +97,40 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
       });
     }
     revalidatePath(`/${input.slug}`, "layout");
+    // A new or changed email gets the private link right away.
+    if (emailChanged) await emailLinks(input.slug, { token });
     return { ok: true, token };
   } catch (e) {
     if (e instanceof Oops) return { ok: false, error: e.message, refresh: true };
     console.error(e);
     return { ok: false, error: "Something went wrong. Try again?" };
   }
+}
+
+/**
+ * Emails a reply's private link. `by` is the reply's token (right after saving)
+ * or an email address ("Email me my link": every reply on this event with that address).
+ * The button goes to /<event>/r/<token>/remember, which also makes that device remember them.
+ */
+async function emailLinks(slug: string, by: { token: string } | { email: string }) {
+  const rows = await sql<{ id: string; token: string; names: string[]; going: boolean; email: string; title: string; bringing: string[] }[]>`
+    select h.id, h.token, h.names, h.going, h.email, e.title,
+      coalesce((select array_agg(i.name order by i.kind) from items i where i.household_id = h.id), '{}') as bringing
+    from households h join events e on e.id = h.event_id
+    where e.slug = ${slug} and h.email is not null
+      and ${"token" in by ? sql`h.token = ${by.token}` : sql`h.email = ${by.email}`}`;
+  const base = await siteUrl();
+  const minute = Math.floor(Date.now() / 60_000); // a double tap within the same minute sends once
+  for (const r of rows) {
+    const mail = linkEmail({ title: r.title, names: joinNames(r.names), going: r.going, bringing: r.bringing, url: `${base}/${slug}/r/${r.token}/remember` });
+    await sendEmail({ to: r.email, ...mail, idempotencyKey: `rsvp-link-${r.id}-${minute}` });
+  }
+}
+
+/** "Already replied? Email me my link." Always answers the same way, so it never reveals who's on the list. */
+export async function emailMyLink(slug: string, _prev: string | null, f: FormData): Promise<string> {
+  const email = String(f.get("email") ?? "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";
+  await emailLinks(slug, { email });
+  return `If ${email} is on a reply, the link is on its way. Check your inbox (and spam).`;
 }

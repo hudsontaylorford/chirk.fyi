@@ -74,6 +74,7 @@ export default async function HostPage({
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
               {h.note && <p className="mt-1 rounded-lg bg-wash px-3 py-2">“{h.note}”</p>}
               {h.updated_by && <p className="text-[14px] text-soft">Last changed by {h.updated_by}</p>}
+              {h.email && <p className="text-[14px] text-soft">{h.email}</p>}
               <div className="mt-2 flex gap-5 text-[15px]">
                 <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />
                 <a href={`/${slug}/r/${h.token}`} className="font-semibold underline underline-offset-2">Edit</a>

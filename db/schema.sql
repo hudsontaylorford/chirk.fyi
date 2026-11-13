@@ -28,6 +28,7 @@ begin
   -- Added Nov 14 for databases created before it existed.
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
   alter table events add column if not exists ask_kids boolean not null default true;
+  alter table households add column if not exists email text;
 
   create table if not exists households (
     id uuid primary key default gen_random_uuid(),
@@ -38,6 +39,7 @@ begin
     kids int not null default 0,
     note text,
     updated_by text,
+    email text,                       -- optional; we email them their private link
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );

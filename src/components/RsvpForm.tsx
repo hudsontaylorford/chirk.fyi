@@ -15,6 +15,7 @@ export interface RsvpFormProps {
     going: boolean;
     kids: number;
     note: string;
+    email: string;
     mainItemId: string | null;
     mainName: string;
     extra: string;
@@ -36,6 +37,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: Rsv
   const [writingOwn, setWritingOwn] = useState(!!initial?.mainName);
   const [extra, setExtra] = useState(initial?.extra ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
   const [me, setMe] = useState<string | null>(null);
 
   // If the dish they picked got taken in the meantime, it's no longer selected.
@@ -47,7 +49,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: Rsv
     if (going === null) return setError({ text: "Are you coming?" });
     if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, extra,
+      slug, token: initial?.token, names, going, kids, note, extra, email,
       main: mainId && stillOpen ? { itemId: mainId } : writingOwn && ownMain.trim() ? { name: ownMain } : null,
       answeringAs: me ?? undefined, sameNameOk,
     };
@@ -162,6 +164,12 @@ export function RsvpForm({ slug, bringPrompt, askKids, openItems, initial }: Rsv
             className="field" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder={going ? "Allergies, needs oven time, arriving late…" : "A note for the hosts"}
           />
+        </Q>
+      )}
+
+      {going !== null && (
+        <Q label="Email" hint="Optional. We'll send you a link to change your reply from any device.">
+          <input className="field" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
         </Q>
       )}
 

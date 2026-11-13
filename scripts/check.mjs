@@ -24,6 +24,13 @@ await a.waitForURL(/\/r\//);
 await b.click("text=Send RSVP");
 await b.waitForSelector("text=Someone just grabbed that one");
 
+// The emailed link (…/remember) makes a fresh device remember the reply.
+const tokenA = a.url().match(/\/r\/([a-f0-9]+)/)[1];
+const other = await phone();
+await other.goto(`${B}/r/${tokenA}/remember`);
+await other.goto(B);
+assert.equal((await other.locator("a.btn").first().textContent()).trim(), "Your RSVP");
+
 // A reused name is caught.
 const c = await phone();
 await rsvp(c, "check a");

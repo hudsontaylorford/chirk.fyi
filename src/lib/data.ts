@@ -15,7 +15,7 @@ export async function getEventData(slug: string, forGuest = false): Promise<Even
   const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items] = await Promise.all([
-    sql<Household[]>`select id, token, names, going, kids, note, updated_by from households where event_id = ${event.id} order by created_at`,
+    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email from households where event_id = ${event.id} order by created_at`,
     sql<Item[]>`select id, kind, name, household_id from items where event_id = ${event.id} order by sort, created_at`,
   ]);
   return { event, households, items };

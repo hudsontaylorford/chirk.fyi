@@ -55,7 +55,7 @@ export default async function YourRsvp({
           askKids={data.event.ask_kids}
           openItems={open}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, note: h.note ?? "", email: h.email ?? "",
             mainItemId: picked?.id ?? null, mainName: own?.name ?? "", extra: extra?.name ?? "",
           }}
         />

@@ -22,6 +22,7 @@ export interface Household {
   kids: number;
   note: string | null;
   updated_by: string | null;
+  email: string | null;
 }
 
 export interface Item {
