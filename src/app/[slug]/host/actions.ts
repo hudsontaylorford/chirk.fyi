@@ -31,6 +31,7 @@ const eventFields = (f: FormData) => ({
   title: val(f, "title"),
   date: val(f, "date"),
   time: val(f, "time") || null,
+  end_time: (val(f, "time") && val(f, "end_time")) || null, // an end needs a start
   place: val(f, "place") || null,
   address: val(f, "address") || null,
   details: val(f, "details") || null,
@@ -58,7 +59,7 @@ async function freeSlug(text: string) {
 export async function copyToNextYear(slug: string) {
   await requireHost();
   const [e] = await sql`
-    select id, title, (date + 364)::text as date, time, place, address, details,
+    select id, title, (date + 364)::text as date, time, end_time, place, address, details,
       (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids
     from events where slug = ${slug}`;
   if (!e) return;

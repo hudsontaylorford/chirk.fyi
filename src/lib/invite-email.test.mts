@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { inviteEmail } from "./invite-email.ts";
 
 const event = {
-  title: "Jets <vs> Bills", date: "2026-11-15", time: "07:45:00", place: "MetLife", address: "1 MetLife Stadium Dr",
+  title: "Jets <vs> Bills", date: "2026-11-15", time: "07:45:00", end_time: null, place: "MetLife", address: "1 MetLife Stadium Dr",
   details: "# Bag policy\n- **Clear** bags only\nSee https://example.com/bags", rsvp_by: null, cover_url: null,
 };
 

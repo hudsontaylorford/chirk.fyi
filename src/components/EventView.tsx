@@ -1,7 +1,7 @@
 import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { joinNames } from "@/lib/data";
-import { clock, longDate, mapsUrl, shortDate } from "@/lib/format";
+import { mapsUrl, shortDate, when } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
 /** The invite: what, when, where, who's coming, who's bringing what. */
@@ -24,8 +24,7 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
       <header className="px-5 pt-6">
         <h1 className="text-[34px] leading-[1.1] font-bold tracking-tight">{event.title}</h1>
         <p className="mt-3 text-[19px] font-medium">
-          {longDate(event.date)}
-          {event.time && ` · ${clock(event.time)}`}
+          {when(event)}
         </p>
         {(event.place || event.address) && (
           <p className="mt-1 text-[17px] text-soft">

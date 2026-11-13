@@ -15,6 +15,7 @@ begin
     title text not null,
     date date not null,
     time time,
+    end_time time,
     place text,
     address text,
     details text,
@@ -29,6 +30,7 @@ begin
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
   alter table events add column if not exists ask_kids boolean not null default true;
   alter table households add column if not exists email text;
+  alter table events add column if not exists end_time time; -- at or before the start = the next day
 
   create table if not exists households (
     id uuid primary key default gen_random_uuid(),

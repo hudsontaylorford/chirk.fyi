@@ -1,15 +1,15 @@
 // The invite as an email: subject, HTML (inline styles, so Gmail and Mail keep the look) and plain text.
 // Pure: no database, no sending. Every value is escaped. The pattern follows crew-scheduler's email templates.
 import { inline, parseDetails } from "./details.ts";
-import { clock, longDate, mapsUrl, shortDate } from "./format.ts";
+import { mapsUrl, shortDate, when as whenText } from "./format.ts";
 import type { Event } from "./types.ts";
 
-type InviteEvent = Pick<Event, "title" | "date" | "time" | "place" | "address" | "details" | "rsvp_by" | "cover_url">;
+type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url">;
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export function inviteEmail(e: InviteEvent, url: string) {
-  const when = `${longDate(e.date)}${e.time ? ` · ${clock(e.time)}` : ""}`;
+  const when = whenText(e);
   const where = [e.place, e.address].filter(Boolean).join(" · ");
   const subject = `You're invited: ${e.title}`;
   const reply = e.rsvp_by ? `Please reply by ${shortDate(e.rsvp_by)}.` : null;

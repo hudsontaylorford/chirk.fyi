@@ -109,6 +109,7 @@ Missing, roughly in order of value:
 10. **Several people per item** (switch "Let people double up", then per-item spots for rides and gear).
 11. **"Your RSVP" email shows the date, place and an add-to-calendar link**, not just the status.
 12. **Your people (saved guests), Partiful-style.** Everyone who has replied to one of your events becomes someone you can pick next time: tap names instead of typing emails. Before accounts, "people" are past guests (name + email). With accounts, they're chirk users, and replies attach to them. A **circle** is then just a saved group of your people ("Thanksgiving crew"), and "send to a circle" picks the whole group. One list grows into the other; no separate contacts system.
+13. **Named invitations.** The host adds names (and optionally an email or phone) before sending. Each person gets their own link that opens a reply already addressed to them ("Hi Sally"), so there's nothing to type and no duplicate names. The host page then shows both numbers: invited vs replied, and who hasn't answered yet (with "copy their link" to nudge them). It reuses today's reply links; an invited-but-not-replied person is just a reply with no answer yet. It feeds straight into Your people and circles.
 7. **Several photos.** Later.
 
 ## What carries over from the Post Up brief and mockups (Nov 14)

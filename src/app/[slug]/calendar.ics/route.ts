@@ -1,4 +1,5 @@
 import { getEvent } from "@/lib/data";
+import { calendarSpan } from "@/lib/format";
 
 // "Add to calendar": a tiny .ics file the phone opens straight into Calendar.
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
@@ -6,11 +7,10 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const e = await getEvent(slug, true);
   if (!e) return new Response("Not found", { status: 404 });
   const day = e.date.replaceAll("-", "");
-  const [h, m] = (e.time ?? "00:00").split(":").map(Number);
-  const pad = (n: number) => String(n).padStart(2, "0");
-  // shortcut: assumes a 3-hour event in New York with no VTIMEZONE block; add an end time + timezone field if events ever need them.
-  const when = e.time
-    ? [`DTSTART;TZID=America/New_York:${day}T${pad(h)}${pad(m)}00`, `DTEND;TZID=America/New_York:${day}T${pad(Math.min(h + 3, 23))}${pad(m)}00`]
+  // shortcut: New York time with no VTIMEZONE block; add a time zone field if events ever happen elsewhere.
+  const span = e.time ? calendarSpan(e.date, e.time, e.end_time) : null;
+  const when = span
+    ? [`DTSTART;TZID=America/New_York:${span.start}`, `DTEND;TZID=America/New_York:${span.end}`]
     : [`DTSTART;VALUE=DATE:${day}`];
   const esc = (s: string) => s.replace(/[,;\\]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
   const ics = [

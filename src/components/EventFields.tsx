@@ -7,9 +7,10 @@ export function EventFields({ event }: { event?: Event }) {
   return (
     <>
       <Field label="Title" name="title" value={event?.title} required />
+      <Field label="Date" name="date" type="date" value={event?.date} required />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Date" name="date" type="date" value={event?.date} required />
-        <Field label="Time" name="time" type="time" value={event?.time?.slice(0, 5)} />
+        <Field label="Starts" name="time" type="time" value={event?.time?.slice(0, 5)} />
+        <Field label="Ends (optional)" name="end_time" type="time" value={event?.end_time?.slice(0, 5)} />
       </div>
       <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
       <Field label="Address" name="address" value={event?.address} />

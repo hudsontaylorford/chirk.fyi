@@ -4,6 +4,7 @@ export interface Event {
   title: string;
   date: string; // YYYY-MM-DD
   time: string | null; // HH:MM:SS
+  end_time: string | null;
   place: string | null;
   address: string | null;
   details: string | null;
