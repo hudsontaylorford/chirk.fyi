@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { EventFields } from "@/components/EventFields";
 import { HostSignIn } from "@/components/HostSignIn";
+import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { isHost } from "@/lib/auth";
@@ -53,6 +54,8 @@ export default async function HostPage({
         {event.ask_kids && <Stat n={kids} label="kids" />}
         <Stat n={open} label="still needed" />
       </div>
+
+      {event.status !== "draft" && <div className="mt-6"><CopyInvite event={event} /></div>}
 
       <h2 className="mt-8 text-[20px] font-bold">Replies</h2>
       <ul className="mt-2 divide-y divide-line border-y border-line">

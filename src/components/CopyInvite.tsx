@@ -1,0 +1,42 @@
+"use client";
+
+import { useState } from "react";
+import { inviteEmail } from "@/lib/invite-email";
+import type { Event } from "@/lib/types";
+
+/**
+ * "Copy invite for email": puts the formatted invite on the clipboard (HTML plus plain text),
+ * so pasting into Gmail or Mail keeps the cover, details and RSVP button. No email service needed.
+ */
+export function CopyInvite({ event }: { event: Event }) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const url = () => `${location.origin}/${event.slug}`;
+
+  async function copy() {
+    const { html, text } = inviteEmail(event, url());
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) }),
+      ]);
+      setState("copied");
+    } catch {
+      // Older browsers: plain text still works.
+      try { await navigator.clipboard.writeText(text); setState("copied"); } catch { setState("failed"); }
+    }
+    setTimeout(() => setState("idle"), 4000);
+  }
+
+  const subject = inviteEmail(event, "").subject;
+  return (
+    <div className="rounded-2xl bg-wash p-4">
+      <p className="text-[17px] font-semibold">Send the invite by email</p>
+      <p className="text-[15px] text-soft">Copy it, start an email, and paste. The photo, details and RSVP button come along.</p>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <button type="button" onClick={copy} className="btn px-3 text-[15px]">
+          {state === "copied" ? "Copied ✓" : state === "failed" ? "Couldn't copy" : "1. Copy invite"}
+        </button>
+        <a href={`mailto:?subject=${encodeURIComponent(subject)}`} className="btn btn-quiet bg-white px-3 text-[15px]">2. Start an email</a>
+      </div>
+    </div>
+  );
+}
