@@ -30,7 +30,7 @@ export default async function YourRsvp({
       <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
 
       <h1 className="mt-6 text-[28px] leading-tight font-bold">
-        {h.going ? (isNew ? "You're in! 🎉" : "You're going") : "You can't make it"}
+        {h.going ? (isNew ? "You're in!" : "You're going") : "You can't make it"}
       </h1>
       <p className="mt-1 text-[17px] text-soft">
         {joinNames(h.names)}
