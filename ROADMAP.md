@@ -4,19 +4,23 @@
 
 ## The one idea
 
-**A plan with a link.** Someone has a plan, makes one page for it, and sends the link. People open it on their phone, say if they're in, and maybe grab something to bring. No app, no feed you have to check, no notifications you didn't ask for. Simple, easy, mindless, not distracting.
+**A plan with a link, shown to the right people.** Everything is called **chirk** (Postup's ideas fold in; chirk.fyi is the domain).
 
-- **Postup** is that idea at its lightest: "wine on the dock tonight," open to whoever.
-- **chirk** is the same idea for a planned event with a known group: "Thanksgiving at ours, here's what we still need."
+The big picture: *close friends × find my friends × Craigslist × Partiful.* A small, peer-to-peer network for spontaneous or shared plans. You post a plan to **your circles**, like a Snapchat story goes to your friends, and people say if they're in.
 
-They are **one product at two settings**, not two products. A Thanksgiving chirk is a Postup that is invite-only, has a reply-by date, and has a bring list turned on.
+- **Circles** belong to the poster and are only a filter for them: "work friends", "soccer", "family", anything. Nobody knows which circles they're in. A plan can go to one or more circles.
+- **Private chirks** go to no circle. Only people with the link see them. **Thanksgiving is a private chirk**, and that's all that's built today.
+- **Community chirks** (later): open to anyone nearby (concerts, shows), capped at a few per month per person to keep quality high. Maybe a paid feature someday.
+- **Order:** peer to peer first, public later.
+
+The feel stays the same at every size: lightweight, web-based, simple, mindless, not distracting.
 
 ## The shape (one object, optional layers)
 
 | Layer | Wine on the dock | Thanksgiving | Weekend trip |
 |---|---|---|---|
 | **Basics**: title, when, where, a few words, host | ✓ | ✓ | ✓ (multi-day) |
-| **Who can see it**: public / link / invite / passcode | public | invite | invite |
+| **Who can see it**: my circles / link only / community | a circle or two | link only (private) | link only or a circle |
 | **Replies**: Going / Can't, names, kids | one tap "I'm in" | ✓ + couples | ✓ |
 | **Lists**: things to claim | — | the menu | rooms, rides, gear |
 | **Reply-by date** | — | ✓ | ✓ |
@@ -28,9 +32,15 @@ Every layer is **off unless the host turns it on**. A plan stays one screen for 
 - **Guests never need an account.** They get a private link to their reply (chirk's model). That's what makes it work for grandma.
 - Later, a guest who *does* sign up can attach past replies to their account. Optional, never required.
 
-### Groups ("a Postup to a specific group of people")
-Phase 1: the group is the group text. You paste the link. That already works.
-Later: a saved guest list ("Thanksgiving crew"). Picking it pre-fills names, so the RSVP page can say "Are you Hudson or Molly?" without typing. Members who have accounts see the plan in their feed.
+### Circles
+Today: the group text is the circle. You paste a private link, and that already works.
+Later, in this order:
+1. **Friends**: two people with accounts connect, either by mutual add or by one person accepting the other.
+2. **Circles**: the poster's private, named lists of friends.
+3. **Feed**: you see plans from people who put you in a circle they posted to, soonest first, never ranked.
+4. **Community**: nearby or open plans, with a monthly cap.
+
+Private-link chirks keep working the whole time, for people without accounts.
 
 ## The "dishes table" question: fixed fields or open-ended?
 
@@ -75,13 +85,17 @@ What we should **not** build: a form builder, custom question types, per-event s
 7. **No link previews.** Plan pages have no title/description for iMessage. Important for a "share the link" product.
 8. **Free Supabase pauses after 7 days idle.** This is why Postup went dark.
 
-## Where it lives (database + hosting)
+## Where it lives: all on Vercel
 
-- **Now:** chirk on Vercel + Neon (free). Postup on Vercel + Supabase (free, paused).
-- **Merged:** one app on Vercel, one Supabase project (Postup's), because Postup's sign-in is Supabase Auth.
-  - **Cost:** free while you stay at ≤2 active Supabase projects. Unpausing Postup puts you at 3, so pause or delete one, or pay ($25/mo Pro). With real weekly use, the 7-day pause stops being an issue.
-  - **One rule worth adopting:** the browser never talks to the database directly; only the server does. That fixes risk #3 by design and is how chirk already works.
-- Moving chirk's data is trivial (3 small tables, plain Postgres). The code moves as a few routes.
+**Decision: one app, the chirk repo, on Vercel, with the database on Neon (created through Vercel).** No Supabase, so no $25/mo and no 7-day pauses.
+
+- **Database:** Neon. chirk already uses it, and Postup's tables are plain Postgres, so they move over easily.
+- **Sign-in:** Supabase Auth is the one thing that doesn't come along. Replace it when accounts are first needed, with either:
+  - **Auth.js / Better Auth** (a library; accounts live in our own Neon database) plus an email service like Resend for sign-in links. Free at our size, a bit more setup.
+  - **Clerk** from the Vercel Marketplace (hosted sign-in screens, email or phone). Least code, one more company involved.
+  - Pick when we get there. Lean: sign-in *links* by email (no passwords), because they're simplest for guests.
+- **One rule:** the browser never talks to the database directly; only the server does. That fixes Postup's "invite only isn't private" problem by design, and it's how chirk already works.
+- **Postup's Supabase project** can be retired once anything worth keeping is copied out.
 
 ## Roadmap
 
@@ -93,21 +107,19 @@ What we should **not** build: a form builder, custom question types, per-event s
 - chirk: fix whatever Thanksgiving taught us.
 - Postup: fix bugs 1, 2, 4, 6 (each small). Decide PR #5.
 
-**3. Decide the merge (one short write-up, then go/no-go).**
-- Name and domain (is the product "Postup", "chirk", or Postup at chirk.fyi?).
-- Confirm Supabase project and cost.
-- Confirm the server-only database rule.
+**3. Fold Postup into chirk (the chirk repo becomes the one app).**
+- Upgrade chirk to Next 16 (Postup is already there).
+- Bring over what's worth keeping from Postup: the feed page, profiles, the "couldn't load" pattern, its tests.
+- Rename "Postup" to "chirk" everywhere; archive the Postup repo.
 
-**4. Build Create + Join in Postup using chirk's model.**
-- `postups` gains: `host_id`, `reply_by`, a real time zone, `bring_prompt` (or lists).
-- chirk's `households` (replies) and `items` tables come over as they are.
-- Join = chirk's RSVP. Share = the phone's share sheet. "Going" count = real replies.
-- Hosts sign in; guests use private links. Host password goes away.
+**4. Accounts (hosts first).**
+- Add sign-in (see above). Hosts sign in to create plans; the shared host password goes away.
+- Guests still use private links and never need an account.
+- Create = a short form that makes a plan. Join = chirk's RSVP. Share = the phone's share sheet.
 
-**5. Move chirk in.** Copy the data; old chirk.fyi links keep working (redirect or same domain).
+**5. Friends → circles → feed.** In that order, each one shipped and used before the next.
 
 **6. Later, only when a real plan needs it.**
-- Saved groups.
 - Several lists / spots per item (see above).
 - "Copy last year's plan."
 - Multi-day plans.
@@ -115,7 +127,11 @@ What we should **not** build: a form builder, custom question types, per-event s
 
 **Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing or payments, push notifications, ads.
 
-## Open questions for Hudson
-1. One brand or two? (e.g. Postup is the app, chirk.fyi is the domain.)
-2. Should a public Postup feed exist at all, or is everything link/invite-based?
-3. OK to pay $25/mo for Supabase if/when the merged app is in real use, or should we keep it free by pausing old projects?
+## Decided (Nov 13)
+- **Name:** everything is chirk (chirk.fyi). Postup's ideas fold in.
+- **Visibility:** peer to peer first (circles), public/community later.
+- **Hosting:** all on Vercel + Neon; no Supabase.
+
+## Open questions
+1. Sign-in: email links (no passwords) OK as the default? Or phone number?
+2. Friends: mutual add (both agree) or follow-style (one-way)?
