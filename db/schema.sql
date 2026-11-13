@@ -1,52 +1,56 @@
--- chirk: database schema. Paste into Neon → SQL Editor → Run. Safe to re-run.
+-- chirk: database schema. Safe to re-run.
+-- Vercel → Storage → your database → Query: turn off "Read-only", paste this whole file, Run.
+-- It's wrapped in one do-block because that editor runs a single command at a time.
 -- Three tables: an event, the households who reply, and the things people bring.
+-- 'needed' items are on the host's list (claimable by one household); 'main' is a household's own dish; 'extra' is the optional "anything else?".
+-- Row-level security is on so nothing but the site's server (which owns the tables) can read them.
 
-create extension if not exists pgcrypto;
+do $setup$
+begin
+  create extension if not exists pgcrypto;
 
-create table if not exists events (
-  id uuid primary key default gen_random_uuid(),
-  slug text not null unique,          -- the web address: chirk.fyi/<slug>
-  title text not null,
-  date date not null,
-  time time,                          -- main start time (e.g. dinner)
-  place text,                         -- "The Fords'"
-  address text,
-  details text,                       -- free text, blank line = new paragraph
-  rsvp_by date,
-  cover_url text,                     -- optional image
-  bring_prompt text,                  -- null = no "what are you bringing" section
-  created_at timestamptz not null default now()
-);
+  create table if not exists events (
+    id uuid primary key default gen_random_uuid(),
+    slug text not null unique,
+    title text not null,
+    date date not null,
+    time time,
+    place text,
+    address text,
+    details text,
+    rsvp_by date,
+    cover_url text,
+    bring_prompt text,
+    created_at timestamptz not null default now()
+  );
 
-create table if not exists households (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references events(id) on delete cascade,
-  token text not null unique default encode(gen_random_bytes(12), 'hex'),  -- private edit link
-  names text[] not null,              -- everyone this reply covers, e.g. {Hudson, Molly}
-  going boolean not null,
-  kids int not null default 0,
-  note text,                          -- allergies, oven needs, arriving late...
-  updated_by text,                    -- which name last touched it
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+  create table if not exists households (
+    id uuid primary key default gen_random_uuid(),
+    event_id uuid not null references events(id) on delete cascade,
+    token text not null unique default encode(gen_random_bytes(12), 'hex'),
+    names text[] not null,
+    going boolean not null,
+    kids int not null default 0,
+    note text,
+    updated_by text,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+  );
 
--- 'needed' = on the host's list, claimable by one household.
--- 'main'   = a household's own main dish when it's not on the list.
--- 'extra'  = the optional "anything else?".
-create table if not exists items (
-  id uuid primary key default gen_random_uuid(),
-  event_id uuid not null references events(id) on delete cascade,
-  kind text not null check (kind in ('needed', 'main', 'extra')),
-  name text not null,
-  household_id uuid references households(id) on delete set null,
-  sort int not null default 0,
-  created_at timestamptz not null default now()
-);
-create index if not exists items_event on items(event_id);
-create index if not exists households_event on households(event_id);
+  create table if not exists items (
+    id uuid primary key default gen_random_uuid(),
+    event_id uuid not null references events(id) on delete cascade,
+    kind text not null check (kind in ('needed', 'main', 'extra')),
+    name text not null,
+    household_id uuid references households(id) on delete set null,
+    sort int not null default 0,
+    created_at timestamptz not null default now()
+  );
+  create index if not exists items_event on items(event_id);
+  create index if not exists households_event on households(event_id);
 
--- Only the site's server reads the database. (Row-level security also blocks any auto-generated public API.)
-alter table events enable row level security;
-alter table households enable row level security;
-alter table items enable row level security;
+  alter table events enable row level security;
+  alter table households enable row level security;
+  alter table items enable row level security;
+end
+$setup$;

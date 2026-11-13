@@ -22,12 +22,12 @@ Done: the code lives in `hudsontaylorford/chirk.fyi`.
 
 ## 3. Neon: the database (created from inside Vercel)
 
-1. In your Vercel project, open the **Storage** tab, click **Create Database**, choose **Neon**, and accept the defaults. Free plan; pick the **US East** region if asked.
-2. When it asks which project to connect, choose `chirk.fyi`. Vercel adds the database address (`DATABASE_URL`) to your project automatically.
-3. Still in Storage, click **Open in Neon**, then **SQL Editor** in Neon's sidebar.
-4. Open `db/schema.sql` on GitHub, copy the whole file, paste it into the editor, and click **Run**.
-5. Clear the editor, paste the whole of `db/thanksgiving-2026.sql`, and click **Run**. This creates Thanksgiving 2026.
-6. Back in Vercel: **Deployments** tab → the **⋯** menu on the latest one → **Redeploy**.
+1. In your Vercel project, open the **Storage** tab, click **Create Database**, choose **Neon**, region **Washington, D.C. (East)**, and turn **Auth** off.
+2. Connect it to `chirk.fyi`. **Important:** in **Custom Prefix**, type `DATABASE` so the setting is named `DATABASE_URL` (the default `STORAGE` won't work).
+3. Click the database, then **Query** in its sidebar. Turn off **Read-only**.
+4. Paste the whole of `db/schema.sql` and click **Run**.
+5. Clear the editor, paste `db/thanksgiving-2026.sql`, and click **Run**.
+6. Back in the project: **Deployments** tab → **⋯** on the latest one → **Redeploy**.
 7. Open `your-project.vercel.app/thanksgiving-2026` on your phone. Then try `/thanksgiving-2026/host` with your host password.
 
 From then on, whenever Claude pushes changes to GitHub, Vercel updates the live site automatically within a minute or two.
