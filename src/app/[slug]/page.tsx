@@ -1,22 +1,27 @@
 import { notFound } from "next/navigation";
-import { InviteCover } from "@/components/Invite";
-import { getEvent } from "@/lib/data";
+import { EventView } from "@/components/EventView";
+import { RsvpBar } from "@/components/YourLink";
+import { getEvent, getEventData } from "@/lib/data";
+import { clock, longDate } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
+// What iMessage / WhatsApp show when the link is pasted into a group text.
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const event = await getEvent(slug);
-  return event ? { title: event.title, description: event.tagline ?? undefined } : {};
+  const e = await getEvent((await params).slug);
+  if (!e) return {};
+  const description = `${longDate(e.date)}${e.time ? ` · ${clock(e.time)}` : ""}${e.place ? ` · ${e.place}` : ""}`;
+  return { title: e.title, description, openGraph: { title: e.title, description } };
 }
 
-export default async function EventCover({ params }: { params: Promise<{ slug: string }> }) {
+export default async function EventPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const event = await getEvent(slug);
-  if (!event) notFound();
+  const data = await getEventData(slug);
+  if (!data) notFound();
   return (
-    <main className="mx-auto max-w-xl">
-      <InviteCover event={event} href={`/${slug}/details`} />
+    <main className="mx-auto max-w-lg">
+      <EventView data={data} />
+      <RsvpBar slug={slug} />
     </main>
   );
 }

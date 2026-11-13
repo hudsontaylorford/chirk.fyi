@@ -1,26 +1,23 @@
-# Event Kit
+# chirk
 
-A small, phone-first invite + RSVP + potluck planner. Guests claim the dishes that are actually needed. Hosts see headcount and an oven timeline with conflicts flagged.
+A tiny, phone-first invite + RSVP site. Day one of a DIY Partiful. First event: Thanksgiving 2026.
 
-- **Guests**: `/<event-slug>` (big invitation), `/<event-slug>/details` (details + live menu), `/<event-slug>/rsvp`, and a personal edit link `/<event-slug>/me/<token>`
-- **Hosts**: `/<event-slug>/host` (password: the `ADMIN_PASSWORD` env var)
+**Guests** open `chirk.fyi/<event>` → tap **RSVP** → Going / Can't, their names (one reply for a couple), and optionally one dish from the "still needed" list plus one extra. They get a private link to change it later. That link works for everyone on the reply ("Who's this? Hudson / Molly").
+
+**Hosts** open `chirk.fyi/<event>/host` (password = `ADMIN_PASSWORD`): headcount, replies, the needed list, edit the event.
 
 To get it live, see **[SETUP.md](SETUP.md)**.
 
-## Stack
-Next.js (App Router) + Tailwind on Vercel, and Postgres on Supabase. The app talks to Postgres directly through `DATABASE_URL`. Supabase's public API is locked off with row-level security.
+## How it's built
+- Next.js + Tailwind on Vercel. Postgres on Supabase, reached directly through `DATABASE_URL`.
+- Three tables (`db/schema.sql`): `events`, `households` (one reply each, with a private `token`), `items` (needed list + what people bring).
+- An event with no `bring_prompt` is a plain invite + RSVP (birthdays, dinners, anything).
+- The look is intentionally plain until it's designed. Colors live in `src/app/globals.css`.
 
 ## Local development
 ```bash
 cp .env.example .env.local
 psql "$DATABASE_URL" -f db/schema.sql
-psql "$DATABASE_URL" -f db/seed-thanksgiving-2026.sql
-node scripts/seed-demo.mjs      # optional: /demo filled with the 2025 contributions
+psql "$DATABASE_URL" -f db/thanksgiving-2026.sql
 npm run dev
 ```
-
-## Layout
-- `db/`: schema and event seed (paste into the Supabase SQL editor)
-- `src/lib/`: data access, menu summary, oven timeline + conflict detection, host auth
-- `src/components/`: invite, menu board, RSVP form, oven timeline
-- `src/app/actions.ts`: guest save. `src/app/[slug]/host/actions.ts`: host actions

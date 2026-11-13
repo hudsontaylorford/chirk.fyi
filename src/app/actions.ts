@@ -2,163 +2,87 @@
 
 import { revalidatePath } from "next/cache";
 import { sql } from "@/lib/db";
-import type { Arrival, KitchenNeed, RsvpStatus, Timing } from "@/lib/types";
-
-export interface DishInput {
-  id?: string;
-  category_id: string;
-  slot_id?: string | null;
-  dish_name?: string | null;
-  kitchen_needs: KitchenNeed[];
-  oven_temp_f?: number | null;
-  oven_minutes?: number | null;
-  timing?: Timing | null;
-  notes?: string | null;
-}
 
 export interface RsvpInput {
   slug: string;
   token?: string;
-  name: string;
-  status: RsvpStatus;
-  adults: number;
+  names: string[];
+  going: boolean;
   kids: number;
-  dietary_notes?: string;
-  arrival_window?: Arrival | null;
-  note?: string;
-  dishes: DishInput[];
-  /** Guest confirmed they're a different person from an existing RSVP with the same name. */
-  differentPerson?: boolean;
+  note: string;
+  main: { itemId: string } | { name: string } | null; // one main dish
+  extra: string; // optional "anything else?"
+  answeringAs?: string;
+  sameNameOk?: boolean;
 }
 
-export type SaveResult = { ok: true; token: string } | { ok: false; error: string; duplicate?: boolean };
+export type RsvpResult =
+  | { ok: true; token: string }
+  | { ok: false; error: string; sameName?: boolean; refresh?: boolean };
 
-const NEEDS: KitchenNeed[] = ["ready", "oven", "stovetop", "outlet", "fridge"];
-const clean = (s?: string | null) => (s ?? "").trim() || null;
-const int = (n: unknown, min: number, max: number) => {
-  const v = Math.round(Number(n));
-  return Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : null;
-};
+class Oops extends Error {}
+const tidy = (s: string, max = 120) => s.trim().replace(/\s+/g, " ").slice(0, max);
 
-export async function saveRsvp(input: RsvpInput): Promise<SaveResult> {
-  const name = clean(input.name);
-  if (!name) return { ok: false, error: "Please add your name." };
-  if (!["yes", "maybe", "no"].includes(input.status)) return { ok: false, error: "Please choose whether you're coming." };
+export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
+  const names = input.names.map((n) => tidy(n, 60)).filter(Boolean).slice(0, 8);
+  if (!names.length) return { ok: false, error: "Add your name." };
 
-  const [event] = await sql<{ id: string; slug: string; max_dishes_per_guest: number }[]>`
-    select id, slug, max_dishes_per_guest from events where slug = ${input.slug}`;
-  if (!event) return { ok: false, error: "We couldn't find this event." };
+  const [event] = await sql<{ id: string }[]>`select id from events where slug = ${input.slug}`;
+  if (!event) return { ok: false, error: "This event doesn't exist anymore." };
 
-  // Stops someone accidentally (or not) making a second RSVP under a name that's already on the list.
-  if (!input.token && !input.differentPerson) {
-    const [same] = await sql`select 1 from guests where event_id = ${event.id} and lower(trim(name)) = lower(${name})`;
-    if (same) {
+  // A second reply under a name that's already here is almost always a mistake.
+  if (!input.token && !input.sameNameOk) {
+    const lower = names.map((n) => n.toLowerCase());
+    const [dupe] = await sql`
+      select 1 from households, unnest(names) n
+      where event_id = ${event.id} and lower(n) = any(${lower})`;
+    if (dupe) {
       return {
-        ok: false, duplicate: true,
-        error: `“${name}” is already on the guest list. If that’s you, open the personal link you got when you RSVP’d (Hudson or Molly can resend it). To change someone else’s RSVP, ask them.`,
+        ok: false, sameName: true,
+        error: "Someone with that name already replied. If it was you, use the link you saved (Hudson or Molly can resend it).",
       };
     }
   }
 
-  const cats = await sql<{ id: string; kind: string }[]>`select id, kind from categories where event_id = ${event.id}`;
-  const slots = await sql<{ id: string; name: string; category_id: string }[]>`
-    select id, name, category_id from slots where event_id = ${event.id}`;
-  const catIds = new Set(cats.map((c) => c.id));
-  const slotById = new Map(slots.map((s) => [s.id, s]));
-
-  const dishes = input.status === "no" ? [] : input.dishes.slice(0, 12).map((d) => {
-    const needs = [...new Set(d.kitchen_needs.filter((n) => NEEDS.includes(n)))];
-    const oven = needs.includes("oven");
-    return {
-      id: d.id,
-      category_id: d.category_id,
-      slot_id: d.slot_id || null,
-      dish_name: clean(d.dish_name)?.slice(0, 120) ?? null,
-      kitchen_needs: needs,
-      oven_temp_f: oven ? int(d.oven_temp_f, 150, 550) : null,
-      oven_minutes: oven ? int(d.oven_minutes, 5, 600) : null,
-      timing: d.timing === "after" ? "after" : d.timing === "before" ? "before" : null,
-      notes: clean(d.notes)?.slice(0, 300) ?? null,
-    };
-  });
-  for (const d of dishes) {
-    if (!catIds.has(d.category_id)) return { ok: false, error: "One of your dishes has an unknown category. Please refresh and try again." };
-    if (d.slot_id && !slotById.has(d.slot_id)) return { ok: false, error: "One of the dishes you picked no longer exists. Please refresh." };
-  }
-  const slotIds = dishes.map((d) => d.slot_id).filter(Boolean);
-  if (new Set(slotIds).size !== slotIds.length) return { ok: false, error: "You've picked the same main dish twice." };
-
   try {
     const token = await sql.begin(async (tx) => {
-      let guestId: string, token: string;
-      const fields = {
-        name: name.slice(0, 80),
-        status: input.status,
-        adults: int(input.adults, 0, 20) ?? 1,
-        kids: int(input.kids, 0, 20) ?? 0,
-        dietary_notes: clean(input.dietary_notes)?.slice(0, 500) ?? null,
-        arrival_window: ["morning", "afternoon", "dinner"].includes(input.arrival_window ?? "") ? input.arrival_window! : null,
-        note: clean(input.note)?.slice(0, 500) ?? null,
+      const row = {
+        names, going: input.going, kids: Math.max(0, Math.min(10, Math.round(input.kids) || 0)),
+        note: tidy(input.note ?? "", 500) || null, updated_by: input.answeringAs ? tidy(input.answeringAs, 60) : null,
       };
-      if (input.token) {
-        const [g] = await tx<{ id: string; edit_token: string }[]>`
-          update guests set ${tx(fields)}, updated_at = now()
-          where edit_token = ${input.token} and event_id = ${event.id}
-          returning id, edit_token`;
-        if (!g) throw new UserError("We couldn't find your RSVP. Your link may be out of date.");
-        guestId = g.id; token = g.edit_token;
-      } else {
-        const [g] = await tx<{ id: string; edit_token: string }[]>`
-          insert into guests ${tx({ ...fields, event_id: event.id })} returning id, edit_token`;
-        guestId = g.id; token = g.edit_token;
-      }
+      const [h] = input.token
+        ? await tx<{ id: string; token: string }[]>`
+            update households set ${tx(row)}, updated_at = now()
+            where token = ${input.token} and event_id = ${event.id} returning id, token`
+        : await tx<{ id: string; token: string }[]>`
+            insert into households ${tx({ ...row, event_id: event.id })} returning id, token`;
+      if (!h) throw new Oops("We couldn't find your RSVP. Is the link right?");
 
-      const existing = await tx<{ id: string; assigned_by_host: boolean; slot_id: string | null }[]>`
-        select id, assigned_by_host, slot_id from dishes where guest_id = ${guestId}`;
-      // Less is more. (Hosts can still assign extra; guests just can't add beyond the limit.)
-      if (dishes.length > event.max_dishes_per_guest && dishes.length > existing.length) {
-        throw new UserError(`Just ${event.max_dishes_per_guest} items each, please. Less is more!`);
-      }
-      const mine = new Map(existing.map((d) => [d.id, d]));
-      const keep = new Set(dishes.map((d) => d.id).filter((id): id is string => !!id && mine.has(id)));
-      // Remove dropped dishes first so their slots free up before anything is re-claimed.
-      for (const d of existing) {
-        if (keep.has(d.id)) continue;
-        if (d.assigned_by_host && input.status !== "no") continue;
-        await tx`delete from dishes where id = ${d.id}`;
-      }
+      // Start clean: let go of anything previously claimed or added, then record the new picks.
+      await tx`update items set household_id = null where household_id = ${h.id} and kind = 'needed'`;
+      await tx`delete from items where household_id = ${h.id} and kind <> 'needed'`;
+      if (!input.going) return h.token;
 
-      for (const d of dishes) {
-        const row = {
-          category_id: d.category_id, slot_id: d.slot_id, dish_name: d.dish_name,
-          kitchen_needs: d.kitchen_needs, oven_temp_f: d.oven_temp_f, oven_minutes: d.oven_minutes,
-          timing: d.timing, notes: d.notes,
-        };
-        const prev = d.id ? mine.get(d.id) : undefined;
-        try {
-          if (prev) {
-            // Guests can't move a dish the host assigned them to another slot.
-            if (prev.assigned_by_host) row.slot_id = prev.slot_id;
-            await tx`update dishes set ${tx(row)}, updated_at = now() where id = ${prev.id}`;
-          } else {
-            await tx`insert into dishes ${tx({ ...row, event_id: event.id, guest_id: guestId })}`;
-          }
-        } catch (e) {
-          if ((e as { code?: string }).code === "23505" && d.slot_id) {
-            throw new UserError(`Someone just claimed ${slotById.get(d.slot_id)?.name}. Could you pick something else?`);
-          }
-          throw e;
-        }
+      const main = input.main;
+      if (main && "itemId" in main) {
+        const [claimed] = await tx`
+          update items set household_id = ${h.id}
+          where id = ${main.itemId} and event_id = ${event.id} and kind = 'needed' and household_id is null
+          returning id`;
+        if (!claimed) throw new Oops("Someone just grabbed that one! Pick another?");
+      } else if (main && tidy(main.name)) {
+        await tx`insert into items (event_id, kind, name, household_id) values (${event.id}, 'main', ${tidy(main.name)}, ${h.id})`;
       }
-      return token;
+      if (tidy(input.extra)) {
+        await tx`insert into items (event_id, kind, name, household_id) values (${event.id}, 'extra', ${tidy(input.extra)}, ${h.id})`;
+      }
+      return h.token;
     });
-    revalidatePath(`/${event.slug}`, "layout");
+    revalidatePath(`/${input.slug}`, "layout");
     return { ok: true, token };
   } catch (e) {
-    if (e instanceof UserError) return { ok: false, error: e.message };
+    if (e instanceof Oops) return { ok: false, error: e.message, refresh: true };
     console.error(e);
-    return { ok: false, error: "Something went wrong saving your RSVP. Please try again." };
+    return { ok: false, error: "Something went wrong. Try again?" };
   }
 }
-
-class UserError extends Error {}

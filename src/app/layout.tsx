@@ -1,16 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
-export const metadata: Metadata = {
-  title: "At the Fords",
-  description: "Invitations and RSVPs from the Fords.",
-};
-
-export const viewport: Viewport = {
-  themeColor: "#5c1000",
-  width: "device-width",
-  initialScale: 1,
-};
+export const metadata: Metadata = { title: "chirk", description: "Invites from the Fords." };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffffff" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

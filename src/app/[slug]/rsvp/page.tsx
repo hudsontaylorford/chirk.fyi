@@ -1,31 +1,20 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
-import { getBoard } from "@/lib/data";
-import { formProps } from "@/lib/form-props";
+import { getEventData } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "RSVP" };
 
-export default async function RsvpPage({
-  params, searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ slot?: string }>;
-}) {
+export default async function RsvpPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { slot } = await searchParams;
-  const board = await getBoard(slug);
-  if (!board) notFound();
-
+  const data = await getEventData(slug);
+  if (!data) notFound();
+  const open = data.items.filter((i) => i.kind === "needed" && !i.household_id);
   return (
-    <main className="mx-auto max-w-xl px-3 pt-6 pb-16 sm:px-0">
-      <Link href={`/${slug}/details`} className="px-2 text-[16px] italic opacity-90">← {board.event.title}</Link>
-      <div className="paper mt-4 px-5 py-6 sm:px-8">
-        <h1 className="smallcaps text-center text-2xl text-maroon">RSVP</h1>
-        <p className="mt-1 mb-6 text-center text-[16px] italic text-muted">Takes about a minute.</p>
-        <RsvpForm {...formProps(board)} preselectSlot={slot} />
-      </div>
+    <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
+      <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
+      <h1 className="mt-4 mb-6 text-[28px] font-bold">RSVP</h1>
+      <RsvpForm slug={slug} bringPrompt={data.event.bring_prompt} openItems={open} />
     </main>
   );
 }
