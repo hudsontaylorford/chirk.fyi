@@ -57,7 +57,6 @@ export function RsvpForm({ slug, bringPrompt, openItems, initial }: RsvpFormProp
         if (res.refresh) router.refresh();
         return;
       }
-      try { localStorage.setItem(`chirk:${slug}`, res.token); } catch {}
       router.push(`/${slug}/r/${res.token}${initial ? "" : "?new=1"}`);
       router.refresh();
     });

@@ -33,6 +33,7 @@ await c.waitForSelector("text=Someone with that name already replied");
 // The invite shows the claim.
 await a.goto(B);
 assert.match(await a.textContent("main"), /Rolls\s*Check A/);
+assert.equal((await a.textContent("a.btn")).trim(), "Your RSVP"); // this phone remembers its reply
 
 await browser.close();
 console.log("✓ RSVP checks passed (delete the 'Check' guests from /host afterwards)");

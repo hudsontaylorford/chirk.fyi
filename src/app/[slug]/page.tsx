@@ -1,6 +1,6 @@
+import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { EventView } from "@/components/EventView";
-import { RsvpBar } from "@/components/YourLink";
 import { getEvent, getEventData } from "@/lib/data";
 import { clock, longDate } from "@/lib/format";
 
@@ -23,10 +23,17 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const data = await getEventData(slug);
   if (!data) notFound();
+  // If this phone already replied, the button opens their reply instead of a new one.
+  const saved = (await cookies()).get(`chirk_${slug}`)?.value;
+  const mine = data.households.find((h) => h.token === saved);
   return (
     <main className="mx-auto max-w-lg">
       <EventView data={data} />
-      <RsvpBar slug={slug} />
+      <div className="fixed inset-x-0 bottom-0 bg-gradient-to-t from-white via-white to-white/0 px-5 pt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+        <a href={mine ? `/${slug}/r/${mine.token}` : `/${slug}/rsvp`} className={`btn mx-auto max-w-lg ${mine ? "btn-quiet" : ""}`}>
+          {mine ? "Your RSVP" : "RSVP"}
+        </a>
+      </div>
     </main>
   );
 }

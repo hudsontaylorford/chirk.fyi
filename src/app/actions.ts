@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { sql } from "@/lib/db";
 
 export interface RsvpInput {
@@ -78,6 +79,13 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
       }
       return h.token;
     });
+    // Remember this phone's reply. Server-set so Safari keeps it (it can wipe localStorage after 7 idle days).
+    // Only on a new reply, so a host editing someone else's RSVP doesn't take it over.
+    if (!input.token) {
+      (await cookies()).set(`chirk_${input.slug}`, token, {
+        httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", path: "/", maxAge: 60 * 60 * 24 * 365,
+      });
+    }
     revalidatePath(`/${input.slug}`, "layout");
     return { ok: true, token };
   } catch (e) {

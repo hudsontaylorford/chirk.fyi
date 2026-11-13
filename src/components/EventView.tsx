@@ -15,7 +15,7 @@ export function EventView({ data }: { data: EventData }) {
   return (
     <article className="pb-36">
       {event.cover_url ? (
-        <img src={event.cover_url} alt="" className="h-auto w-full" />
+        <img src={event.cover_url} alt="" className="mx-auto h-auto max-h-[55dvh] w-auto max-w-full" />
       ) : (
         <div className="h-6" />
       )}
