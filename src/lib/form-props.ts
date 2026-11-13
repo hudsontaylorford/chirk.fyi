@@ -17,6 +17,7 @@ export function formProps(board: Board, guestId?: string): Omit<RsvpFormProps, "
     slots: board.slots,
     takenSlots,
     hostName: "Hudson & Molly",
+    maxDishes: board.event.max_dishes_per_guest,
   };
 }
 

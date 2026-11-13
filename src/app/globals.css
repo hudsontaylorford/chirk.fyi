@@ -27,13 +27,19 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* The site itself is plain on purpose. Each event brings its own look (see src/app/[slug]/layout.tsx). */
 body {
-  background: var(--color-maroon);
-  color: var(--color-cream);
+  background: #faf8f4;
+  color: #1f1f1f;
   font-family: var(--font-serif);
   font-size: 18px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+.event-theme {
+  background: var(--color-maroon);
+  color: var(--color-cream);
 }
 
 /* Cream "menu card" panels that sit on the maroon page */

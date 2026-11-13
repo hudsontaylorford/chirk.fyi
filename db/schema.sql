@@ -20,10 +20,14 @@ create table if not exists events (
   rsvp_deadline date,
   dish_name_deadline date,
   theme jsonb not null default '{}'::jsonb,   -- colors, images, etc.
+  max_dishes_per_guest int not null default 2,   -- "less is more"
   is_archived boolean not null default false,  -- Phase 2
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Columns added after the first version (safe to re-run).
+alter table events add column if not exists max_dishes_per_guest int not null default 2;
 
 -- Ovens, toaster ovens, slow cookers, outlets...
 create table if not exists kitchen_resources (

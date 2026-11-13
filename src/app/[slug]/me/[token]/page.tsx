@@ -23,7 +23,7 @@ export default async function MyRsvp({
 
   return (
     <main className="mx-auto max-w-xl px-3 pt-6 pb-16 sm:px-0">
-      <Link href={`/${slug}`} className="px-2 text-[16px] italic opacity-90">← {board.event.title}</Link>
+      <Link href={`/${slug}/details`} className="px-2 text-[16px] italic opacity-90">← {board.event.title}</Link>
 
       <section className="paper mt-4 px-5 py-6 sm:px-8">
         {saved ? (

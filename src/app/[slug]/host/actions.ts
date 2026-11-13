@@ -81,6 +81,7 @@ export async function updateEvent(slug: string, f: FormData) {
     event_date: s(f, "event_date"),
     dinner_time: s(f, "dinner_time"),
     meal_minutes: n(f, "meal_minutes") ?? 120,
+    max_dishes_per_guest: Math.max(1, n(f, "max_dishes_per_guest") ?? 2),
     location_name: s(f, "location_name") || null,
     address: s(f, "address") || null,
     invite_copy: s(f, "invite_copy") || null,

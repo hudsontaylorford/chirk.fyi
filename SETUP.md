@@ -45,13 +45,21 @@ You'll come out of this with two secrets. Keep them in your password manager:
 
 From then on, whenever Claude pushes changes to GitHub, Vercel updates the live site automatically within a minute or two.
 
-## 4. A custom domain (optional, can wait)
+## 4. Your Cloudflare domain
 
-1. In Vercel, open your project, then **Settings → Domains**.
-2. Type the domain you want (e.g. `atthefords.com`). If it's available, Vercel lets you buy it right there, and the setup is automatic.
-3. If you already own the domain somewhere else (Squarespace, GoDaddy...), Vercel shows you two DNS records to copy into that company's settings. Send Claude a screenshot if it's confusing.
+The website stays on Vercel, and Cloudflare just points your domain at it. Below, `yourdomain.com` stands for your real domain.
 
-Invite link: `https://yourdomain.com/thanksgiving-2026`
+1. In **Vercel**, open the project, then **Settings → Domains**. Type `yourdomain.com` and click **Add**. Choose the option that also adds `www`.
+2. Vercel then shows a short list of DNS records, usually an **A** record for `@` and a **CNAME** for `www`. Leave that page open.
+3. In **Cloudflare**, open your domain, then **DNS → Records**.
+   - If records for `@` or `www` already exist, edit those. Otherwise click **Add record**.
+   - Copy the **Type**, **Name** and **Value/Target** exactly as Vercel shows them.
+   - Set **Proxy status** to **DNS only** (the grey cloud, not orange). Vercel needs this to issue the security certificate.
+4. Back in Vercel, within a few minutes both domains should show **Valid Configuration**.
+
+The home page `yourdomain.com` is a plain placeholder for now. The event lives at `yourdomain.com/thanksgiving-2026`, and that's the link you send out.
+
+If anything shows red, send Claude a screenshot of the Vercel Domains page and the Cloudflare DNS page.
 
 ---
 

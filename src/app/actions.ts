@@ -27,9 +27,11 @@ export interface RsvpInput {
   arrival_window?: Arrival | null;
   note?: string;
   dishes: DishInput[];
+  /** Guest confirmed they're a different person from an existing RSVP with the same name. */
+  differentPerson?: boolean;
 }
 
-export type SaveResult = { ok: true; token: string } | { ok: false; error: string };
+export type SaveResult = { ok: true; token: string } | { ok: false; error: string; duplicate?: boolean };
 
 const NEEDS: KitchenNeed[] = ["ready", "oven", "stovetop", "outlet", "fridge"];
 const clean = (s?: string | null) => (s ?? "").trim() || null;
@@ -43,8 +45,20 @@ export async function saveRsvp(input: RsvpInput): Promise<SaveResult> {
   if (!name) return { ok: false, error: "Please add your name." };
   if (!["yes", "maybe", "no"].includes(input.status)) return { ok: false, error: "Please choose whether you're coming." };
 
-  const [event] = await sql<{ id: string; slug: string }[]>`select id, slug from events where slug = ${input.slug}`;
+  const [event] = await sql<{ id: string; slug: string; max_dishes_per_guest: number }[]>`
+    select id, slug, max_dishes_per_guest from events where slug = ${input.slug}`;
   if (!event) return { ok: false, error: "We couldn't find this event." };
+
+  // Stops someone accidentally (or not) making a second RSVP under a name that's already on the list.
+  if (!input.token && !input.differentPerson) {
+    const [same] = await sql`select 1 from guests where event_id = ${event.id} and lower(trim(name)) = lower(${name})`;
+    if (same) {
+      return {
+        ok: false, duplicate: true,
+        error: `“${name}” is already on the guest list. If that’s you, open the personal link you got when you RSVP’d (Hudson or Molly can resend it). To change someone else’s RSVP, ask them.`,
+      };
+    }
+  }
 
   const cats = await sql<{ id: string; kind: string }[]>`select id, kind from categories where event_id = ${event.id}`;
   const slots = await sql<{ id: string; name: string; category_id: string }[]>`
@@ -101,6 +115,10 @@ export async function saveRsvp(input: RsvpInput): Promise<SaveResult> {
 
       const existing = await tx<{ id: string; assigned_by_host: boolean; slot_id: string | null }[]>`
         select id, assigned_by_host, slot_id from dishes where guest_id = ${guestId}`;
+      // Less is more. (Hosts can still assign extra; guests just can't add beyond the limit.)
+      if (dishes.length > event.max_dishes_per_guest && dishes.length > existing.length) {
+        throw new UserError(`Just ${event.max_dishes_per_guest} items each, please. Less is more!`);
+      }
       const mine = new Map(existing.map((d) => [d.id, d]));
       const keep = new Set(dishes.map((d) => d.id).filter((id): id is string => !!id && mine.has(id)));
       // Remove dropped dishes first so their slots free up before anything is re-claimed.

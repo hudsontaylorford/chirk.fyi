@@ -44,7 +44,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   return (
     <main className="mx-auto max-w-2xl space-y-4 px-3 pt-6 pb-20">
       <div className="flex items-center justify-between px-2">
-        <Link href={`/${slug}`} className="text-[16px] italic">← Guest view</Link>
+        <Link href={`/${slug}/details`} className="text-[16px] italic">← Guest view</Link>
         <form action={A.logout.bind(null, slug)}>
           <button className="text-[15px] underline opacity-80">Sign out</button>
         </form>
@@ -237,7 +237,10 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
               <Input label="RSVP deadline" name="rsvp_deadline" type="date" defaultValue={event.rsvp_deadline} />
               <Input label="Name-your-dish deadline" name="dish_name_deadline" type="date" defaultValue={event.dish_name_deadline} />
             </div>
-            <Input label="Meal length (minutes)" name="meal_minutes" type="number" defaultValue={String(event.meal_minutes)} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Meal length (minutes)" name="meal_minutes" type="number" defaultValue={String(event.meal_minutes)} />
+              <Input label="Items per guest" name="max_dishes_per_guest" type="number" defaultValue={String(event.max_dishes_per_guest)} />
+            </div>
             <Input label="Location name" name="location_name" defaultValue={event.location_name} />
             <Area label="Address" name="address" rows={2} defaultValue={event.address} />
             <Area label="Invitation" name="invite_copy" rows={6} defaultValue={event.invite_copy} />

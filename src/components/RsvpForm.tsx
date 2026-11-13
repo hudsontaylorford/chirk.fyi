@@ -29,6 +29,7 @@ export interface RsvpFormProps {
   };
   preselectSlot?: string;
   hostName?: string;
+  maxDishes: number;
 }
 
 let keySeq = 0;
@@ -39,6 +40,7 @@ export function RsvpForm(props: RsvpFormProps) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [duplicate, setDuplicate] = useState(false);
 
   const coreCat = categories.find((c) => c.kind === "core");
   const [name, setName] = useState(initial?.name ?? "");
@@ -73,9 +75,10 @@ export function RsvpForm(props: RsvpFormProps) {
     setDishes((ds) => ds.filter((d) => d.key !== key));
   }
 
-  function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent, differentPerson = false) {
     e.preventDefault();
     setError(null);
+    setDuplicate(false);
     if (!name.trim()) return setError("Please add your name.");
     if (!status) return setError("Please let us know if you’re coming.");
     for (const d of dishes) {
@@ -91,9 +94,11 @@ export function RsvpForm(props: RsvpFormProps) {
         dietary_notes: dietary,
         arrival_window: arrival,
         dishes: dishes.map(toInput),
+        differentPerson,
       });
       if (!res.ok) {
         setError(res.error);
+        setDuplicate(!!res.duplicate);
         router.refresh();
         return;
       }
@@ -160,6 +165,9 @@ export function RsvpForm(props: RsvpFormProps) {
           <div>
             <h3 className="smallcaps text-[17px] text-maroon">What you’re bringing</h3>
             <p className="text-[15px] italic text-muted">
+              {props.maxDishes === 2
+                ? "Less is more: one dish, and a drink or dessert if you like. "
+                : `Up to ${props.maxDishes} items, please. `}
               Homemade only, please. Don’t know the exact dish yet? Pick a category now and name it
               {props.dishDeadline ? ` by ${props.dishDeadline}` : " later"}.
             </p>
@@ -179,7 +187,9 @@ export function RsvpForm(props: RsvpFormProps) {
               ))}
             </div>
 
-            {!picking ? (
+            {dishes.length >= props.maxDishes ? (
+              <p className="mt-4 text-center text-[15px] italic text-muted">That’s plenty. Thank you!</p>
+            ) : !picking ? (
               <button type="button" onClick={() => setPicking(true)} className="btn btn-ghost mt-4 w-full text-maroon">
                 + {dishes.length ? "Add another dish" : "Add a dish"}
               </button>
@@ -241,6 +251,11 @@ export function RsvpForm(props: RsvpFormProps) {
       {error && (
         <p role="alert" className="rounded-md bg-alert/10 p-3 text-[16px] text-alert">
           {error}
+          {duplicate && (
+            <button type="button" onClick={(e) => submit(e, true)} className="mt-2 block underline">
+              We’re a different person with the same name. RSVP anyway.
+            </button>
+          )}
         </p>
       )}
 

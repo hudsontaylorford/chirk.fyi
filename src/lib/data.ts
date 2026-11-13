@@ -3,7 +3,7 @@ import type { Board, Category, Dish, EventRow, Guest, KitchenResource, Slot } fr
 
 const EVENT_COLS = sql`
   id, slug, title, tagline, event_date::text as event_date, dinner_time::text as dinner_time,
-  meal_minutes, timezone, location_name, address, invite_copy, closing_note, house_rules,
+  meal_minutes, max_dishes_per_guest, timezone, location_name, address, invite_copy, closing_note, house_rules,
   rsvp_deadline::text as rsvp_deadline, dish_name_deadline::text as dish_name_deadline, theme`;
 
 export async function getEvent(slug: string): Promise<EventRow | null> {

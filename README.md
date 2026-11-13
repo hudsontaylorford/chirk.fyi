@@ -2,7 +2,7 @@
 
 A small, phone-first invite + RSVP + potluck planner. Guests claim the dishes that are actually needed. Hosts see headcount and an oven timeline with conflicts flagged.
 
-- **Guests**: `/<event-slug>` (invite + live menu), `/<event-slug>/rsvp`, and a personal edit link `/<event-slug>/me/<token>`
+- **Guests**: `/<event-slug>` (big invitation), `/<event-slug>/details` (details + live menu), `/<event-slug>/rsvp`, and a personal edit link `/<event-slug>/me/<token>`
 - **Hosts**: `/<event-slug>/host` (password: the `ADMIN_PASSWORD` env var)
 
 To get it live, see **[SETUP.md](SETUP.md)**.

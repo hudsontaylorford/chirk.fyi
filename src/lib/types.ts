@@ -17,6 +17,7 @@ export interface EventRow {
   event_date: string; // YYYY-MM-DD
   dinner_time: string; // HH:MM:SS
   meal_minutes: number;
+  max_dishes_per_guest: number;
   timezone: string;
   location_name: string | null;
   address: string | null;
