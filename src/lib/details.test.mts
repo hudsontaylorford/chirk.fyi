@@ -28,3 +28,8 @@ test("auto-format writes explicit marks and is stable when run twice", async () 
   assert.equal(once, "Intro line.\n\n**Tickets:** Purchased\n**Kickoff:** 1:00 PM\n\n# Bag policy\n- Clear bags only.\n- No umbrellas.\n\nSee you there");
   assert.equal(autoFormat(once), once);
 });
+
+test("clear formatting leaves plain lines", async () => {
+  const { clearFormatting } = await import("./details.ts");
+  assert.equal(clearFormatting("# Bag policy\n- **Clear** bags only\n\nKickoff: 1:00 PM"), "Bag policy\nClear bags only\n\nKickoff: 1:00 PM");
+});

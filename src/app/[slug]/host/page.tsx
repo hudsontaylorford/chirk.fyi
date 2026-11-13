@@ -96,7 +96,7 @@ export default async function HostPage({
             ))}
           </ul>
           <form action={act.addItem.bind(null, slug)} className="mt-3 flex gap-2">
-            <input name="name" className="field" placeholder="Add something needed" />
+            <input name="name" className="field" placeholder="Add things, separated by commas" />
             <SaveButton>Add</SaveButton>
           </form>
         </>

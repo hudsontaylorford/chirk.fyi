@@ -19,7 +19,7 @@ export function EventFields({ event }: { event?: Event }) {
       {event?.cover_url && <img src={event.cover_url} alt="Current cover" className="h-auto w-32 rounded-lg" />}
       <Field
         label="“What are you bringing?” question (blank = no bring list)"
-        name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. What's your main dish?"
+        name="bring_prompt" value={event?.bring_prompt} placeholder="e.g. Bringing anything?"
       />
       <label className="flex items-center gap-3 py-1 text-[16px]">
         <input type="checkbox" name="ask_kids" defaultChecked={event?.ask_kids ?? true} className="h-5 w-5" />

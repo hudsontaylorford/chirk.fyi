@@ -64,3 +64,11 @@ export function autoFormat(text: string): string {
     })
     .join("\n\n");
 }
+
+/** "Clear formatting": removes # titles, **bold** and bullet marks, leaving plain lines. */
+export function clearFormatting(text: string): string {
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^\s*#{1,3}\s+/, "").replace(/^\s*[-•*]\s+/, "").replace(/\*\*([^*]+)\*\*/g, "$1"))
+    .join("\n");
+}

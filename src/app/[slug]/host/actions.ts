@@ -83,7 +83,7 @@ export async function createEvent(f: FormData) {
   if (!fields.title || !fields.date) return;
   const slug = await freeSlug(val(f, "slug") || fields.title);
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
-  const needed = val(f, "needed").split("\n").map((s) => s.trim()).filter(Boolean).slice(0, 50);
+  const needed = val(f, "needed").split(/[,\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 50);
   if (fields.bring_prompt && needed.length) {
     await sql`insert into items ${sql(needed.map((name, i) => ({ event_id: e.id, kind: "needed", name, sort: i + 1 })))}`;
   }
@@ -92,9 +92,10 @@ export async function createEvent(f: FormData) {
 
 export async function addItem(slug: string, f: FormData) {
   const ev = await eventId(slug);
-  const name = val(f, "name");
-  if (name) await sql`insert into items (event_id, kind, name, sort)
-    values (${ev}, 'needed', ${name}, (select coalesce(max(sort), 0) + 1 from items where event_id = ${ev}))`;
+  // "Chairs, grill, blankets" adds three.
+  const names = val(f, "name").split(/[,\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 50);
+  const [{ max }] = await sql<{ max: number }[]>`select coalesce(max(sort), 0)::int as max from items where event_id = ${ev}`;
+  if (names.length) await sql`insert into items ${sql(names.map((name, i) => ({ event_id: ev, kind: "needed", name, sort: max + i + 1 })))}`;
   revalidatePath(`/${slug}`, "layout");
 }
 

@@ -59,6 +59,40 @@ What generalizes, in the order we'd actually need it:
 
 What we should **not** build: a form builder, custom question types, per-event schemas, or JSON blobs of "settings". They feel flexible but turn the host's 1-minute setup into a 10-minute one, and that's exactly the complexity we're avoiding.
 
+## Plans written Nov 14
+
+### Many hosts, Instagram-style addresses
+- **Addresses:** `chirk.fyi/hudson` is a host's page, and `chirk.fyi/hudson/thanksgiving-2026` is an event. People claim a username when they sign up.
+- **Old links keep working:** today's `chirk.fyi/thanksgiving-2026` redirects to the owner's new address.
+- **Reserved names** can't be claimed: host, login, settings, api, help, about and so on.
+- **Signing in** happens at one place, `chirk.fyi/login` (phone code or email link). No secret per-person paths: a secret URL is a password that ends up in browser history and screenshots.
+- **Managing an event** stays `…/thanksgiving-2026/host`, open only to its host(s) once signed in.
+- **Private events:** a readable address like `/hudson/thanksgiving-2026` is guessable. Private (link-only) events get a short code in the link (`/hudson/thanksgiving-2026-k3x9`), and public/circle events don't need one. This matches the Post Up brief's `/p/4g7k2` idea while staying readable.
+- **Data:**
+  - `users` (id, username unique, name, phone/email)
+  - `events.host_id`, with the address unique per host (`host_id + slug`)
+  - `event_hosts` for co-hosts, later
+- **Order:** sign-in (decided with tomorrow's Resend/Twilio look), then usernames, then `host_id` on events (Hudson's existing events become his), then the new addresses with redirects, then the shared host password goes away.
+
+### Photos
+1. **Upload instead of pasting a link.** Pick a photo on your phone, it's stored with chirk (Vercel Blob, included in your Vercel plan), shrunk to a sensible size, and becomes the cover. This also fixes Pinterest links breaking.
+2. **Several photos per event** (`event_photos`: url, order). The first is the cover; the rest show as a simple swipe row on the invite.
+3. **Later:** guests add photos after the event (an album), only if it earns its place.
+
+### Email invites (reusing crew-scheduler's approach)
+crew-scheduler already sends through Resend with a plain web request (no SDK):
+- every send has an idempotency key, so retries can't double-send
+- emails have an HTML and a plain-text version, styled inline so Gmail shows them right
+- an .ics calendar file is attached
+- a guard stops real sends from test sites
+- a person always presses Send
+
+chirk copies that pattern.
+- **Step 1: "Copy invite for email" (no email service needed).** Copies the invite as formatted email content: cover, title, date, place, details, and a big RSVP button. Paste into a Gmail compose window and it looks like the invite. Quickest win.
+- **Step 2: "Email this invite."** The host types or pastes addresses and presses Send. Each person gets the formatted invite from chirk, with a calendar file attached and an RSVP button that opens their RSVP.
+- **Step 3: Contacts.** Saved people (name, email/phone) per host, so the next invite is a few taps. It grows into circles later.
+- **Setup:** reuse the Resend account and verify **chirk.fyi** as a sending domain (DNS on Cloudflare, about 10 minutes), so invites come from `invites@chirk.fyi`. The emailed-RSVP-link feature from the earlier plan uses the same setup.
+
 ## Gaps found by pasting a real group text (Jets vs Bills tailgate, Nov 14)
 
 Fits today: title, date, place + address, a bring list (chairs, snacks, ice), RSVP, and since Nov 14 the details keep headings, bullets, bold labels and tappable links.

@@ -49,6 +49,10 @@ await h.uncheck("input[name=ask_kids]");
 await h.click("text=Create event");
 await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
+await h.fill("input[placeholder^='Add things']", "Plates, Napkins");
+await h.click("button:has-text('Add')");
+await h.waitForSelector("text=Napkins");
+assert.match(await h.textContent("main"), /Plates[\s\S]*Napkins/); // comma bulk-add
 const kidless = h.url().replace(/\/host$/, "/rsvp");
 const g = await phone();
 await g.goto(kidless);

@@ -38,8 +38,8 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
         <form action={createEvent} className="mt-4 space-y-3">
           <EventFields />
           <label className="block">
-            <span className="text-[15px] text-soft">Things still needed, one per line (only if there&apos;s a bring list)</span>
-            <textarea name="needed" rows={4} className="field mt-1" placeholder={"Turkey & gravy\nMashed potatoes\nRolls"} />
+            <span className="text-[15px] text-soft">Things still needed, separated by commas (only if there&apos;s a bring list)</span>
+            <textarea name="needed" rows={2} className="field mt-1" placeholder="Chairs, grill, picnic blankets" />
           </label>
           <label className="block">
             <span className="text-[15px] text-soft">Web address (optional; made from the title)</span>
