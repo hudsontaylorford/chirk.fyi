@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { EventFields } from "@/components/EventFields";
-import { HostSignIn } from "@/components/HostSignIn";
 import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
@@ -12,17 +11,12 @@ import * as act from "./actions";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Host", robots: { index: false } };
 
-export default async function HostPage({
-  params, searchParams,
-}: {
-  params: Promise<{ slug: string }>;
-  searchParams: Promise<{ wrong?: string }>;
-}) {
+export default async function HostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const data = await getEventData(slug);
   if (!data) notFound();
 
-  if (!(await isHost())) return <HostSignIn next={`/${slug}/host`} wrong={!!(await searchParams).wrong} />;
+  if (!(await isHost())) redirect(`/${slug}`);
 
   const { event, households, items } = data;
   const list = bringList(data);

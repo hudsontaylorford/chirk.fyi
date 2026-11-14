@@ -60,7 +60,8 @@ function EventList({ events }: { events: { slug: string; title: string; date: st
             <span>
               <span className="block text-[17px] font-semibold">
                 {e.title}
-                {e.status === "draft" && <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[13px] font-semibold">Draft</span>}
+                {e.status === "draft" && <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[13px] font-semibold text-amber-900">Draft</span>}
+                {e.status === "live" && <span className="ml-2 rounded-full bg-green-50 px-2 py-0.5 text-[13px] font-semibold text-green-800">Live</span>}
               </span>
               <span className="text-[15px] text-soft">{shortDate(e.date)} · chirk.fyi/{e.slug}</span>
             </span>

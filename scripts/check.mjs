@@ -138,6 +138,11 @@ await h.reload();
 assert.match(await h.textContent("main"), /There by\s*Bagels\s*0\s*Snacks & wine\s*1\s*Dinner\s*\d+/);
 assert.match(await h.textContent("main"), /Coming for Snacks & wine/);
 
+// A host link sent to a guest by mistake just opens the invite.
+const nosy = await phone();
+await nosy.goto(B + "/host");
+assert.equal(new URL(nosy.url()).pathname, "/thanksgiving-2026");
+
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));
 assert.match(await a.textContent("main"), /Your plans[\s\S]*Thanksgiving 2026[\s\S]*Going/);
