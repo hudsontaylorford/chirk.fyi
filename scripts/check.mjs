@@ -39,7 +39,7 @@ await c.waitForSelector("text=Someone with that name already replied");
 
 // The invite shows the claim.
 await a.goto(B);
-assert.match(await a.textContent("main"), /Rolls\s*Check A/);
+assert.match(await a.textContent("main"), /Check A\s*Rolls/);
 assert.equal((await a.locator("a.btn").first().textContent()).trim(), "Your RSVP"); // this phone remembers its reply
 
 // Host makes a new event whose title is already taken: it gets its own web address and its list.
@@ -88,7 +88,7 @@ await d2.click('button.pill:has-text("Wine")');
 await d2.click("text=Send RSVP");
 await d2.waitForURL(/\/r\//);
 await d2.goto(kidless.replace(/\/rsvp$/, ""));
-assert.match(await d2.textContent("main"), /Wine\s*Picker, Doubler/);
+assert.match(await d2.textContent("main"), /Picker\s*[^\n]*Wine[\s\S]*Doubler\s*[^\n]*Wine/);
 
 // Public notes show on the invite as bubbles.
 const n1 = await phone();

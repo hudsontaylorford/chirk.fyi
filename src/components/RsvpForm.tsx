@@ -164,6 +164,9 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                     {o} <span aria-hidden>✕</span>
                   </button>
                 ))}
+                {allowOwn && QUICK.filter((q) => !own.includes(q)).map((q) => (
+                  <button key={q} type="button" className="pill text-soft" onClick={() => addOwn(q)}>+ {q}</button>
+                ))}
               </div>
               {allowOwn && (
                 <>
@@ -174,11 +177,6 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
                 />
                 <button type="button" className="btn btn-quiet shrink-0 px-4" disabled={!typing.trim()} onClick={() => addOwn(typing)}>Add</button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {QUICK.filter((q) => !own.includes(q)).map((q) => (
-                  <button key={q} type="button" className="pill py-1.5 text-[15px]" onClick={() => addOwn(q)}>+ {q}</button>
-                ))}
               </div>
                 </>
               )}

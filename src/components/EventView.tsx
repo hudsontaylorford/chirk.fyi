@@ -11,6 +11,12 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
   const { claimed, open } = bringList(data);
+  // One row per reply, in the order people first claimed something, so names aren't repeated per item.
+  const first = (id: string) => data.claims.findIndex((c) => c.household_id === id);
+  const byWho = households
+    .map((h) => ({ h, things: claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name) }))
+    .filter((x) => x.things.length)
+    .sort((a, b) => first(a.h.id) - first(b.h.id));
   const stages = parseSchedule(event.schedule, event.time);
   const hasMain = stages.some((s) => s.main);
 
@@ -74,10 +80,10 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
             <>
               <h2 className={`text-[20px] font-bold ${open.length ? "mt-8" : ""}`}>Who&apos;s bringing what</h2>
               <ul className="mt-3 divide-y divide-line border-y border-line">
-                {claimed.map((r) => (
-                  <li key={r.item.id} className="flex items-baseline justify-between gap-3 py-3 text-[17px]">
-                    <span>{r.item.name}</span>
-                    <span className="text-right text-soft">{r.who}</span>
+                {byWho.map(({ h, things }) => (
+                  <li key={h.id} className="py-3 text-[17px]">
+                    <p className="font-semibold">{joinNames(h.names)}</p>
+                    <p>{things.join(" · ")}</p>
                   </li>
                 ))}
               </ul>
@@ -105,9 +111,9 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
           {/* Message bubbles: set apart from the bring list, newest last like a chat. */}
           <ul className="mt-3 space-y-3">
             {households.filter((h) => h.note).map((h) => (
-              <li key={h.id} className="max-w-[85%]">
+              <li key={h.id} className="flex max-w-[85%] flex-col items-start">
                 <p className="mb-1 ml-3 text-[13px] text-soft">{joinNames(h.names)}</p>
-                <p className="rounded-[20px] rounded-bl-md bg-wash px-4 py-2.5 text-[16px] leading-snug whitespace-pre-line">{h.note}</p>
+                <p className="rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2.5 text-[16px] leading-snug whitespace-pre-line">{h.note}</p>
               </li>
             ))}
           </ul>
