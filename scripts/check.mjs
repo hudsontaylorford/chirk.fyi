@@ -141,10 +141,10 @@ await s1.click("button.pill:text-is('Snacks & wine')");
 await s1.click("button.pill:text-is('Leftovers')");
 await s1.click("text=Send RSVP");
 await s1.waitForURL(/\/r\//);
-assert.match(await s1.textContent("main"), /Coming to: Snacks & wine and Leftovers/);
+assert.match(await s1.textContent("main"), /Coming to: Snacks & wine · Leftovers/);
 await h.reload();
 assert.match(await h.textContent("main"), /Coming to each part\s*Bagels\s*0\s*Snacks & wine\s*1\s*Dinner\s*0\s*Leftovers\s*1\s*Didn't say\s*\d+/);
-assert.match(await h.textContent("main"), /Coming to Snacks & wine and Leftovers/);
+assert.match(await h.textContent("main"), /Coming to Snacks & wine · Leftovers/);
 
 // Half-typed new events survive a reload, and Discard clears them.
 await h.goto(B.replace("/thanksgiving-2026", "/host"));

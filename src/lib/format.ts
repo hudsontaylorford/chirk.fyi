@@ -44,5 +44,6 @@ export function calendarSpan(date: string, time: string, end: string | null) {
 /** "Graham and Ellen" or "Sam & Priya" is more than one person, even typed in one box. */
 export const several = (who: string) => /,|&|\band\b/i.test(who);
 
-/** "Ham, Salad and Pie". */
-export const listText = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
+/** "Ham, Salad and Pie"; with an "and" inside an item ("Games and Dessert"), "Dinner · Games and Dessert" so it stays clear. */
+export const listText = (xs: string[]) =>
+  xs.some((x) => /\band\b|&/i.test(x)) ? xs.join(" · ") : xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;

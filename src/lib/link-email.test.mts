@@ -2,12 +2,22 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { linkEmail } from "./link-email.ts";
 
-test("link email: escaped, status, bringing and the private link", () => {
-  const e = linkEmail({ title: "Jets <vs> Bills", names: "Hudson & Molly", going: true, bringing: ["Chairs"], url: "https://chirk.fyi/x/r/abc/remember" });
-  assert.equal(e.subject, "Your RSVP: Jets <vs> Bills");
+const event = { title: "Jets <vs> Bills", date: "2026-11-15", time: "13:00:00", end_time: null, place: "MetLife", address: "1 MetLife Stadium Dr", long_times: false };
+const base = { event, names: "Hudson & Molly", parts: [], bringing: [], url: "https://chirk.fyi/x/r/abc/remember", calendarUrl: "https://chirk.fyi/x/calendar.ics" };
+
+test("going: when, where, what they picked, their link and the calendar", () => {
+  const e = linkEmail({ ...base, going: true, parts: ["Tailgate", "Game"], bringing: ["Chairs", "Ice"] });
+  assert.equal(e.subject, "You're going: Jets <vs> Bills");
   assert.match(e.html, /Jets &lt;vs&gt; Bills/);
   assert.match(e.html, /Hudson &amp; Molly<\/strong>: You&#39;re going\./);
-  assert.match(e.html, /href="https:\/\/chirk\.fyi\/x\/r\/abc\/remember"/);
-  assert.match(e.text, /Bringing: Chairs\n\nSee or change your reply: https:\/\/chirk\.fyi\/x\/r\/abc\/remember/);
-  assert.doesNotMatch(linkEmail({ title: "T", names: "A", going: false, bringing: ["X"], url: "u" }).text, /Bringing/);
+  assert.match(e.html, /href="https:\/\/www\.google\.com\/maps|href="https:\/\/maps\.apple\.com\/\?q=1%20MetLife/);
+  assert.match(e.text, /^Jets <vs> Bills\nSunday, November 15 · 1 pm\nMetLife · 1 MetLife Stadium Dr\n\nHudson & Molly: You're going\.\nComing to: Tailgate and Game\nBringing: Chairs and Ice\n\nSee or change your reply: https:\/\/chirk\.fyi\/x\/r\/abc\/remember\nAdd to calendar: https:\/\/chirk\.fyi\/x\/calendar\.ics/);
+});
+
+test("can't make it, and a named guest who hasn't answered", () => {
+  const no = linkEmail({ ...base, going: false, bringing: ["X"] });
+  assert.equal(no.subject, "Your RSVP: Jets <vs> Bills");
+  assert.doesNotMatch(no.text, /Bringing|calendar/);
+  const later = linkEmail({ ...base, going: null });
+  assert.match(later.text, /haven't replied yet\.\n\nReply now: https/);
 });

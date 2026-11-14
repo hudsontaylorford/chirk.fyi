@@ -18,5 +18,6 @@ test("calendar span: end time, default 3 hours, past midnight", () => {
 test("wording helpers", () => {
   assert.equal(listText(["Ham"]), "Ham");
   assert.equal(listText(["Ham", "Salad", "Pie"]), "Ham, Salad and Pie");
+  assert.equal(listText(["Thanksgiving Dinner", "Games and Dessert"]), "Thanksgiving Dinner · Games and Dessert");
   assert.ok(several("Graham and Ellen") && several("Sam & Priya") && !several("Sandy") && !several("Andrea"));
 });

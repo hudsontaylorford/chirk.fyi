@@ -160,17 +160,19 @@ async function saveBringing(tx: Tx, event: { id: string; allow_doubles: boolean 
  * The button goes to /<event>/r/<token>/remember, which also makes that device remember them.
  */
 async function emailLinks(slug: string, by: { token: string } | { email: string }) {
-  const rows = await sql<{ id: string; token: string; names: string[]; going: boolean | null; email: string; title: string; bringing: string[] }[]>`
-    select h.id, h.token, h.names, h.going, h.email, e.title,
-      coalesce((select array_agg(i.name order by c.created_at) from claims c join items i on i.id = c.item_id where c.household_id = h.id), '{}') as bringing
-    from households h join events e on e.id = h.event_id
-    where e.slug = ${slug} and h.email is not null
-      and ${"token" in by ? sql`h.token = ${by.token}` : sql`h.email = ${by.email}`}`;
+  const data = await getEventData(slug);
+  if (!data) return;
+  const rows = data.households.filter((h) => h.email && ("token" in by ? h.token === by.token : h.email === by.email));
+  const claimed = bringList(data).claimed;
   const base = await siteUrl();
   const minute = Math.floor(Date.now() / 60_000); // a double tap within the same minute sends once
-  for (const r of rows) {
-    const mail = linkEmail({ title: r.title, names: joinNames(r.names), going: r.going, bringing: r.bringing, url: `${base}/${slug}/r/${r.token}/remember` });
-    await sendEmail({ to: r.email, ...mail, idempotencyKey: `rsvp-link-${r.id}-${minute}` });
+  for (const h of rows) {
+    const mail = linkEmail({
+      event: data.event, names: joinNames(h.names), going: h.going, parts: partsOf(data.event, h),
+      bringing: claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name),
+      url: `${base}/${slug}/r/${h.token}/remember`, calendarUrl: `${base}/${slug}/calendar.ics`,
+    });
+    await sendEmail({ to: h.email!, ...mail, idempotencyKey: `rsvp-link-${h.id}-${minute}` });
   }
 }
 
