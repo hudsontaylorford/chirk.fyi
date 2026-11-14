@@ -14,7 +14,7 @@ export interface RsvpFormProps {
   allowOwn: boolean;
   notesPublic: boolean;
   maxGuests: number | null; // extra people per reply; null = no limit
-  arrivals: string[]; // stages they can say they're coming for; empty = don't ask
+  arrivals: string[]; // parts of the day they can pick; empty = don't ask
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
   initial?: {
@@ -22,7 +22,7 @@ export interface RsvpFormProps {
     names: string[];
     going: boolean;
     kids: number;
-    arrival: string | null;
+    parts: string[];
     note: string;
     picks: string[];
     own: string[];
@@ -38,7 +38,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const [going, setGoing] = useState<boolean | null>(initial?.going ?? null);
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
-  const [arrival, setArrival] = useState<string | null>(initial?.arrival ?? null);
+  const [parts, setParts] = useState<string[]>(initial?.parts ?? []);
   const [picks, setPicks] = useState<string[]>(initial?.picks ?? []);
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
@@ -64,7 +64,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
     if (going === null) return setError({ text: "Are you coming?" });
     if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, arrival,
+      slug, token: initial?.token, names, going, kids, note, parts,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
@@ -140,10 +140,10 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
           </div>}
 
           {arrivals.length > 1 && (
-            <Q label="When are you coming?" hint="Optional.">
+            <Q label="Which parts are you coming to?" hint="Optional. Tap all that apply.">
               <div className="flex flex-wrap gap-2">
                 {arrivals.map((a) => (
-                  <button key={a} type="button" className="pill" aria-pressed={arrival === a} onClick={() => setArrival(arrival === a ? null : a)}>{a}</button>
+                  <button key={a} type="button" className="pill" aria-pressed={parts.includes(a)} onClick={() => setParts(parts.includes(a) ? parts.filter((p) => p !== a) : [...parts, a])}>{a}</button>
                 ))}
               </div>
             </Q>

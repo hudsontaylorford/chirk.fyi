@@ -59,7 +59,7 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
               placeholder={"10am Bagels & coffee\n1pm Snacks & wine\n4:30pm Dinner"} />
             <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
           </label>
-          <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests when they're arriving" />
+          <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
           <Check name="long_times" checked={event?.long_times ?? false} label="Write times as 3:00 PM" />
         </Row>
         <Row id="reply-by" label="Reply by" value={event?.rsvp_by ? shortDate(event.rsvp_by) : "No deadline"}>

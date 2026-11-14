@@ -28,9 +28,17 @@ export function parseSchedule(text: string | null, start: string | null, long = 
   });
 }
 
-/** What guests can say they're arriving for: timed stages up to and including the main one. */
-export function arrivalChoices(stages: Stage[]): string[] {
-  const timed = stages.filter((s) => s.at);
-  const end = timed.findIndex((s) => s.main);
-  return (end < 0 ? timed : timed.slice(0, end + 1)).map((s) => s.what);
+/** The parts of the day guests can pick (any number of them). */
+export const partChoices = (stages: Stage[]) => [...new Set(stages.map((s) => s.what))];
+
+/**
+ * Replies from before guests could pick several parts said one arrival time ("Snacks & wine").
+ * Read that as that part through the main one (or just that part if the day has no main one).
+ */
+export function partsFromArrival(stages: Stage[], arrival: string | null): string[] {
+  const parts = partChoices(stages);
+  const from = parts.indexOf(arrival ?? "");
+  if (from < 0) return [];
+  const main = stages.findIndex((s) => s.main);
+  return parts.slice(from, main >= from ? main + 1 : from + 1);
 }

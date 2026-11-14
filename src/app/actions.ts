@@ -9,7 +9,7 @@ import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
 import { replyEmail } from "@/lib/reply-email";
-import { arrivalChoices, parseSchedule } from "@/lib/schedule";
+import { parseSchedule, partChoices } from "@/lib/schedule";
 
 export interface RsvpInput {
   slug: string;
@@ -21,7 +21,7 @@ export interface RsvpInput {
   email?: string; // left out = keep the email already on the reply
   picks: string[]; // items they tapped (from the list, or doubling up on someone else's)
   own: string[]; // things they typed in themselves
-  arrival?: string | null; // the stage they're coming for
+  parts?: string[]; // the parts of the day they're coming to
   answeringAs?: string;
   sameNameOk?: boolean;
 }
@@ -67,7 +67,9 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
         names, going: input.going, kids: Math.max(0, Math.min(10, Math.round(input.kids) || 0)),
         note: tidy(input.note ?? "", 500) || null, updated_by: input.answeringAs ? tidy(input.answeringAs, 60) : null,
         ...(email === undefined ? {} : { email }),
-        arrival: input.going && event.ask_arrival && arrivalChoices(parseSchedule(event.schedule, event.time)).includes(input.arrival ?? "") ? input.arrival : null,
+        // Only parts that are on this event's schedule; saving parts replaces the old one-time answer.
+        parts: input.going && event.ask_arrival ? partChoices(parseSchedule(event.schedule, event.time)).filter((p) => input.parts?.includes(p)) : null,
+        arrival: null,
       };
       const [before] = input.token ? await tx<{ email: string | null }[]>`select email from households where token = ${input.token}` : [];
       emailChanged = !!email && email !== before?.email;

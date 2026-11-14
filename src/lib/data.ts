@@ -1,7 +1,7 @@
 import { isHost } from "./auth";
 import { sql } from "./db";
 import type { Claim, Event, EventData, Household, Item } from "./types";
-import { arrivalChoices, parseSchedule } from "./schedule.ts";
+import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
 
 /** `forGuest`: drafts stay hidden from everyone but the host. */
 export async function getEvent(slug: string, forGuest = false) {
@@ -16,7 +16,7 @@ export async function getEventData(slug: string, forGuest = false): Promise<Even
   const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items, claims] = await Promise.all([
-    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival from households where event_id = ${event.id} order by created_at`,
+    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival, parts from households where event_id = ${event.id} order by created_at`,
     sql<Item[]>`select id, kind, name, household_id from items where event_id = ${event.id} order by sort, created_at`,
     sql<Claim[]>`select c.item_id, c.household_id from claims c join items i on i.id = c.item_id
       where i.event_id = ${event.id} order by c.created_at`,
@@ -60,5 +60,11 @@ export function bringChoices(data: EventData, householdId?: string) {
   };
 }
 
-/** The stages guests can say they're arriving for; empty when the event doesn't ask. */
-export const arrivals = (e: Event) => (e.ask_arrival ? arrivalChoices(parseSchedule(e.schedule, e.time)) : []);
+/** The parts of the day guests can pick; empty when the event doesn't ask. */
+export const arrivals = (e: Event) => (e.ask_arrival ? partChoices(parseSchedule(e.schedule, e.time)) : []);
+
+/** The parts a reply is coming to (older replies said one arrival time instead). */
+export const partsOf = (e: Event, h: Household) => {
+  const choices = arrivals(e);
+  return (h.parts ?? partsFromArrival(parseSchedule(e.schedule, e.time), h.arrival)).filter((p) => choices.includes(p));
+};

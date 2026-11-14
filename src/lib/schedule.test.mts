@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { arrivalChoices, parseSchedule } from "./schedule.ts";
+import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
 
 const text = "10am Bagels & coffee\n1pm Snacks & wine\n\n4:30 pm Thanksgiving dinner\nLate Leftover sandwiches";
 
@@ -35,7 +35,11 @@ test("any typing style reads the same, shown in the event's style", () => {
   ]);
 });
 
-test("arrival choices stop at the main stage", () => {
-  assert.deepEqual(arrivalChoices(parseSchedule(text, "16:30")), ["Bagels & coffee", "Snacks & wine", "Thanksgiving dinner"]);
-  assert.deepEqual(arrivalChoices(parseSchedule(text, null)), ["Bagels & coffee", "Snacks & wine", "Thanksgiving dinner"]);
+test("every part can be picked, and old one-time answers carry over", () => {
+  const stages = parseSchedule(text, "16:30");
+  assert.deepEqual(partChoices(stages), ["Bagels & coffee", "Snacks & wine", "Thanksgiving dinner", "Leftover sandwiches"]);
+  assert.deepEqual(partsFromArrival(stages, "Snacks & wine"), ["Snacks & wine", "Thanksgiving dinner"]);
+  assert.deepEqual(partsFromArrival(stages, "Thanksgiving dinner"), ["Thanksgiving dinner"]);
+  assert.deepEqual(partsFromArrival(parseSchedule(text, null), "Snacks & wine"), ["Snacks & wine"]);
+  assert.deepEqual(partsFromArrival(stages, null), []);
 });

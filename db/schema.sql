@@ -47,7 +47,8 @@ begin
     note text,
     updated_by text,
     email text,                          -- optional; we email them their private link
-    arrival text,                        -- the stage they're coming for (when the event asks)
+    arrival text,                        -- old: one arrival part (replaced by parts)
+    parts text[],                        -- the parts of the day they're coming to (when the event asks)
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -94,6 +95,7 @@ begin
   alter table events add column if not exists schedule text;
   alter table events add column if not exists ask_arrival boolean not null default false;
   alter table households add column if not exists arrival text;
+  alter table households add column if not exists parts text[];
   alter table events add column if not exists hosted_by text;
   alter table events add column if not exists long_times boolean not null default false;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,

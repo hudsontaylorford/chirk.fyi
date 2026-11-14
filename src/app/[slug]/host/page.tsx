@@ -6,7 +6,8 @@ import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { OpenRow } from "@/components/OpenRow";
 import { isHost } from "@/lib/auth";
-import { arrivals, bringList, getEventData, joinNames } from "@/lib/data";
+import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
+import { listText } from "@/lib/format";
 import * as act from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -27,10 +28,11 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
   const open = list.open.length;
-  // Who's there by each stage: arriving earlier counts for every later stage; no answer counts from the last.
+  // People coming to each part of the day, from what each reply picked; replies that didn't pick are counted apart.
   const stages = arrivals(event);
-  const startsAt = (h: (typeof going)[number]) => (stages.includes(h.arrival ?? "") ? stages.indexOf(h.arrival!) : stages.length - 1);
-  const thereBy = stages.map((_, i) => going.filter((h) => startsAt(h) <= i).reduce((n, h) => n + h.names.length + h.kids, 0));
+  const size = (h: (typeof going)[number]) => h.names.length + h.kids;
+  const perPart = stages.map((s) => going.filter((h) => partsOf(event, h).includes(s)).reduce((n, h) => n + size(h), 0));
+  const unsaid = going.filter((h) => !partsOf(event, h).length).reduce((n, h) => n + size(h), 0);
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
@@ -57,11 +59,12 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
 
       {stages.length > 1 && (
         <div className="mt-4">
-          <p className="text-[15px] text-soft">There by</p>
+          <p className="text-[15px] text-soft">Coming to each part</p>
           <ul className="mt-1 divide-y divide-line border-y border-line">
             {stages.map((s, i) => (
-              <li key={s} className="flex justify-between gap-3 py-2 text-[16px]"><span>{s}</span><span className="font-semibold tabular-nums">{thereBy[i]}</span></li>
+              <li key={s} className="flex justify-between gap-3 py-2 text-[16px]"><span>{s}</span><span className="font-semibold tabular-nums">{perPart[i]}</span></li>
             ))}
+            {unsaid > 0 && <li className="flex justify-between gap-3 py-2 text-[16px] text-soft"><span>Didn&apos;t say</span><span className="tabular-nums">{unsaid}</span></li>}
           </ul>
         </div>
       )}
@@ -82,7 +85,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                 </span>
                 <span className={h.going ? "text-green-700" : "text-soft"}>{h.going ? "Going" : "Can't"}</span>
               </div>
-              {h.going && h.arrival && <p className="text-soft">Coming for {h.arrival}</p>}
+              {h.going && partsOf(event, h).length > 0 && <p className="text-soft">Coming to {listText(partsOf(event, h))}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
               {h.note && (
                 <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 leading-snug whitespace-pre-line italic">{h.note}</p>

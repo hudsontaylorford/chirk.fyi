@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
-import { arrivals, bringChoices, getEventData, joinNames } from "@/lib/data";
+import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
+import { listText } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your RSVP", robots: { index: false } };
@@ -19,6 +20,7 @@ export default async function YourRsvp({
   if (!data || !h) notFound();
 
   const { choices, picks, own, bringing } = bringChoices(data, h.id);
+  const parts = partsOf(data.event, h);
 
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
@@ -33,7 +35,7 @@ export default async function YourRsvp({
       </p>
       {h.going && (
         <p className="mt-3 text-[17px]">
-          {h.arrival && <>Coming for: <strong>{h.arrival}</strong><br /></>}
+          {parts.length > 0 && <>Coming to: <strong>{listText(parts)}</strong><br /></>}
           {bringing.length ? <>Bringing: <strong>{bringing.join(", ")}</strong></> : "Not bringing anything yet."}
         </p>
       )}
@@ -57,7 +59,7 @@ export default async function YourRsvp({
           arrivals={arrivals(data.event)}
           choices={choices}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, arrival: h.arrival, note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
             picks, own,
           }}
         />

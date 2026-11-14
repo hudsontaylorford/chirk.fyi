@@ -35,7 +35,8 @@ export interface Household {
   note: string | null;
   updated_by: string | null;
   email: string | null;
-  arrival: string | null; // the stage they're coming for
+  arrival: string | null; // old: the one part they said they'd arrive for (see `parts`)
+  parts: string[] | null; // the parts of the day they're coming to
 }
 
 export interface Item {
