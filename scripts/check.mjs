@@ -228,6 +228,8 @@ await h.goto(B + "/host");
 await h.click("text=Copy to next year");
 await h.waitForURL(/\/thanksgiving-2027(-\d+)?\/host$/);
 assert.match(await h.textContent("main"), /Draft\./);
+assert.match(await h.textContent("main"), /Check A\s*No reply yet/); // last year's guests come along, unanswered
+assert.match(await h.textContent("main"), /0\s*of \d+ replied/);
 const draftUrl = h.url().replace(/\/host$/, "");
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 await h.click("button:has-text('Publish')");
@@ -237,7 +239,7 @@ assert.equal((await (await phone()).goto(draftUrl)).status(), 200);
 // Deleting an event takes two taps and lands back on Your events, without it.
 await h.goto(draftUrl + "/host");
 await h.click("summary:has-text('Delete this event')");
-await h.click("button:text-is('Sure?')");
+await h.click("details:has(summary:has-text('Delete this event')) button:text-is('Sure?')");
 await h.waitForURL(/\/host$/);
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 

@@ -70,7 +70,8 @@ async function freeSlug(text: string) {
 }
 
 /**
- * Copy an event to next year as a draft: same details and needed list, nobody's replies.
+ * Copy an event to next year as a draft: same details and needed list, and the same guests
+ * (names and emails, each with a new personal link and no answer yet). Nobody's replies come along.
  * Dates move 52 weeks so the weekday holds (Thu Nov 26 2026 → Thu Nov 25 2027, next Thanksgiving).
  */
 export async function copyToNextYear(slug: string) {
@@ -86,6 +87,8 @@ export async function copyToNextYear(slug: string) {
   const [copy] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, title, slug: newSlug, status: "draft" })} returning id`;
   await sql`insert into items (event_id, kind, name, sort)
     select ${copy.id}, 'needed', name, sort from items where event_id = ${oldId} and kind = 'needed'`;
+  await sql`insert into households (event_id, names, going, email)
+    select ${copy.id}, names, null, email from households where event_id = ${oldId} order by created_at`;
   redirect(`/${newSlug}/host`);
 }
 
