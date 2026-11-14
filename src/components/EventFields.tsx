@@ -1,6 +1,7 @@
 import { BringSection } from "@/components/BringSection";
 import { CoverInput } from "@/components/CoverInput";
 import { DetailsInput } from "@/components/DetailsInput";
+import { FormDraft } from "@/components/FormDraft";
 import type { Event } from "@/lib/types";
 
 /** The fields that describe an event. Shared by "New event" and "Edit event". */
@@ -8,6 +9,7 @@ import type { Event } from "@/lib/types";
 export function EventFields({ event, moreOptions }: { event?: Event; moreOptions?: React.ReactNode }) {
   return (
     <>
+      <FormDraft id={event ? `edit:${event.slug}` : "new"} />
       <Field label="Title" name="title" value={event?.title} required />
       <Field label="Date" name="date" type="date" value={event?.date} required />
       <div className="grid grid-cols-2 gap-3">

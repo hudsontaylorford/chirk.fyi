@@ -138,6 +138,21 @@ await h.reload();
 assert.match(await h.textContent("main"), /There by\s*Bagels\s*0\s*Snacks & wine\s*1\s*Dinner\s*\d+/);
 assert.match(await h.textContent("main"), /Coming for Snacks & wine/);
 
+// Half-typed new events survive a reload, and Discard clears them.
+await h.goto(B.replace("/thanksgiving-2026", "/host"));
+await h.click("summary:has-text('+ New event')");
+await h.fill("input[name=title]", "Half typed");
+await h.fill("textarea[name=details]", "Bring a chair");
+await h.waitForTimeout(100);
+await h.reload();
+await h.waitForSelector("text=Restored what you were typing");
+assert.equal(await h.inputValue("input[name=title]"), "Half typed");
+assert.equal(await h.inputValue("textarea[name=details]"), "Bring a chair");
+await h.click("button:text-is('Discard')");
+await h.waitForLoadState();
+await h.waitForTimeout(300);
+assert.equal(await h.locator("text=Restored what you were typing").count(), 0);
+
 // A host link sent to a guest by mistake just opens the invite.
 const nosy = await phone();
 await nosy.goto(B + "/host");
