@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
 import { EventView } from "@/components/EventView";
 import { RsvpButton } from "@/components/RsvpButton";
-import { isHost } from "@/lib/auth";
+import { hostRole } from "@/lib/auth";
 import { getEvent, getEventData, joinNames } from "@/lib/data";
 import { when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
@@ -35,7 +35,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   return (
     <>
     <main className="mx-auto max-w-lg">
-      {(await isHost()) && (
+      {(await hostRole(slug)) && (
         <a href={`/${slug}/host`} className="block bg-ink px-5 py-2.5 text-[15px] font-semibold text-white">‹ Back to host page</a>
       )}
       <EventView

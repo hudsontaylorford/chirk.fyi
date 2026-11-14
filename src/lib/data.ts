@@ -1,4 +1,4 @@
-import { isHost } from "./auth";
+import { hostRole } from "./auth";
 import { sql } from "./db";
 import type { Claim, Event, EventData, Household, Item } from "./types";
 import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
@@ -8,7 +8,7 @@ export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
     select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times
     from events where slug = ${slug}`;
-  if (!e || (forGuest && e.status === "draft" && !(await isHost()))) return null;
+  if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   return e;
 }
 

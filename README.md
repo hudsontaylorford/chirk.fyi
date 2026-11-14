@@ -4,7 +4,7 @@ A tiny, phone-first invite + RSVP site. Day one of a DIY Partiful. First event: 
 
 **Guests** open `chirk.fyi/<event>` → tap **RSVP** → Going / Can't, their names (one reply for a couple), and optionally one dish from the "still needed" list plus one extra. They get a private link to change it later. That link works for everyone on the reply ("Who's this? Hudson / Molly").
 
-**Hosts** open `chirk.fyi/host` (all events, New event) or `chirk.fyi/<event>/host` (password = `ADMIN_PASSWORD`): headcount, replies, the needed list, edit the event.
+**Hosts** sign in at `chirk.fyi/host` with their email and an emailed 6-digit code: their events, New event, and each event's host page (headcount, guests, the list, edit, co-hosts).
 
 To get it live, see **[SETUP.md](SETUP.md)**.
 

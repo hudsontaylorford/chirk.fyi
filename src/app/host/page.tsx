@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { HostSignIn } from "@/components/HostSignIn";
-import { isHost } from "@/lib/auth";
+import { SaveButton } from "@/components/SaveButton";
+import { currentUser, hasLegacyCookie, unclaimedEvents } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { shortDate } from "@/lib/format";
-import { signOut } from "../[slug]/host/actions";
+import { saveName, signOut } from "./sign-in";
 import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
@@ -12,14 +13,19 @@ export const metadata = { title: "Host", robots: { index: false } };
 type Row = { slug: string; title: string; date: string; status: string; hosted_by: string | null; going: number; past: boolean };
 
 /** The host's home: upcoming events (soonest first), then past and archived ones tucked away. */
-export default async function HostHome({ searchParams }: { searchParams: Promise<{ wrong?: string }> }) {
-  if (!(await isHost())) return <HostSignIn next="/host" wrong={!!(await searchParams).wrong} />;
+export default async function HostHome({ searchParams }: { searchParams: Promise<{ wrong?: string; email?: string }> }) {
+  const me = await currentUser();
+  if (!me) {
+    const q = await searchParams;
+    return <HostSignIn claiming={await hasLegacyCookie()} legacy={(await unclaimedEvents()) > 0} wrong={!!q.wrong} email={q.email} />;
+  }
 
   const events = await sql<Row[]>`
     select e.slug, e.title, e.date::text, e.status, e.hosted_by,
       e.date < (now() at time zone 'America/New_York')::date as past,
       (select coalesce(sum(cardinality(h.names) + h.kids), 0)::int from households h where h.event_id = e.id and h.going) as going
-    from events e order by e.date`;
+    from events e join event_hosts eh on eh.event_id = e.id and eh.user_id = ${me.id}
+    order by e.date`;
   const archived = events.filter((e) => e.status === "archived").reverse();
   const past = events.filter((e) => e.status !== "archived" && e.past).reverse();
   const upcoming = events.filter((e) => e.status !== "archived" && !e.past);
@@ -31,6 +37,16 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
         <form action={signOut}><button>Sign out</button></form>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">Your events</h1>
+      <p className="text-[15px] text-soft">Signed in as {me.email}</p>
+      {!me.name && (
+        <form action={saveName} className="mt-4 rounded-2xl bg-wash p-4">
+          <label className="text-[15px] font-semibold" htmlFor="name">What should co-hosts see you as?</label>
+          <div className="mt-2 flex gap-2">
+            <input id="name" name="name" className="field" placeholder="Your first name" required />
+            <SaveButton>Save</SaveButton>
+          </div>
+        </form>
+      )}
       <Link href="/host/new" className="btn mt-4 w-full">+ New event</Link>
 
       {upcoming.length ? <EventList events={upcoming} /> : <p className="mt-4 text-soft">Nothing coming up.</p>}

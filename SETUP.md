@@ -2,7 +2,7 @@
 
 About 20 minutes. Everything happens in **Vercel**, which runs the website and also creates the database (Neon, free) for you. No separate database account to manage.
 
-You'll pick one secret: the **host password** that you and Molly type to open the host page. Keep it in your password manager.
+You'll pick one secret, `ADMIN_PASSWORD`. Hosts now sign in with their email and a 6-digit code, so nobody types it day to day. It only claims events made before accounts existed, and it signs everyone's sign-in cookie, so **never delete it** from Vercel (changing it signs every host out).
 
 ---
 
@@ -17,7 +17,7 @@ Done: the code lives in `hudsontaylorford/chirk.fyi`.
 3. Open **Environment Variables** and add one:
    | Name | Value |
    |---|---|
-   | `ADMIN_PASSWORD` | a password you choose for the host page |
+   | `ADMIN_PASSWORD` | a long secret you choose (see above; keep it, never delete it) |
 4. Click **Deploy** and wait about a minute. The site won't work yet (it has no database), and that's expected.
 
 ## 3. Neon: the database (created from inside Vercel)
@@ -28,7 +28,9 @@ Done: the code lives in `hudsontaylorford/chirk.fyi`.
 4. Paste the whole of `db/schema.sql` and click **Run**.
 5. Clear the editor, paste `db/thanksgiving-2026.sql`, and click **Run**.
 6. Back in the project: **Deployments** tab → **⋯** on the latest one → **Redeploy**.
-7. Open `your-project.vercel.app/thanksgiving-2026` on your phone. Then try `/thanksgiving-2026/host` with your host password.
+7. Open `your-project.vercel.app/thanksgiving-2026` on your phone. Then open `/host`, sign in with your email and the code chirk emails you. (The very first time, tap "Have the old host password?", enter `ADMIN_PASSWORD`, then your email: every existing event becomes yours.)
+
+**Co-hosts:** on an event's host page, "+ Add a co-host" with their email. They sign in at `chirk.fyi/host` with that email. Only the owner can remove co-hosts or delete the event. Anyone on an event's guest list (with an email) can also sign in and host their own events; nobody else can.
 
 From then on, whenever Claude pushes changes to GitHub, Vercel updates the live site automatically within a minute or two.
 

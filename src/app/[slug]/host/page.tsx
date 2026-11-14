@@ -8,7 +8,9 @@ import { OpenRow } from "@/components/OpenRow";
 import { GuestSend } from "@/components/GuestSend";
 import { RemindAll } from "@/components/RemindAll";
 import { MessageGuests } from "@/components/MessageGuests";
-import { isHost } from "@/lib/auth";
+import { currentUser, hostRole } from "@/lib/auth";
+import { sql } from "@/lib/db";
+import { AddCohost } from "@/components/AddCohost";
 import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
 import * as act from "./actions";
@@ -22,7 +24,12 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const data = await getEventData(slug);
   if (!data) notFound();
 
-  if (!(await isHost())) redirect(`/${slug}`);
+  const role = await hostRole(slug);
+  if (!role) redirect(`/${slug}`);
+  const me = (await currentUser())!;
+  const hosts = await sql<{ id: string; name: string | null; email: string; role: string }[]>`
+    select u.id, u.name, u.email, h.role from event_hosts h join users u on u.id = h.user_id
+    where h.event_id = ${data.event.id} order by h.role desc, h.created_at`;
 
   const { event, households, items } = data;
   const list = bringList(data);
@@ -49,6 +56,19 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <a href={`/${slug}`} className="font-semibold text-ink">View invite</a>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
+      {/* Who hosts this: everyone here can edit and send; only the owner removes hosts or deletes the event. */}
+      <div className="mt-1 text-[15px] text-soft">
+        Hosts:{" "}
+        {hosts.map((h, i) => (
+          <span key={h.id}>
+            {i > 0 && " · "}
+            {h.id === me.id ? "you" : h.name || h.email}
+            {h.role === "owner" && " (owner)"}
+            {role === "owner" && h.role !== "owner" && <> <Confirm label="Remove" action={act.removeCohost.bind(null, slug, h.id)} /></>}
+          </span>
+        ))}
+        <AddCohost action={act.addCohost.bind(null, slug)} />
+      </div>
       {event.status === "draft" && (
         <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 text-[16px]">
           <span><strong>Draft.</strong> Only you can see it. Check the details, then publish.</span>
@@ -182,9 +202,11 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
           <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
         </form>
-        <p className="pt-2 text-center text-[15px] text-soft">
-          <Confirm label="Delete this event" action={act.deleteEvent.bind(null, slug)} />
-        </p>
+        {role === "owner" && (
+          <p className="pt-2 text-center text-[15px] text-soft">
+            <Confirm label="Delete this event" action={act.deleteEvent.bind(null, slug)} />
+          </p>
+        )}
       </div>
     </main>
     <Footer />

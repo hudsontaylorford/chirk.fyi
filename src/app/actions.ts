@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type postgres from "postgres";
 import { cookies } from "next/headers";
-import { isHost } from "@/lib/auth";
+import { hostRole } from "@/lib/auth";
 import { bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
@@ -103,7 +103,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     // A new or changed email gets the private link right away.
     if (emailChanged) await emailLinks(input.slug, { token });
     // The host's own edits (from the host page) don't email the host.
-    if (event.notify_host && !(await isHost())) await notifyHost(input.slug, token, answeredBefore);
+    if (event.notify_host && !(await hostRole(input.slug))) await notifyHost(input.slug, token, answeredBefore);
     return { ok: true, token };
   } catch (e) {
     if (e instanceof Oops) return { ok: false, error: e.message, refresh: true };
@@ -186,8 +186,6 @@ export async function emailMyLink(slug: string, _prev: string | null, f: FormDat
 
 /** Emails the host about a reply. Replying to that email goes straight to the guest when they left an email. */
 async function notifyHost(slug: string, token: string, changed: boolean) {
-  const to = process.env.EMAIL_REPLY_TO;
-  if (!to) return;
   const data = await getEventData(slug);
   const h = data?.households.find((x) => x.token === token);
   if (!data || !h || h.going === null) return;
@@ -199,7 +197,11 @@ async function notifyHost(slug: string, token: string, changed: boolean) {
     coming: going.reduce((n, x) => n + x.names.length + x.kids, 0), waiting: data.households.filter((x) => x.going === null).length,
     hostUrl: `${await siteUrl()}/${slug}/host`,
   });
-  await sendEmail({ to, ...mail, replyTo: h.email, idempotencyKey: `reply-note-${h.id}-${Math.floor(Date.now() / 60_000)}` });
+  // To each of the event's hosts (or the site's own inbox for an event nobody hosts yet).
+  const hosts = await sql<{ email: string }[]>`select u.email from event_hosts eh join users u on u.id = eh.user_id where eh.event_id = ${data.event.id}`;
+  const to = hosts.length ? hosts.map((x) => x.email) : process.env.EMAIL_REPLY_TO ? [process.env.EMAIL_REPLY_TO] : [];
+  const minute = Math.floor(Date.now() / 60_000);
+  for (const addr of to) await sendEmail({ to: addr, ...mail, replyTo: h.email, idempotencyKey: `reply-note-${h.id}-${addr}-${minute}` });
 }
 
 /** "Keep your link": saves an email on a reply and sends the link there. */

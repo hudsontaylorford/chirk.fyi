@@ -8,6 +8,24 @@ const { chromium, devices } = createRequire(import.meta.url)("playwright");
 const B = (process.env.BASE_URL ?? "http://localhost:3000") + "/thanksgiving-2026";
 const browser = await chromium.launch();
 const phone = async () => (await browser.newContext({ ...devices["iPhone 13"] })).newPage();
+// Host sign-in: email, then the code. Locally the server runs with LOGIN_TEST_CODE so no inbox is needed.
+// The first time on a fresh database, the old password claims the events made before accounts.
+const ORIGIN = B.replace("/thanksgiving-2026", "");
+const hostSignIn = async (page, email) => {
+  await page.goto(ORIGIN + "/host");
+  if (await page.locator("text=Have the old host password?").count()) {
+    await page.click("text=Have the old host password?");
+    await page.fill("input[aria-label='Old host password']", process.env.ADMIN_PASSWORD ?? "gravy");
+    await page.click("button:text-is('Continue')");
+    await page.waitForSelector("text=Set up your account");
+  }
+  await page.fill("input[aria-label='Your email']", email);
+  await page.click("button:text-is('Email me a code')");
+  await page.fill("input[aria-label='Code']", process.env.LOGIN_TEST_CODE ?? "123456");
+  await page.click("button:text-is('Sign in')");
+  await page.waitForSelector("text=Your events");
+};
+
 const rsvp = async (page, name, dish) => {
   await page.goto(B + "/rsvp");
   await page.click("text=Going");
@@ -45,9 +63,7 @@ assert.match(await a.getAttribute("a:text-is('+ Add your own')", "href"), /\/r\/
 
 // Host makes a new event whose title is already taken: it gets its own web address and its list.
 const h = await phone();
-await h.goto(B.replace("/thanksgiving-2026", "/host"));
-await h.fill("input[name=password]", process.env.ADMIN_PASSWORD ?? "gravy");
-await h.click("text=Sign in");
+await hostSignIn(h, "host@example.com");
 await h.click("text=+ New event");
 await h.waitForURL(/\/host\/new$/);
 await h.fill("input[name=title]", "Thanksgiving 2026");
@@ -203,6 +219,31 @@ await h.fill("textarea[aria-label='Your note']", "Parking is on the street.");
 await h.click("button:text-is('Send…')");
 await h.click("button:has-text('Send to 1 guest')");
 await h.waitForSelector("text=Email only sends from the live site.");
+
+// Co-hosts: any host adds one by email; they sign in and can run the event, but only the owner deletes it or removes hosts.
+// Someone never invited anywhere can't get in, even with the right code.
+await h.goto(kidless.replace(/\/rsvp$/, "/host"));
+await h.click("summary:has-text('+ Add a co-host')");
+await h.fill("input[aria-label=\"Co-host's email\"]", "molly@example.com");
+await h.click("form:has(input[aria-label=\"Co-host's email\"]) button:text-is('Add')");
+await h.waitForSelector("text=Added ✓");
+const m = await phone();
+await hostSignIn(m, "molly@example.com");
+await m.goto(kidless.replace(/\/rsvp$/, "/host"));
+assert.match(await m.textContent("main"), /Hosts:\s*host@example\.com \(owner\)|Hosts:[^\n]*\(owner\)[^\n]*you/);
+assert.equal(await m.locator("summary:has-text('Delete this event')").count(), 0);
+const nobody = await phone();
+await nobody.goto(ORIGIN + "/host");
+await nobody.fill("input[aria-label='Your email']", "nobody@example.com");
+await nobody.click("button:text-is('Email me a code')");
+await nobody.fill("input[aria-label='Code']", process.env.LOGIN_TEST_CODE ?? "123456");
+await nobody.click("button:text-is('Sign in')");
+await nobody.waitForSelector("text=That code didn't work");
+await h.reload();
+await h.click("summary:text-is('Remove')");
+await h.click("details:has(summary:text-is('Remove')) button:text-is('Sure?')");
+await m.goto(kidless.replace(/\/rsvp$/, "/host"));
+assert.equal(new URL(m.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, "")); // no longer a host
 
 // Hosted by signs the message; notes show in italics; 3:00 PM style when asked for.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));

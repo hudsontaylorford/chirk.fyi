@@ -3,7 +3,8 @@
 import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { checkPassword, clearHostCookie, requireHost, setHostCookie } from "@/lib/auth";
+import { hostRole, requireUser } from "@/lib/auth";
+import { cohostEmail } from "@/lib/code-email";
 import { getEvent, joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
@@ -13,23 +14,12 @@ import { messageEmail } from "@/lib/message-email";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
-async function eventId(slug: string) {
-  await requireHost();
+/** The event's id, once we know the signed-in host hosts it (owner or co-host; `owner` = owner only). */
+async function eventId(slug: string, owner = false) {
+  const role = await hostRole(slug);
+  if (!role || (owner && role !== "owner")) throw new Error("Not a host of this event");
   const [e] = await sql<{ id: string }[]>`select id from events where slug = ${slug}`;
-  if (!e) throw new Error("No such event");
   return e.id;
-}
-
-/** `next` is where to land afterwards, e.g. "/host" or "/thanksgiving-2026/host". */
-export async function signIn(next: string, f: FormData) {
-  if (!checkPassword(val(f, "password"))) redirect(`${next}?wrong=1`);
-  await setHostCookie();
-  redirect(next);
-}
-
-export async function signOut() {
-  await clearHostCookie();
-  redirect("/");
 }
 
 const eventFields = (f: FormData) => ({
@@ -75,7 +65,8 @@ async function freeSlug(text: string) {
  * Dates move 52 weeks so the weekday holds (Thu Nov 26 2026 → Thu Nov 25 2027, next Thanksgiving).
  */
 export async function copyToNextYear(slug: string) {
-  await requireHost();
+  await eventId(slug);
+  const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
       (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times
@@ -89,6 +80,9 @@ export async function copyToNextYear(slug: string) {
     select ${copy.id}, 'needed', name, sort from items where event_id = ${oldId} and kind = 'needed'`;
   await sql`insert into households (event_id, names, going, email)
     select ${copy.id}, names, null, email from households where event_id = ${oldId} order by created_at`;
+  // The same hosts, with whoever copied it as the owner.
+  await sql`insert into event_hosts (event_id, user_id, role)
+    select ${copy.id}, user_id, case when user_id = ${me.id} then 'owner' else 'cohost' end from event_hosts where event_id = ${oldId}`;
   redirect(`/${newSlug}/host`);
 }
 
@@ -100,11 +94,12 @@ export async function setStatus(slug: string, status: "draft" | "live" | "archiv
 }
 
 export async function createEvent(f: FormData) {
-  await requireHost();
+  const me = await requireUser();
   const fields = eventFields(f);
   if (!fields.title || !fields.date) return;
   const slug = await freeSlug(val(f, "slug") || fields.title);
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
+  await sql`insert into event_hosts (event_id, user_id, role) values (${e.id}, ${me.id}, 'owner')`;
   await saveList(e.id, f);
   redirect(`/${slug}/host`);
 }
@@ -131,7 +126,7 @@ async function saveList(eventId: string, f: FormData) {
 
 /** Deletes an event with everything on it (replies, list, claims). The host page asks "Sure?" first. */
 export async function deleteEvent(slug: string) {
-  await sql`delete from events where id = ${await eventId(slug)}`;
+  await sql`delete from events where id = ${await eventId(slug, true)}`; // owner only
   redirect("/host");
 }
 
@@ -201,10 +196,39 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
   let sent = 0;
   for (const h of rows) {
     const mail = messageEmail(e, joinNames(h.names), note, await personalUrl(slug, h.token), f.get("details") === "on");
-    if (await sendEmail({ to: h.email, ...mail, idempotencyKey: `note-${h.token}-${key}` })) sent++;
+    if (await sendEmail({ to: h.email, ...mail, replyTo: await ownerEmail(ev), idempotencyKey: `note-${h.token}-${key}` })) sent++;
   }
   if (process.env.VERCEL_ENV !== "production") return "Email only sends from the live site.";
   return sent === rows.length ? `Sent to ${sent} ✓` : `Sent ${sent} of ${rows.length}. Try again for the rest?`;
+}
+
+/** Guests' replies to chirk's emails go to the event's owner. */
+async function ownerEmail(eventId: string) {
+  const [o] = await sql<{ email: string }[]>`select u.email from event_hosts h join users u on u.id = h.user_id where h.event_id = ${eventId} and h.role = 'owner'`;
+  return o?.email ?? null;
+}
+
+/** Adds a co-host by email (making their account if they don't have one) and emails them. Any host can add. */
+export async function addCohost(slug: string, _prev: string | null, f: FormData): Promise<string> {
+  const ev = await eventId(slug);
+  const me = await requireUser();
+  const email = val(f, "email").toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";
+  const [u] = await sql<{ id: string }[]>`insert into users (email) values (${email}) on conflict (email) do update set email = excluded.email returning id`;
+  const [added] = await sql`insert into event_hosts (event_id, user_id, role) values (${ev}, ${u.id}, 'cohost') on conflict do nothing returning 1`;
+  revalidatePath(`/${slug}/host`);
+  if (!added) return "They're already a host.";
+  const [e] = await sql<{ title: string }[]>`select title from events where id = ${ev}`;
+  const mail = cohostEmail({ by: me.name || me.email, title: e.title, url: `${await siteUrl()}/host?email=${encodeURIComponent(email)}` });
+  const sent = await sendEmail({ to: email, ...mail, replyTo: me.email, idempotencyKey: `cohost-${ev}-${u.id}` });
+  return sent ? "Added ✓ They've been emailed." : process.env.VERCEL_ENV === "production" ? "Added ✓ (the email didn't send; tell them yourself)" : "Added ✓ (email only sends from the live site)";
+}
+
+/** Removes a co-host. Owner only, and the owner can't be removed. */
+export async function removeCohost(slug: string, userId: string) {
+  const ev = await eventId(slug, true);
+  await sql`delete from event_hosts where event_id = ${ev} and user_id = ${userId} and role = 'cohost'`;
+  revalidatePath(`/${slug}/host`);
 }
 
 async function sendTo(slug: string, h: { token: string; names: string[]; email: string }, kind: "invite" | "reminder") {
@@ -215,7 +239,7 @@ async function sendTo(slug: string, h: { token: string; names: string[]; email: 
   const mail = kind === "invite" ? inviteEmail(e, url, names) : reminderEmail(e, url, names);
   // The same invite within a minute, or a second reminder the same day, is only sent once.
   const when = kind === "invite" ? Math.floor(Date.now() / 60_000) : new Date().toISOString().slice(0, 10);
-  return sendEmail({ to: h.email, ...mail, idempotencyKey: `${kind}-${h.token}-${when}` });
+  return sendEmail({ to: h.email, ...mail, replyTo: await ownerEmail(e.id), idempotencyKey: `${kind}-${h.token}-${when}` });
 }
 
 export async function removeHousehold(slug: string, id: string) {
@@ -241,7 +265,7 @@ export async function saveEvent(slug: string, f: FormData) {
  * which the event form then saves like any other cover link.
  */
 export async function uploadPhoto(f: FormData): Promise<{ url: string } | { error: string }> {
-  await requireHost();
+  await requireUser();
   const file = f.get("photo");
   if (!(file instanceof File) || file.type !== "image/jpeg" || file.size > 2 * 1024 * 1024) {
     return { error: "That photo didn't come through. Try again." };

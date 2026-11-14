@@ -1,7 +1,8 @@
 -- chirk: database schema. Safe to re-run, on a new database or an existing one.
 -- Vercel → Storage → your database → Query: turn off "Read-only", paste this whole file, Run.
 -- It's wrapped in one do-block because that editor runs a single command at a time.
--- Tables: an event, the households who reply, the things on the list, and who's bringing what (claims).
+-- Tables: an event, the households who reply, the things on the list, who's bringing what (claims),
+-- and host accounts with the events they host.
 -- Row-level security is on so nothing but the site's server (which owns the tables) can read them.
 
 do $setup$
@@ -72,12 +73,37 @@ begin
     primary key (item_id, household_id)
   );
 
+  -- Host accounts (sign in with an emailed code), and who hosts which event.
+  create table if not exists users (
+    id uuid primary key default gen_random_uuid(),
+    email text not null unique,
+    name text,
+    created_at timestamptz not null default now()
+  );
+  create table if not exists login_codes (
+    email text primary key,
+    code_hash text not null,
+    expires_at timestamptz not null,
+    attempts int not null default 0,
+    created_at timestamptz not null default now()
+  );
+  create table if not exists event_hosts (
+    event_id uuid not null references events(id) on delete cascade,
+    user_id uuid not null references users(id) on delete cascade,
+    role text not null check (role in ('owner', 'cohost')),
+    created_at timestamptz not null default now(),
+    primary key (event_id, user_id)
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;
   alter table households enable row level security;
   alter table items enable row level security;
   alter table claims enable row level security;
+  alter table users enable row level security;
+  alter table login_codes enable row level security;
+  alter table event_hosts enable row level security;
 
   -- Upgrades for databases made before these existed (each does nothing once applied).
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
