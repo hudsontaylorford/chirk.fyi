@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "chirk",
-  description: "Invites from the Fords.",
+  description: "By invitation only.",
   // Link previews need full addresses; Vercel supplies the live domain (chirk.fyi).
   metadataBase: new URL(process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000"),
 };

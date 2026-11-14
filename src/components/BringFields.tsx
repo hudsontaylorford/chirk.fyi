@@ -1,5 +1,6 @@
 "use client";
 
+import { several } from "@/lib/format";
 import { useState } from "react";
 
 export interface ListItem { name: string; by: string | null } // by = who's bringing it, if anyone
@@ -25,7 +26,7 @@ export function BringFields({
   }
   function remove(name: string) {
     const who = by.get(name.toLowerCase());
-    if (who && !window.confirm(`${who} ${who.includes("&") || who.includes(",") ? "are" : "is"} bringing ${name}. Take it off the list anyway?`)) return;
+    if (who && !window.confirm(`${who} ${several(who) ? "are" : "is"} bringing ${name}. Take it off the list anyway?`)) return;
     setText(names.filter((n) => n !== name).join("\n"));
   }
 

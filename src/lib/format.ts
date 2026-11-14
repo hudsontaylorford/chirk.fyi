@@ -40,3 +40,9 @@ export function calendarSpan(date: string, time: string, end: string | null) {
   };
   return { start: stamp(start), end: stamp(stop) };
 }
+
+/** "Graham and Ellen" or "Sam & Priya" is more than one person, even typed in one box. */
+export const several = (who: string) => /,|&|\band\b/i.test(who);
+
+/** "Ham, Salad and Pie". */
+export const listText = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);

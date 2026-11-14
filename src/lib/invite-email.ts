@@ -2,9 +2,10 @@
 // Pure: no database, no sending. Every value is escaped. Text color is left to the mail app so dark mode reads well. The pattern follows crew-scheduler's email templates.
 import { inline, parseDetails } from "./details.ts";
 import { mapsUrl, shortDate, when as whenText } from "./format.ts";
+import { parseSchedule } from "./schedule.ts";
 import type { Event } from "./types.ts";
 
-type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url"> & { long_times?: boolean };
+type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url"> & { long_times?: boolean; schedule?: string | null; hosted_by?: string | null };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
@@ -12,6 +13,8 @@ export function inviteEmail(e: InviteEvent, url: string) {
   const when = whenText(e);
   const where = [e.place, e.address].filter(Boolean).join(" · ");
   const subject = `You're invited: ${e.title}`;
+  const stages = parseSchedule(e.schedule ?? null, e.time, e.long_times);
+  const sign = e.hosted_by ? (e.details ? `— ${e.hosted_by}` : `Hosted by ${e.hosted_by}`) : null;
   const reply = e.rsvp_by ? `Please reply by ${shortDate(e.rsvp_by)}.` : null;
 
   const rich = (t: string) =>
@@ -31,7 +34,9 @@ ${e.cover_url ? `<img src="${esc(e.cover_url)}" alt="" style="display:block;widt
 <p style="margin:16px 0 0;font-size:28px;line-height:1.15;font-weight:700;">${esc(e.title)}</p>
 <p style="margin:8px 0 0;font-size:18px;font-weight:600;">${esc(when)}</p>
 ${where ? `<p style="margin:2px 0 0;color:#78716c;">${e.address ? `<a href="${esc(mapsUrl(e.address))}" style="color:#78716c;">${esc(where)}</a>` : esc(where)}</p>` : ""}
+${stages.length ? `<div style="margin:12px 0 0;">${stages.map((s) => `<p style="margin:2px 0;${s.main ? "font-weight:700;" : ""}"><span style="${s.main ? "" : "color:#78716c;"}">${esc(s.when)}</span>&nbsp;&nbsp;${esc(s.what)}</p>`).join("")}</div>` : ""}
 ${details}
+${sign ? `<p style="margin:12px 0 0;color:#78716c;">${esc(sign)}</p>` : ""}
 <p style="margin:24px 0 0;"><a href="${esc(url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:999px;">RSVP</a></p>
 ${reply ? `<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>` : ""}
 </div>`;
@@ -39,7 +44,8 @@ ${reply ? `<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>` : ""}
   const detailsText = parseDetails(e.details ?? "").map((block) =>
     block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1")).join("\n"),
   ).join("\n\n");
-  const text = [e.title, when, where, "", detailsText, "", `RSVP: ${url}`, reply ?? ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
+  const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
+  const text = [e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
 
   return { subject, html, text };
 }

@@ -45,7 +45,7 @@ export function CopyInvite({ event }: { event: Event }) {
   return (
     <div className="rounded-2xl bg-wash p-4">
       <p className="text-[17px] font-semibold">Send the invite</p>
-      <p className="text-[15px] text-soft">Text it to a group, or copy it into an email (the photo, details and RSVP button come along).</p>
+      <p className="text-[15px] text-soft">Text it to a group, or copy it into an email (the photo, message and RSVP button come along).</p>
       <div className="mt-3 grid gap-2">
         <button type="button" onClick={share} className="btn w-full text-[16px]">
           {shared === "copied" ? "Link copied ✓" : "Share invite (text, WhatsApp…)"}

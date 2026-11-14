@@ -18,3 +18,14 @@ test("subject, escaped title, RSVP button and formatted details", () => {
   assert.match(text, /Sunday, November 15 · 7:45 am\nMetLife · 1 MetLife Stadium Dr\n\nBag policy\n- Clear bags only/);
   assert.match(text, /RSVP: https:\/\/chirk\.fyi\/jets-vs-bills/);
 });
+
+test("the schedule and the hosts' signature come along", () => {
+  const { html, text } = inviteEmail(
+    { ...event, time: "15:00:00", schedule: "10am Bagels\n3pm Dinner", hosted_by: "Hudson & Molly", long_times: true },
+    "https://chirk.fyi/t",
+  );
+  assert.match(html, /10:00 AM<\/span>&nbsp;&nbsp;Bagels/);
+  assert.match(html, /font-weight:700;"><span style="">3:00 PM/);
+  assert.match(html, /— Hudson &amp; Molly/);
+  assert.match(text, /1 MetLife Stadium Dr\n10:00 AM  Bagels\n3:00 PM  Dinner\n\nBag policy[\s\S]*— Hudson & Molly\n\nRSVP:/);
+});

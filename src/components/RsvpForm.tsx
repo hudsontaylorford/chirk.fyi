@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { several } from "@/lib/format";
 import { useState, useTransition } from "react";
 import { saveRsvp, type RsvpInput } from "@/app/actions";
 
@@ -48,7 +49,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const livePicks = picks.filter((id) => choices.some((c) => c.id === id));
   function togglePick(c: { id: string; name: string; by: string | null }) {
     if (livePicks.includes(c.id)) return setPicks(picks.filter((id) => id !== c.id));
-    if (c.by && !window.confirm(`${c.by} ${c.by.includes("&") || c.by.includes(",") ? "are" : "is"} already bringing ${c.name}. Bring it too?`)) return;
+    if (c.by && !window.confirm(`${c.by} ${several(c.by) ? "are" : "is"} already bringing ${c.name}. Bring it too?`)) return;
     setPicks([...picks, c.id]);
   }
   function addOwn(text: string) {
