@@ -12,6 +12,7 @@ import { isHost } from "@/lib/auth";
 import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
 import * as act from "./actions";
+import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Host", robots: { index: false } };
@@ -41,6 +42,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const unsaid = going.filter((h) => !partsOf(event, h).length).reduce((n, h) => n + size(h), 0);
 
   return (
+    <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <div className="flex justify-between text-[16px] text-soft">
         <Link href="/host">‹ Your events</Link>
@@ -185,6 +187,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         </p>
       </div>
     </main>
+    <Footer />
+    </>
   );
 }
 

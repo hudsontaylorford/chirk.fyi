@@ -3,6 +3,7 @@ import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
+import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your RSVP", robots: { index: false } };
@@ -23,6 +24,7 @@ export default async function YourRsvp({
   const parts = partsOf(data.event, h);
 
   return (
+    <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
       <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
 
@@ -94,5 +96,7 @@ export default async function YourRsvp({
         </>
       )}
     </main>
+    <Footer />
+    </>
   );
 }

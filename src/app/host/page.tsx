@@ -4,6 +4,7 @@ import { isHost } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { shortDate } from "@/lib/format";
 import { signOut } from "../[slug]/host/actions";
+import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Host", robots: { index: false } };
@@ -24,6 +25,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
   const upcoming = events.filter((e) => e.status !== "archived" && !e.past);
 
   return (
+    <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <div className="flex justify-end text-[16px] text-soft">
         <form action={signOut}><button>Sign out</button></form>
@@ -45,6 +47,8 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
         </details>
       )}
     </main>
+    <Footer />
+    </>
   );
 }
 

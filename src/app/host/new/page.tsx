@@ -4,6 +4,7 @@ import { EventFields } from "@/components/EventFields";
 import { SaveButton } from "@/components/SaveButton";
 import { isHost } from "@/lib/auth";
 import { createEvent } from "../../[slug]/host/actions";
+import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "New event", robots: { index: false } };
@@ -11,6 +12,7 @@ export const metadata = { title: "New event", robots: { index: false } };
 export default async function NewEvent() {
   if (!(await isHost())) redirect("/host");
   return (
+    <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <Link href="/host" className="text-[16px] text-soft">‹ Your events</Link>
       <h1 className="mt-4 text-[28px] font-bold">New event</h1>
@@ -19,5 +21,7 @@ export default async function NewEvent() {
         <SaveButton className="btn w-full">Create event</SaveButton>
       </form>
     </main>
+    <Footer />
+    </>
   );
 }

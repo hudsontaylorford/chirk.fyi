@@ -219,9 +219,27 @@ await s2.goto(kidless.replace(/\/rsvp$/, ""));
 assert.match(await s2.textContent("main"), /Come hungry\.\s*— Pat & Lee/);
 assert.match(await s2.textContent("header"), /4:30 PM[\s\S]*10:00 AM\s*Bagels/);
 
+// The footer shows only to people who belong: link holders, hosts and repliers; never strangers or bad links.
+const stranger = await phone();
+await stranger.goto(B.replace("/thanksgiving-2026", "/"));
+assert.equal(await stranger.locator("footer").count(), 0);
+await stranger.goto(B.replace("/thanksgiving-2026", "/no-such-event"));
+assert.equal(await stranger.locator("footer").count(), 0);
+for (const path of ["", "/rsvp"]) {
+  await stranger.goto(B + path);
+  assert.match(await stranger.textContent("footer"), /By invitation only/);
+}
+await stranger.goto(B.replace("/thanksgiving-2026", "/privacy"));
+assert.equal(await stranger.locator("footer").count(), 1);
+await h.goto(B.replace("/thanksgiving-2026", "/host"));
+assert.equal(await h.locator("footer").count(), 1);
+await h.goto(B.replace("/thanksgiving-2026", "/"));
+assert.equal(await h.locator("footer").count(), 1); // a host's own device
+
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));
 assert.match(await a.textContent("main"), /Your plans[\s\S]*Thanksgiving 2026[\s\S]*Going/);
+assert.equal(await a.locator("footer").count(), 1); // a device that has replied
 
 // Copy to next year: a draft one year (52 weeks) on, hidden from guests until published.
 await h.goto(B + "/host");

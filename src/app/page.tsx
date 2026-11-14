@@ -1,4 +1,6 @@
 import { cookies } from "next/headers";
+import { Footer } from "@/components/Footer";
+import { isHost } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { shortDate } from "@/lib/format";
 
@@ -17,9 +19,11 @@ export default async function Home() {
         where h.token = any(${tokens}) and e.status = 'live' and e.date >= current_date - 1
         order by e.date`
     : [];
+  const known = tokens.length > 0 || (await isHost());
 
   return (
-    <main className="mx-auto flex min-h-[75dvh] max-w-lg flex-col justify-center px-5 py-12">
+    <>
+    <main className={`mx-auto flex max-w-lg flex-col justify-center px-5 py-12 ${known ? "min-h-[75dvh]" : "min-h-dvh"}`}>
       <div className="text-center">
         <h1 className="text-2xl font-semibold">chirk*</h1>
       </div>
@@ -44,5 +48,7 @@ export default async function Home() {
         </section>
       )}
     </main>
+    {known && <Footer />}
+    </>
   );
 }

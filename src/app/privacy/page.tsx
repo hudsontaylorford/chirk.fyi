@@ -1,10 +1,12 @@
 import Link from "next/link";
+import { Footer } from "@/components/Footer";
 
 export const metadata = { title: "Privacy · chirk", description: "What chirk keeps, who sees it, and how to remove it." };
 
 /** The privacy page: short, plain, and accurate to what the site actually stores. */
 export default function Privacy() {
   return (
+    <>
     <main className="mx-auto max-w-lg px-5 pt-10 text-[16px] leading-relaxed">
       <Link href="/" className="text-[15px] text-soft">‹ chirk</Link>
       <h1 className="mt-6 text-[28px] leading-tight font-bold">Privacy</h1>
@@ -19,6 +21,8 @@ export default function Privacy() {
       </dl>
       <p className="mt-8 text-[14px] text-soft">Last updated November 15, 2026.</p>
     </main>
+    <Footer />
+    </>
   );
 }
 
