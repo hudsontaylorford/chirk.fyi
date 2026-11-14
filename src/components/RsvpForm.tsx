@@ -167,7 +167,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                 <>
               <div className="mt-3 flex gap-2">
                 <input
-                  className="field" value={typing} placeholder="Add your own (e.g. wine, a pie)" aria-label="Add your own"
+                  className="field" value={typing} placeholder="Add your own" aria-label="Add your own"
                   onChange={(e) => setTyping(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
                 />

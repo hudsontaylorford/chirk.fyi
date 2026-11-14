@@ -1,7 +1,7 @@
 import { clock } from "./format.ts";
 
 export interface Stage {
-  when: string; // the time as the host typed it ("10am", "3:00 PM"), or their word ("Late")
+  when: string; // "10 am" (or "10:00 AM" with the event's setting), or the host's word ("Late")
   what: string;
   at: string | null; // "HH:MM" when the line starts with a clock time
   main: boolean; // the line at the event's start time
@@ -11,7 +11,7 @@ export interface Stage {
  * The host's schedule, one stage per line, time first: "10am Bagels", "4:30 pm Dinner", "Late - Leftovers".
  * A line without a clock time uses the words before " - " or ":", else its first word, as the time.
  */
-export function parseSchedule(text: string | null, start: string | null): Stage[] {
+export function parseSchedule(text: string | null, start: string | null, long = false): Stage[] {
   const main = start?.slice(0, 5) ?? null;
   return (text ?? "").split("\n").map((l) => l.trim()).filter(Boolean).map((line) => {
     const m = line.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])?\.?m?\.?(?=\s|$)\s*[-–—:·]?\s*(.*)$/i);
@@ -21,9 +21,7 @@ export function parseSchedule(text: string | null, start: string | null): Stage[
       const pm = m[3] ? m[3].toLowerCase() === "p" : !(h >= 8 && h <= 11);
       if (pm) h += 12;
       const at = `${String(h).padStart(2, "0")}:${m[2] ?? "00"}`;
-      const typed = line.slice(0, line.length - (m[4] ?? "").length).replace(/[\s\-–—:·]+$/, "").replace(/\s+/g, " ");
-      // No am/pm typed: write out the guess so guests see what we assumed.
-      return { when: m[3] ? typed : clock(at), what: m[4] || line, at, main: at === main };
+      return { when: clock(at, long), what: m[4] || line, at, main: at === main };
     }
     const split = line.match(/^(.{1,20}?)\s*(?:\s[-–—]\s|:\s)\s*(.+)$/) ?? line.match(/^(\S+)\s+(.+)$/);
     return { when: split?.[1] ?? "", what: split?.[2] ?? line, at: null, main: false };

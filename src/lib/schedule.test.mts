@@ -7,8 +7,8 @@ const text = "10am Bagels & coffee\n1pm Snacks & wine\n\n4:30 pm Thanksgiving di
 test("reads time-first lines and marks the one at the start time", () => {
   const s = parseSchedule(text, "16:30:00");
   assert.deepEqual(s.map((x) => [x.when, x.what, x.main]), [
-    ["10am", "Bagels & coffee", false],
-    ["1pm", "Snacks & wine", false],
+    ["10 am", "Bagels & coffee", false],
+    ["1 pm", "Snacks & wine", false],
     ["4:30 pm", "Thanksgiving dinner", true],
     ["Late", "Leftover sandwiches", false],
   ]);
@@ -21,15 +21,15 @@ test("guesses am/pm, and handles words and separators", () => {
     ["6:15 pm", "Dinner", "18:15"],
     ["12 pm", "Lunch", "12:00"],
     ["Late night", "Dessert", null],
-    ["4p.m.", "Games", "16:00"],
+    ["4 pm", "Games", "16:00"],
     ["No", "time here", null],
   ]);
   assert.equal(parseSchedule("2026 party", null)[0].at, null);
   assert.deepEqual(parseSchedule(null, null), []);
 });
 
-test("keeps times the way they were typed", () => {
-  assert.deepEqual(parseSchedule("10:00 AM  Coffee\n3:00 PM - Dinner", "15:00").map((x) => [x.when, x.what, x.main]), [
+test("any typing style reads the same, shown in the event's style", () => {
+  assert.deepEqual(parseSchedule("10:00 AM  Coffee\n3pm - Dinner", "15:00", true).map((x) => [x.when, x.what, x.main]), [
     ["10:00 AM", "Coffee", false],
     ["3:00 PM", "Dinner", true],
   ]);

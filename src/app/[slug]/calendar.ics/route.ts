@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
     ? [`DTSTART;TZID=America/New_York:${span.start}`, `DTEND;TZID=America/New_York:${span.end}`]
     : [`DTSTART;VALUE=DATE:${day}`];
   const esc = (s: string) => s.replace(/[,;\\]/g, (c) => `\\${c}`).replace(/\n/g, "\\n");
-  const schedule = parseSchedule(e.schedule, e.time).map((s) => `${s.when} ${s.what}`).join("\n");
+  const schedule = parseSchedule(e.schedule, e.time, e.long_times).map((s) => `${s.when} ${s.what}`).join("\n");
   const ics = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//chirk//EN", "BEGIN:VEVENT",
     `UID:${e.id}@chirk`, `DTSTAMP:${new Date().toISOString().replace(/[-:]|\.\d+/g, "")}`, ...when,

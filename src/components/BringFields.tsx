@@ -50,7 +50,7 @@ export function BringFields({
         )}
         <div className="flex gap-2">
           <input
-            className="field" value={typing} placeholder="e.g. Pie, wine" aria-label="Add things"
+            className="field" value={typing} placeholder="Add things (commas for several)" aria-label="Add things"
             onChange={(e) => setTyping(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
           />

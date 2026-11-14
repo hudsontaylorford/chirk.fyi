@@ -31,7 +31,6 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
       <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
       <Field label="Address" name="address" value={event?.address} />
       <Field label="Hosted by (optional)" name="hosted_by" value={event?.hosted_by} placeholder="e.g. Hudson & Molly" />
-      <Check name="long_times" checked={event?.long_times ?? false} label="Show times like 3:00 PM (instead of 3 pm)" />
     </div>
   );
 
@@ -61,6 +60,7 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
             <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
           </label>
           <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests when they're arriving" />
+          <Check name="long_times" checked={event?.long_times ?? false} label="Write times as 3:00 PM" />
         </Row>
         <Row id="reply-by" label="Reply by" value={event?.rsvp_by ? shortDate(event.rsvp_by) : "No deadline"}>
           <Field label="Reply deadline" name="rsvp_by" type="date" value={event?.rsvp_by} />
