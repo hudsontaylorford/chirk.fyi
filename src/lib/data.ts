@@ -6,7 +6,7 @@ import { arrivalChoices, parseSchedule } from "./schedule.ts";
 /** `forGuest`: drafts stay hidden from everyone but the host. */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await isHost()))) return null;
   return e;

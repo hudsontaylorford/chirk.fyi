@@ -47,7 +47,8 @@ const h = await phone();
 await h.goto(B.replace("/thanksgiving-2026", "/host"));
 await h.fill("input[name=password]", process.env.ADMIN_PASSWORD ?? "gravy");
 await h.click("text=Sign in");
-await h.click("summary:has-text('New event')");
+await h.click("text=+ New event");
+await h.waitForURL(/\/host\/new$/);
 await h.fill("input[name=title]", "Thanksgiving 2026");
 await h.fill("input[name=date]", "2027-11-25");
 await h.click("summary:has-text('What to bring')");
@@ -130,8 +131,8 @@ await h.click("form:has(textarea[name=schedule]) button:text-is('Save')");
 await h.waitForSelector("text=Saved");
 const s1 = await phone();
 await s1.goto(kidless.replace(/\/rsvp$/, ""));
-assert.match(await s1.textContent("header"), /10 am\s*Bagels\s*1 pm\s*Snacks & wine\s*4:30 pm\s*Dinner\s*Late\s*Leftovers/);
-assert.equal(await s1.locator("header li.font-bold").textContent(), "4:30 pmDinner");
+assert.match(await s1.textContent("header"), /10am\s*Bagels\s*1pm\s*Snacks & wine\s*4:30pm\s*Dinner\s*Late\s*Leftovers/);
+assert.equal(await s1.locator("header li.font-bold").textContent(), "4:30pmDinner");
 await s1.goto(kidless);
 await s1.click("text=Going");
 await s1.fill('input[aria-label="Your name"]', "Early Bird");
@@ -145,7 +146,7 @@ assert.match(await h.textContent("main"), /Coming for Snacks & wine/);
 
 // Half-typed new events survive a reload, and Discard clears them.
 await h.goto(B.replace("/thanksgiving-2026", "/host"));
-await h.click("summary:has-text('+ New event')");
+await h.goto(B.replace("/thanksgiving-2026", "/host/new"));
 await h.fill("input[name=title]", "Half typed");
 await h.click("summary:has-text('Message')");
 await h.fill("textarea[name=details]", "Bring a chair");
@@ -164,6 +165,20 @@ const nosy = await phone();
 await nosy.goto(B + "/host");
 assert.equal(new URL(nosy.url()).pathname, "/thanksgiving-2026");
 
+// Hosted by signs the message; notes show in italics; 3:00 PM style when asked for.
+await h.goto(kidless.replace(/\/rsvp$/, "/host"));
+await h.click("summary:has-text('Basics')");
+await h.fill("input[name=hosted_by]", "Pat & Lee");
+await h.check("input[name=long_times]");
+await h.click("summary:has-text('Message')");
+await h.fill("textarea[name=details]", "Come hungry.");
+await h.click("button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const s2 = await phone();
+await s2.goto(kidless.replace(/\/rsvp$/, ""));
+assert.match(await s2.textContent("main"), /Come hungry\.\s*— Pat & Lee/);
+assert.match(await s2.textContent("header"), /4:30 PM/);
+
 // The guest's phone lists the plan on the home page.
 await a.goto(B.replace("/thanksgiving-2026", "/"));
 assert.match(await a.textContent("main"), /Your plans[\s\S]*Thanksgiving 2026[\s\S]*Going/);
@@ -178,6 +193,13 @@ assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 await h.click("button:has-text('Publish')");
 await h.waitForSelector("text=Draft.", { state: "detached" });
 assert.equal((await (await phone()).goto(draftUrl)).status(), 200);
+
+// Deleting an event takes two taps and lands back on Your events, without it.
+await h.goto(draftUrl + "/host");
+await h.click("summary:has-text('Delete this event')");
+await h.click("button:text-is('Sure?')");
+await h.waitForURL(/\/host$/);
+assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 
 await browser.close();
 console.log("✓ RSVP checks passed (delete the 'Check' guests and the extra event afterwards)");

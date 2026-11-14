@@ -4,7 +4,7 @@ import { inline, parseDetails } from "./details.ts";
 import { mapsUrl, shortDate, when as whenText } from "./format.ts";
 import type { Event } from "./types.ts";
 
-type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url">;
+type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url"> & { long_times?: boolean };
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 

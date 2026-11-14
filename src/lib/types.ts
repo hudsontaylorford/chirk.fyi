@@ -22,6 +22,8 @@ export interface Event {
   max_guests: number | null; // extra people per reply; null = no limit
   schedule: string | null; // one stage per line, time first
   ask_arrival: boolean;
+  hosted_by: string | null;
+  long_times: boolean; // 3:00 PM instead of 3 pm
 }
 
 export interface Household {

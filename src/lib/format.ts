@@ -6,8 +6,10 @@ const fmt = (d: string, opts: Intl.DateTimeFormatOptions) =>
 export const longDate = (d: string) => fmt(d, { weekday: "long", month: "long", day: "numeric" });
 export const shortDate = (d: string) => fmt(d, { weekday: "short", month: "short", day: "numeric" });
 
-export function clock(t: string) {
+/** "3 pm", or with `long` (the event's "3:00 PM" setting) "3:00 PM". */
+export function clock(t: string, long = false) {
   const [h, m] = t.split(":").map(Number);
+  if (long) return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
   return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`;
 }
 
@@ -16,9 +18,10 @@ export function mapsUrl(address: string) {
 }
 
 /** "Sunday, November 15 · 7:45 am – 4 pm" (end optional). */
-export function when(e: { date: string; time: string | null; end_time?: string | null }) {
+export function when(e: { date: string; time: string | null; end_time?: string | null; long_times?: boolean }) {
   if (!e.time) return longDate(e.date);
-  return `${longDate(e.date)} · ${clock(e.time)}${e.end_time ? ` – ${clock(e.end_time)}` : ""}`;
+  const c = (t: string) => clock(t, e.long_times);
+  return `${longDate(e.date)} · ${c(e.time)}${e.end_time ? ` – ${c(e.end_time)}` : ""}`;
 }
 
 /**

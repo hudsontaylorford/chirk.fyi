@@ -28,8 +28,6 @@ export interface RsvpFormProps {
   };
 }
 
-const QUICK = ["Drinks", "Dessert", "An appetizer"];
-
 export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, choices, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
@@ -164,15 +162,12 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                     {o} <span aria-hidden>✕</span>
                   </button>
                 ))}
-                {allowOwn && QUICK.filter((q) => !own.includes(q)).map((q) => (
-                  <button key={q} type="button" className="pill text-soft" onClick={() => addOwn(q)}>+ {q}</button>
-                ))}
               </div>
               {allowOwn && (
                 <>
               <div className="mt-3 flex gap-2">
                 <input
-                  className="field" value={typing} placeholder="Add your own (e.g. wine)" aria-label="Add your own"
+                  className="field" value={typing} placeholder="Add your own (e.g. wine, a pie)" aria-label="Add your own"
                   onChange={(e) => setTyping(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
                 />

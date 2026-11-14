@@ -28,10 +28,11 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
             {event.address && <a href={mapsUrl(event.address)} className="underline underline-offset-2">{event.address}</a>}
           </p>
         )}
+        {event.hosted_by && !event.details && <p className="mt-1 text-[17px] text-soft">Hosted by {event.hosted_by}</p>}
         {stages.length > 0 && (
-          <ul className="mt-3 space-y-1 text-[17px]">
+          <ul className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[17px]">
             {stages.map((s, i) => (
-              <li key={i} className={`grid grid-cols-[5.5rem_1fr] gap-2 ${s.main ? "font-bold" : ""}`}>
+              <li key={i} className={`contents ${s.main ? "font-bold" : ""}`}>
                 <span className={`tabular-nums ${s.main ? "" : "text-soft"}`}>{s.when}</span><span>{s.what}</span>
               </li>
             ))}
@@ -45,6 +46,8 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
       {event.details && (
         <section className="mt-5 space-y-3 px-5 text-[17px] leading-relaxed">
           <Details text={event.details} />
+          {/* The message is signed by whoever's hosting, so it reads as a note from them. */}
+          {event.hosted_by && <p className="text-soft">— {event.hosted_by}</p>}
         </section>
       )}
 
@@ -86,7 +89,7 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
                   </p>
                   {things.length > 0 && <p>{things.join(" · ")}</p>}
                   {note && (
-                    <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 text-[16px] leading-snug whitespace-pre-line">{note}</p>
+                    <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 text-[16px] leading-snug whitespace-pre-line italic">{note}</p>
                   )}
                 </li>
               );

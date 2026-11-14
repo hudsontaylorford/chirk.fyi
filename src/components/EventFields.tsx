@@ -30,6 +30,8 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
       </div>
       <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
       <Field label="Address" name="address" value={event?.address} />
+      <Field label="Hosted by (optional)" name="hosted_by" value={event?.hosted_by} placeholder="e.g. Hudson & Molly" />
+      <Check name="long_times" checked={event?.long_times ?? false} label="Show times like 3:00 PM (instead of 3 pm)" />
     </div>
   );
 
@@ -63,7 +65,7 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         <Row id="reply-by" label="Reply by" value={event?.rsvp_by ? shortDate(event.rsvp_by) : "No deadline"}>
           <Field label="Reply deadline" name="rsvp_by" type="date" value={event?.rsvp_by} />
         </Row>
-        <Row id="guests" label="Guest options" value={extras.length ? extras.join(", ") : "Notes, plus-ones"}>
+        <Row id="guests" label="Guest options" value={extras.length ? extras.join(", ").replace(/^./, (c) => c.toUpperCase()) : "Notes, plus-ones"}>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
             <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />

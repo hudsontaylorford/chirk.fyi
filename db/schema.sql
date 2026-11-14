@@ -32,6 +32,8 @@ begin
     max_guests int,                      -- extra people per reply: null = no limit, 0 = just them
     schedule text,                       -- all-day events: one stage per line, time first
     ask_arrival boolean not null default false,   -- ask guests which stage they're coming for
+    hosted_by text,                      -- "Hudson & Molly", shown on the invite (accounts later)
+    long_times boolean not null default false,    -- times as 3:00 PM instead of 3 pm
     created_at timestamptz not null default now()
   );
 
@@ -92,6 +94,8 @@ begin
   alter table events add column if not exists schedule text;
   alter table events add column if not exists ask_arrival boolean not null default false;
   alter table households add column if not exists arrival text;
+  alter table events add column if not exists hosted_by text;
+  alter table events add column if not exists long_times boolean not null default false;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,
   -- then clear it on list items so a later re-run can't bring back something a guest un-picked.
   insert into claims (item_id, household_id, created_at)

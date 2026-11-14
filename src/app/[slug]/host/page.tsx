@@ -35,7 +35,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   return (
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <div className="flex justify-between text-[16px] text-soft">
-        <Link href="/host">‹ All events</Link>
+        <Link href="/host">‹ Your events</Link>
         <a href={`/${slug}`} className="font-semibold text-ink">View invite</a>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
@@ -84,12 +84,14 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
               </div>
               {h.going && h.arrival && <p className="text-soft">Coming for {h.arrival}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
-              {h.note && <p className="mt-1 rounded-lg bg-wash px-3 py-2">“{h.note}”</p>}
+              {h.note && (
+                <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 leading-snug whitespace-pre-line italic">{h.note}</p>
+              )}
               {h.updated_by && <p className="text-[14px] text-soft">Last changed by {h.updated_by}</p>}
               {h.email && <p className="text-[14px] text-soft">{h.email}</p>}
-              <div className="mt-2 flex gap-5 text-[15px]">
+              <div className="mt-2 flex gap-5 text-[14px] text-soft">
                 <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />
-                <a href={`/${slug}/r/${h.token}`} className="font-semibold underline underline-offset-2">Edit</a>
+                <a href={`/${slug}/r/${h.token}`} className="underline underline-offset-2">Edit</a>
                 <Confirm label="Delete" action={act.removeHousehold.bind(null, slug, h.id)} />
               </div>
             </li>
@@ -140,6 +142,9 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
           <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
         </form>
+        <p className="pt-2 text-center text-[15px] text-soft">
+          <Confirm label="Delete this event" action={act.deleteEvent.bind(null, slug)} />
+        </p>
       </div>
     </main>
   );
@@ -159,7 +164,7 @@ function Stat({ n, label, sub }: { n: number; label: string; sub?: string }) {
 function Confirm({ label, action }: { label: string; action: () => Promise<void> }) {
   return (
     <details className="inline">
-      <summary className="cursor-pointer list-none font-semibold text-red-700 underline underline-offset-2">{label}</summary>
+      <summary className="inline cursor-pointer list-none underline underline-offset-2 [&::-webkit-details-marker]:hidden">{label}</summary>
       <form action={action} className="inline">
         <button className="ml-2 font-semibold text-red-700">Sure?</button>
       </form>

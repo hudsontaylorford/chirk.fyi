@@ -46,7 +46,7 @@ export function CopyLink({ path, label = "Copy link" }: { path: string; label?: 
   const [done, setDone] = useState(false);
   return (
     <button
-      type="button" className="font-semibold underline underline-offset-2"
+      type="button" className="underline underline-offset-2"
       onClick={async () => {
         await navigator.clipboard.writeText(location.origin + path).catch(() => {});
         setDone(true);
