@@ -32,8 +32,8 @@ test("the schedule and the hosts' signature come along", () => {
 
 test("personal invites greet the guest; reminders ask plainly", () => {
   const mine = inviteEmail(event, "https://chirk.fyi/t/r/abc/remember?to=invite", "Sam & Lee");
-  assert.match(mine.html, /Hi Sam &amp; Lee!/);
-  assert.match(mine.text, /^Hi Sam & Lee!\n\nJets <vs> Bills/);
+  assert.match(mine.html, /Hi Sam &amp; Lee, you&#39;re invited!|Hi Sam &amp; Lee, you're invited!/);
+  assert.match(mine.text, /^Hi Sam & Lee, you're invited!\n\nJets <vs> Bills/);
   const r = reminderEmail({ ...event, rsvp_by: "2026-11-10" }, "https://chirk.fyi/t/r/abc/remember?to=invite", "Sam");
   assert.equal(r.subject, "Can you make Jets <vs> Bills?");
   assert.match(r.text, /^Hi Sam! Can you make Jets <vs> Bills on Sunday, November 15\? Let us know by Tue, Nov 10\.\n\nRSVP: https/);

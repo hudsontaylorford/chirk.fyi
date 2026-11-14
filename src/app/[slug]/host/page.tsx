@@ -7,6 +7,7 @@ import { CopyLink } from "@/components/YourLink";
 import { OpenRow } from "@/components/OpenRow";
 import { GuestSend } from "@/components/GuestSend";
 import { RemindAll } from "@/components/RemindAll";
+import { MessageGuests } from "@/components/MessageGuests";
 import { isHost } from "@/lib/auth";
 import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
@@ -28,6 +29,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const going = households.filter((h) => h.going);
   const answered = households.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
+  const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email).length, total: hs.length });
   const adults = going.reduce((n, h) => n + h.names.length, 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
@@ -127,6 +129,13 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           );
         })}
       </ul>
+
+      {households.length > 0 && (
+        <MessageGuests
+          counts={{ going: count(going), waiting: count(waiting), everyone: count(households.filter((h) => h.going !== false)) }}
+          action={act.messageGuests.bind(null, slug)}
+        />
+      )}
 
       {event.bring_prompt && (
         <section>

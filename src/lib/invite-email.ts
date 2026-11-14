@@ -32,7 +32,7 @@ export function inviteEmail(e: InviteEvent, url: string, greeting?: string) {
   ).map((b) => `<div style="margin:12px 0 0;">${b}</div>`).join("");
 
   const html = `<div style="max-width:560px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-${greeting ? `<p style="margin:0 0 12px;font-size:18px;">Hi ${esc(greeting)}!</p>` : ""}
+${greeting ? `<p style="margin:0 0 12px;font-size:18px;">Hi ${esc(greeting)}, you're invited!</p>` : ""}
 ${e.cover_url ? `<img src="${esc(e.cover_url)}" alt="" style="display:block;width:100%;max-width:560px;height:auto;border-radius:12px;">` : ""}
 <p style="margin:16px 0 0;font-size:28px;line-height:1.15;font-weight:700;">${esc(e.title)}</p>
 <p style="margin:8px 0 0;font-size:18px;font-weight:600;">${esc(when)}</p>
@@ -48,7 +48,7 @@ ${reply ? `<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>` : ""}
     block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1")).join("\n"),
   ).join("\n\n");
   const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
-  const text = [greeting ? `Hi ${greeting}!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
+  const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
 
   return { subject, html, text };
 }

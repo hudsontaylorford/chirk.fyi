@@ -9,6 +9,7 @@ import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { parseGuests } from "@/lib/guests";
 import { inviteEmail, reminderEmail } from "@/lib/invite-email";
+import { messageEmail } from "@/lib/message-email";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -172,6 +173,35 @@ export async function remindAll(slug: string): Promise<string> {
   for (const h of rows) if (await sendTo(slug, h, "reminder")) sent++;
   if (process.env.VERCEL_ENV !== "production") return "Email only sends from the live site.";
   return sent === rows.length ? `Reminders sent to ${sent} ✓` : `Sent ${sent} of ${rows.length}. Try again for the rest?`;
+}
+
+/** Who a guest message goes to: going, not replied yet, or both (never people who said they can't). */
+export type Audience = "going" | "waiting" | "everyone";
+const audienceSql = { going: "going is true", waiting: "going is null", everyone: "going is not false" } as const;
+
+/**
+ * "Message your guests": emails a note (and, if ticked, the date, place and schedule) to one group of guests.
+ * The same note to the same guest is only ever sent once, so a double tap or a retry can't repeat it.
+ */
+export async function messageGuests(slug: string, _prev: string | null, f: FormData): Promise<string> {
+  const ev = await eventId(slug);
+  const note = val(f, "note").slice(0, 2000);
+  const to = val(f, "to") as Audience;
+  if (!note) return "Write your note first.";
+  if (!(to in audienceSql)) return "Pick who it's for.";
+  const e = await getEvent(slug);
+  if (!e) return "Something went wrong. Try again?";
+  const rows = await sql<{ token: string; names: string[]; email: string }[]>`
+    select token, names, email from households where event_id = ${ev} and email is not null and ${sql.unsafe(audienceSql[to])}`;
+  if (!rows.length) return "Nobody in that group has an email yet.";
+  const key = [...note].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7).toString(36); // same note → same key
+  let sent = 0;
+  for (const h of rows) {
+    const mail = messageEmail(e, joinNames(h.names), note, await personalUrl(slug, h.token), f.get("details") === "on");
+    if (await sendEmail({ to: h.email, ...mail, idempotencyKey: `note-${h.token}-${key}` })) sent++;
+  }
+  if (process.env.VERCEL_ENV !== "production") return "Email only sends from the live site.";
+  return sent === rows.length ? `Sent to ${sent} ✓` : `Sent ${sent} of ${rows.length}. Try again for the rest?`;
 }
 
 async function sendTo(slug: string, h: { token: string; names: string[]; email: string }, kind: "invite" | "reminder") {
