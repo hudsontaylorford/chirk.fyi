@@ -19,10 +19,9 @@ export default async function Home() {
     : [];
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-lg flex-col justify-center px-5 py-12">
+    <main className="mx-auto flex min-h-[75dvh] max-w-lg flex-col justify-center px-5 py-12">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold">chirk</h1>
-        <p className="mt-1 text-soft">By invitation only.</p>
+        <h1 className="text-2xl font-semibold">chirk*</h1>
       </div>
       {plans.length > 0 && (
         <section className="mt-10">

@@ -15,7 +15,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);
 
   return (
-    <article className="pb-28">
+    <article>
       {event.cover_url ? <Cover src={event.cover_url} /> : <div className="h-6" />}
 
       <header className="px-5 pt-6">
