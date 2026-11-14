@@ -42,7 +42,7 @@ begin
     event_id uuid not null references events(id) on delete cascade,
     token text not null unique default encode(gen_random_bytes(12), 'hex'),
     names text[] not null,
-    going boolean not null,
+    going boolean,                       -- null = on the guest list, no answer yet
     kids int not null default 0,
     note text,
     updated_by text,
@@ -96,6 +96,7 @@ begin
   alter table events add column if not exists ask_arrival boolean not null default false;
   alter table households add column if not exists arrival text;
   alter table households add column if not exists parts text[];
+  alter table households alter column going drop not null;
   alter table events add column if not exists hosted_by text;
   alter table events add column if not exists long_times boolean not null default false;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,

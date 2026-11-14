@@ -2,8 +2,8 @@
 import { listText } from "./format.ts";
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-export function linkEmail(i: { title: string; names: string; going: boolean; bringing: string[]; url: string }) {
-  const status = i.going ? "You're going." : "You can't make it.";
+export function linkEmail(i: { title: string; names: string; going: boolean | null; bringing: string[]; url: string }) {
+  const status = i.going === null ? "You're invited, and haven't replied yet." : i.going ? "You're going." : "You can't make it.";
   const bring = i.going && i.bringing.length ? `Bringing: ${listText(i.bringing)}` : null;
   const subject = `Your RSVP: ${i.title}`;
   const text = [i.title, `${i.names}: ${status}`, bring ?? "", "", `See or change your reply: ${i.url}`, "", "This link is just for you (and anyone on your reply)."]

@@ -6,7 +6,7 @@ import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
 /** The invite in three parts: the plan (when, where, your message, RSVP), what's still needed, and who's coming. */
-export function EventView({ data, rsvp, rsvpHref }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string }) {
+export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string; greeting?: string }) {
   const { event, households } = data;
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
@@ -19,6 +19,7 @@ export function EventView({ data, rsvp, rsvpHref }: { data: EventData; rsvp?: Re
       {event.cover_url ? <Cover src={event.cover_url} /> : <div className="h-6" />}
 
       <header className="px-5 pt-6">
+        {greeting && <p className="mb-2 text-[17px] text-soft">Hi {greeting}, you&apos;re invited!</p>}
         <h1 className="text-[34px] leading-[1.1] font-bold tracking-tight">{event.title}</h1>
         <p className="mt-3 text-[19px] font-medium">{when(event)}</p>
         {(event.place || event.address) && (

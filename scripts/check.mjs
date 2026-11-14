@@ -64,7 +64,7 @@ await h.waitForURL(/\/thanksgiving-2026-\d+\/host$/);
 assert.match(await h.textContent("main"), /Pie[\s\S]*Cider/);
 await h.click("button:text-is('Edit list')");
 await h.fill("input[aria-label='Add things']", "Plates, Napkins");
-await h.click("button:text-is('Add')");
+await h.click("#bring button:text-is('Add')");
 await h.click("button:text-is('Save')");
 await h.waitForSelector("text=Saved");
 await h.reload();
@@ -166,6 +166,35 @@ assert.equal(await h.locator("text=Restored what you were typing").count(), 0);
 const nosy = await phone();
 await nosy.goto(B + "/host");
 assert.equal(new URL(nosy.url()).pathname, "/thanksgiving-2026");
+
+// Named guests: the host adds them, each gets a personal link that says hi and fills in their names.
+await h.goto(kidless.replace(/\/rsvp$/, "/host"));
+await h.fill("input[aria-label='Add guests']", "Zed, Yan & Xu yan@example.com");
+await h.click("form:has(input[aria-label='Add guests']) button:text-is('Add')");
+await h.waitForSelector("li:has-text('Yan & Xu')");
+assert.match(await h.textContent("main"), /Zed\s*No reply yet/);
+assert.match(await h.textContent("main"), /of \d+ replied/);
+await h.click("li:has-text('Yan & Xu') summary:has-text('Send')");
+await h.click("li:has-text('Yan & Xu') button:text-is('Email invite')");
+await h.waitForSelector("li:has-text('Yan & Xu') >> text=Email only sends from the live site.");
+const zedReply = await h.getAttribute("li:has-text('Zed') a:text-is('Edit')", "href");
+const z = await phone();
+await z.goto(new URL(zedReply + "/remember?to=invite", h.url()).href);
+assert.equal(new URL(z.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, ""));
+assert.match(await z.textContent("header"), /Hi Zed, you're invited!/);
+assert.doesNotMatch(await z.textContent("main"), /Yan & Xu/); // unanswered guests aren't listed as coming
+await z.click("a.btn:text-is('RSVP')");
+assert.match(await z.textContent("main"), /Hi Zed!/);
+assert.equal(await z.inputValue('input[aria-label="Your name"]'), "Zed");
+await z.click("text=Going");
+await z.click("text=Send RSVP");
+await z.waitForSelector("text=You're in!");
+const y = await phone();
+await y.goto(kidless);
+await y.click("text=Going");
+await y.fill('input[aria-label="Your name"]', "Yan");
+await y.click("text=Send RSVP");
+await y.waitForSelector("text=You're on the guest list!");
 
 // Hosted by signs the message; notes show in italics; 3:00 PM style when asked for.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));

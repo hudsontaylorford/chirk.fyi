@@ -26,6 +26,32 @@ export default async function YourRsvp({
     <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
       <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
 
+      {h.going === null ? (
+        // A named guest who hasn't answered: say hi, and the reply form is right here with their names in it.
+        <>
+          <h1 className="mt-6 text-[28px] leading-tight font-bold">Hi {joinNames(h.names)}!</h1>
+          <p className="mt-1 text-[17px] text-soft">You&apos;re invited to {data.event.title}.</p>
+          <div className="mt-8">
+        <RsvpForm
+          slug={slug}
+          bringPrompt={data.event.bring_prompt}
+          askKids={data.event.ask_kids}
+          notePrompt={data.event.note_prompt}
+          noteHint={data.event.note_hint}
+          allowOwn={data.event.allow_own}
+          notesPublic={data.event.notes_public}
+          maxGuests={data.event.max_guests}
+          arrivals={arrivals(data.event)}
+          choices={choices}
+          initial={{
+            token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
+            picks, own,
+          }}
+        />
+          </div>
+        </>
+      ) : (
+        <>
       <h1 className="mt-6 text-[28px] leading-tight font-bold">
         {h.going ? (isNew ? "You're in!" : "You're going") : "You can't make it"}
       </h1>
@@ -65,6 +91,8 @@ export default async function YourRsvp({
         />
         </div>
       </details>
+        </>
+      )}
     </main>
   );
 }

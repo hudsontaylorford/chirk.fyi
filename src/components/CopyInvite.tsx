@@ -21,15 +21,7 @@ export function CopyInvite({ event }: { event: Event }) {
   async function copy() {
     // A cover that doesn't load is left out, so the email never shows a broken image.
     const { html, text } = inviteEmail({ ...event, cover_url: coverOk ? event.cover_url : null }, url());
-    try {
-      await navigator.clipboard.write([
-        new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) }),
-      ]);
-      setState("copied");
-    } catch {
-      // Older browsers: plain text still works.
-      try { await navigator.clipboard.writeText(text); setState("copied"); } catch { setState("failed"); }
-    }
+    setState((await copyRich(html, text)) ? "copied" : "failed");
     setTimeout(() => setState("idle"), 4000);
   }
 
@@ -56,4 +48,17 @@ export function CopyInvite({ event }: { event: Event }) {
       </div>
     </div>
   );
+}
+
+/** Puts a formatted email on the clipboard (HTML plus plain text), for pasting into Gmail or Mail. */
+export async function copyRich(html: string, text: string) {
+  try {
+    await navigator.clipboard.write([
+      new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }), "text/plain": new Blob([text], { type: "text/plain" }) }),
+    ]);
+    return true;
+  } catch {
+    // Older browsers: plain text still works.
+    try { await navigator.clipboard.writeText(text); return true; } catch { return false; }
+  }
 }

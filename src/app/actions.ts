@@ -49,9 +49,15 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   // A second reply under a name that's already here is almost always a mistake.
   if (!input.token && !input.sameNameOk) {
     const lower = names.map((n) => n.toLowerCase());
-    const [dupe] = await sql`
-      select 1 from households, unnest(names) n
+    const [dupe] = await sql<{ going: boolean | null }[]>`
+      select going from households, unnest(names) n
       where event_id = ${event.id} and lower(n) = any(${lower})`;
+    if (dupe?.going === null) {
+      return {
+        ok: false, sameName: true,
+        error: "You're on the guest list! Use the personal link the host sent you, or ask them to resend it.",
+      };
+    }
     if (dupe) {
       return {
         ok: false, sameName: true,
@@ -61,6 +67,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   }
 
   let emailChanged = false;
+  let answeredBefore = false; // a named guest's first answer is new, not a change
   try {
     const token = await sql.begin(async (tx) => {
       const row = {
@@ -71,7 +78,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
         parts: input.going && event.ask_arrival ? partChoices(parseSchedule(event.schedule, event.time)).filter((p) => input.parts?.includes(p)) : null,
         arrival: null,
       };
-      const [before] = input.token ? await tx<{ email: string | null }[]>`select email from households where token = ${input.token}` : [];
+      const [before] = input.token ? await tx<{ email: string | null; going: boolean | null }[]>`select email, going from households where token = ${input.token}` : [];
+      answeredBefore = before?.going != null;
       emailChanged = !!email && email !== before?.email;
       const [h] = input.token
         ? await tx<{ id: string; token: string }[]>`
@@ -95,7 +103,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     // A new or changed email gets the private link right away.
     if (emailChanged) await emailLinks(input.slug, { token });
     // The host's own edits (from the host page) don't email the host.
-    if (event.notify_host && !(await isHost())) await notifyHost(input.slug, token, !!input.token);
+    if (event.notify_host && !(await isHost())) await notifyHost(input.slug, token, answeredBefore);
     return { ok: true, token };
   } catch (e) {
     if (e instanceof Oops) return { ok: false, error: e.message, refresh: true };
@@ -152,7 +160,7 @@ async function saveBringing(tx: Tx, event: { id: string; allow_doubles: boolean 
  * The button goes to /<event>/r/<token>/remember, which also makes that device remember them.
  */
 async function emailLinks(slug: string, by: { token: string } | { email: string }) {
-  const rows = await sql<{ id: string; token: string; names: string[]; going: boolean; email: string; title: string; bringing: string[] }[]>`
+  const rows = await sql<{ id: string; token: string; names: string[]; going: boolean | null; email: string; title: string; bringing: string[] }[]>`
     select h.id, h.token, h.names, h.going, h.email, e.title,
       coalesce((select array_agg(i.name order by c.created_at) from claims c join items i on i.id = c.item_id where c.household_id = h.id), '{}') as bringing
     from households h join events e on e.id = h.event_id

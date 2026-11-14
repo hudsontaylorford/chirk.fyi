@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { EventView } from "@/components/EventView";
 import { RsvpButton } from "@/components/RsvpButton";
 import { isHost } from "@/lib/auth";
-import { getEvent, getEventData } from "@/lib/data";
+import { getEvent, getEventData, joinNames } from "@/lib/data";
 import { when } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +39,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       <EventView
         data={data}
         rsvpHref={href}
-        rsvp={<RsvpButton href={href} label={mine ? "Your RSVP" : "RSVP"} quiet={!!mine} />}
+        greeting={mine && mine.going === null ? joinNames(mine.names) : undefined}
+        rsvp={<RsvpButton href={href} label={mine?.going != null ? "Your RSVP" : "RSVP"} quiet={mine?.going != null} />}
       />
     </main>
   );

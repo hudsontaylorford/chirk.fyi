@@ -30,7 +30,7 @@ export interface Household {
   id: string;
   token: string;
   names: string[];
-  going: boolean;
+  going: boolean | null; // null = invited by name, no answer yet
   kids: number;
   note: string | null;
   updated_by: string | null;

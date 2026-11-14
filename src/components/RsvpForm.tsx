@@ -20,7 +20,7 @@ export interface RsvpFormProps {
   initial?: {
     token: string;
     names: string[];
-    going: boolean;
+    going: boolean | null; // null = named guest who hasn't answered yet
     kids: number;
     parts: string[];
     note: string;
@@ -75,14 +75,14 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
         if (res.refresh) router.refresh();
         return;
       }
-      router.push(`/${slug}/r/${res.token}${initial ? "" : "?new=1"}`);
+      router.push(`/${slug}/r/${res.token}${initial?.going != null ? "" : "?new=1"}`);
       router.refresh();
     });
   }
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-8">
-      {initial && initial.names.length > 1 && (
+      {initial && initial.going !== null && initial.names.length > 1 && (
         <Q label="Who's this?">
           <div className="flex flex-wrap gap-2">
             {initial.names.map((n) => (
@@ -203,7 +203,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
       )}
 
       <button className="btn w-full" disabled={busy || going === null}>
-        {busy ? "Sending…" : initial ? "Save" : "Send RSVP"}
+        {busy ? "Sending…" : initial?.going != null ? "Save" : "Send RSVP"}
       </button>
     </form>
   );

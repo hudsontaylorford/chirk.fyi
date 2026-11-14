@@ -5,6 +5,8 @@ import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { OpenRow } from "@/components/OpenRow";
+import { GuestSend } from "@/components/GuestSend";
+import { RemindAll } from "@/components/RemindAll";
 import { isHost } from "@/lib/auth";
 import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
@@ -24,6 +26,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const list = bringList(data);
   const whoHas = new Map(list.claimed.map((r) => [r.item.id, r.who]));
   const going = households.filter((h) => h.going);
+  const answered = households.filter((h) => h.going !== null);
+  const waiting = households.filter((h) => h.going === null);
   const adults = going.reduce((n, h) => n + h.names.length, 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
@@ -53,7 +57,11 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
 
       <div className={`mt-4 grid gap-2 text-center ${event.bring_prompt ? "grid-cols-3" : "grid-cols-2"}`}>
         <Stat n={adults + kids} label="coming" sub={kids ? `${adults} adult${adults === 1 ? "" : "s"}, ${kids} kid${kids === 1 ? "" : "s"}` : undefined} />
-        <Stat n={households.length} label={households.length === 1 ? "reply" : "replies"} sub={households.length - going.length ? `${households.length - going.length} can't make it` : undefined} />
+        <Stat
+          n={answered.length}
+          label={waiting.length ? `of ${households.length} replied` : answered.length === 1 ? "reply" : "replies"}
+          sub={answered.length - going.length ? `${answered.length - going.length} can't make it` : undefined}
+        />
         {event.bring_prompt && <Stat n={open} label="still needed" />}
       </div>
 
@@ -71,8 +79,19 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
 
       {event.status !== "draft" && <div className="mt-6"><CopyInvite event={event} /></div>}
 
-      <h2 className="mt-8 text-[20px] font-bold">Replies</h2>
-      <ul className="mt-2 divide-y divide-line border-y border-line">
+      {/* Everyone you've named and everyone who replied, in one list. */}
+      <h2 className="mt-8 text-[20px] font-bold">Guests</h2>
+      <form action={act.addGuests.bind(null, slug)} className="mt-2">
+        <div className="flex gap-2">
+          <input name="guests" className="field" placeholder="Sam, Graham & Ellen" aria-label="Add guests" />
+          <SaveButton>Add</SaveButton>
+        </div>
+        <p className="mt-1 text-[14px] text-soft">Commas between invites. Add an email after a name to send it from here.</p>
+      </form>
+      {waiting.some((h) => h.email) && (
+        <RemindAll count={waiting.filter((h) => h.email).length} action={act.remindAll.bind(null, slug)} />
+      )}
+      <ul className="mt-3 divide-y divide-line border-y border-line">
         {households.length === 0 && <li className="py-3 text-soft">Nobody yet.</li>}
         {households.map((h) => {
           const bringing = list.claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
@@ -83,7 +102,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                   {joinNames(h.names)}
                   {h.kids > 0 && <span className="font-normal text-soft"> +{h.kids} kid{h.kids > 1 ? "s" : ""}</span>}
                 </span>
-                <span className={h.going ? "text-green-700" : "text-soft"}>{h.going ? "Going" : "Can't"}</span>
+                <span className={`shrink-0 ${h.going ? "text-green-700" : "text-soft"}`}>{h.going === null ? "No reply yet" : h.going ? "Going" : "Can't"}</span>
               </div>
               {h.going && partsOf(event, h).length > 0 && <p className="text-soft">Coming to {listText(partsOf(event, h))}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
@@ -92,8 +111,15 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
               )}
               {h.updated_by && <p className="text-[14px] text-soft">Last changed by {h.updated_by}</p>}
               {h.email && <p className="text-[14px] text-soft">{h.email}</p>}
+              {h.going === null && (
+                <GuestSend
+                  event={event} token={h.token} names={joinNames(h.names)} email={h.email}
+                  emailInvite={act.emailGuest.bind(null, slug, h.id, "invite")}
+                  emailReminder={act.emailGuest.bind(null, slug, h.id, "reminder")}
+                />
+              )}
               <div className="mt-2 flex gap-5 text-[14px] text-soft">
-                <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />
+                {h.going !== null && <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />}
                 <a href={`/${slug}/r/${h.token}`} className="underline underline-offset-2">Edit</a>
                 <Confirm label="Delete" action={act.removeHousehold.bind(null, slug, h.id)} />
               </div>

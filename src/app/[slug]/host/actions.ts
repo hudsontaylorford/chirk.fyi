@@ -4,7 +4,11 @@ import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { checkPassword, clearHostCookie, requireHost, setHostCookie } from "@/lib/auth";
+import { getEvent, joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
+import { sendEmail, siteUrl } from "@/lib/email";
+import { parseGuests } from "@/lib/guests";
+import { inviteEmail, reminderEmail } from "@/lib/invite-email";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -125,6 +129,60 @@ async function saveList(eventId: string, f: FormData) {
 export async function deleteEvent(slug: string) {
   await sql`delete from events where id = ${await eventId(slug)}`;
   redirect("/host");
+}
+
+/** "Add guests": each entry becomes a reply with no answer yet; names already on the list are skipped. */
+export async function addGuests(slug: string, f: FormData) {
+  const ev = await eventId(slug);
+  const have = (await sql<{ n: string }[]>`select lower(unnest(names)) as n from households where event_id = ${ev}`).map((r) => r.n);
+  const fresh = parseGuests(val(f, "guests")).filter((g) => !g.names.some((n) => have.includes(n.toLowerCase())));
+  if (fresh.length) {
+    await sql`insert into households ${sql(fresh.map((g) => ({ event_id: ev, names: g.names, going: null, email: g.email })))}`;
+  }
+  revalidatePath(`/${slug}`, "layout");
+}
+
+/** A named guest's own link: it remembers them on that device, then opens the invite. */
+const personalUrl = async (slug: string, token: string) => `${await siteUrl()}/${slug}/r/${token}/remember?to=invite`;
+
+/**
+ * Emails one guest their personal invite or a reminder. An email typed in the form is saved to them first.
+ * Answers in plain words for the button: sent, email off (anywhere but the live site), or failed.
+ */
+export async function emailGuest(slug: string, id: string, kind: "invite" | "reminder", _prev: string | null, f: FormData): Promise<string> {
+  const ev = await eventId(slug);
+  const typed = val(f, "email").toLowerCase();
+  if (typed) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(typed)) return "That email doesn't look right.";
+    await sql`update households set email = ${typed} where id = ${id} and event_id = ${ev}`;
+    revalidatePath(`/${slug}`, "layout");
+  }
+  const [h] = await sql<{ token: string; names: string[]; email: string | null }[]>`select token, names, email from households where id = ${id} and event_id = ${ev}`;
+  if (!h?.email) return "Add their email first.";
+  const sent = await sendTo(slug, h as { token: string; names: string[]; email: string }, kind);
+  return sent ? "Sent ✓" : process.env.VERCEL_ENV === "production" ? "Couldn't send. Try again?" : "Email only sends from the live site.";
+}
+
+/** "Remind everyone": a reminder email to each guest with an email who hasn't answered. */
+export async function remindAll(slug: string): Promise<string> {
+  const ev = await eventId(slug);
+  const rows = await sql<{ token: string; names: string[]; email: string }[]>`
+    select token, names, email from households where event_id = ${ev} and going is null and email is not null`;
+  let sent = 0;
+  for (const h of rows) if (await sendTo(slug, h, "reminder")) sent++;
+  if (process.env.VERCEL_ENV !== "production") return "Email only sends from the live site.";
+  return sent === rows.length ? `Reminders sent to ${sent} ✓` : `Sent ${sent} of ${rows.length}. Try again for the rest?`;
+}
+
+async function sendTo(slug: string, h: { token: string; names: string[]; email: string }, kind: "invite" | "reminder") {
+  const e = await getEvent(slug);
+  if (!e) return false;
+  const url = await personalUrl(slug, h.token);
+  const names = joinNames(h.names);
+  const mail = kind === "invite" ? inviteEmail(e, url, names) : reminderEmail(e, url, names);
+  // The same invite within a minute, or a second reminder the same day, is only sent once.
+  const when = kind === "invite" ? Math.floor(Date.now() / 60_000) : new Date().toISOString().slice(0, 10);
+  return sendEmail({ to: h.email, ...mail, idempotencyKey: `${kind}-${h.token}-${when}` });
 }
 
 export async function removeHousehold(slug: string, id: string) {

@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function Home() {
   const tokens = (await cookies()).getAll().filter((c) => c.name.startsWith("chirk_")).map((c) => c.value);
   const plans = tokens.length
-    ? await sql<{ slug: string; title: string; date: string; going: boolean; token: string }[]>`
+    ? await sql<{ slug: string; title: string; date: string; going: boolean | null; token: string }[]>`
         select e.slug, e.title, e.date::text, h.going, h.token
         from households h join events e on e.id = h.event_id
         where h.token = any(${tokens}) and e.status = 'live' and e.date >= current_date - 1
@@ -36,7 +36,7 @@ export default async function Home() {
                     <span className="text-[15px] text-soft">{shortDate(p.date)}</span>
                   </span>
                   <span className={`shrink-0 text-[15px] ${p.going ? "text-green-700" : "text-soft"}`}>
-                    {p.going ? "Going" : "Can't go"} ›
+                    {p.going === null ? "Not answered" : p.going ? "Going" : "Can't go"} ›
                   </span>
                 </a>
               </li>
