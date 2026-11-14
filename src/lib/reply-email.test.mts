@@ -6,9 +6,17 @@ const base = { title: "Thanksgiving", names: "Sally & Bo", adults: 2, kids: 1, b
 
 test("going: subject, party, bringing, note, escaped", () => {
   const e = replyEmail({ ...base, going: true });
-  assert.equal(e.subject, "Sally & Bo is going: Thanksgiving");
+  assert.equal(e.subject, "Sally & Bo are going: Thanksgiving");
   assert.match(e.text, /2 adults, 1 kid\nBringing: Pie\nNote: "Nut allergy"/);
-  assert.match(e.html, /Sally &amp; Bo is going/);
+  assert.match(e.html, /Sally &amp; Bo are going/);
+});
+
+test("two people in one name box, one-person replies, and a list of several things", () => {
+  const e = replyEmail({ ...base, names: "Graham and Ellen", adults: 1, kids: 0, going: true, bringing: ["Ham", "Salad", "Apple pie"] });
+  assert.equal(e.subject, "Graham and Ellen are going: Thanksgiving");
+  assert.doesNotMatch(e.text, /adult/);
+  assert.match(e.text, /Bringing: Ham, Salad and Apple pie/);
+  assert.equal(replyEmail({ ...base, names: "Sally", adults: 1, kids: 0, going: true }).subject, "Sally is going: Thanksgiving");
 });
 
 test("can't make it, and changed replies", () => {

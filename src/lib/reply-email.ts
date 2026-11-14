@@ -5,12 +5,16 @@ export function replyEmail(i: {
   title: string; names: string; going: boolean; adults: number; kids: number;
   bringing: string[]; note: string | null; changed: boolean; hostUrl: string;
 }) {
-  const verb = i.going ? (i.changed ? "updated: going" : "is going") : "can't make it";
+  // "Graham and Ellen" typed in one box is still two people.
+  const several = i.adults > 1 || /,|&|\band\b/i.test(i.names);
+  const verb = i.going ? (i.changed ? "updated: going" : several ? "are going" : "is going") : "can't make it";
   const subject = `${i.names} ${verb}: ${i.title}`;
-  const party = i.going ? `${i.adults} adult${i.adults === 1 ? "" : "s"}${i.kids ? `, ${i.kids} kid${i.kids === 1 ? "" : "s"}` : ""}` : null;
+  // A head count only when it adds something (one name and no kids says nothing new).
+  const party = i.going && (i.adults > 1 || i.kids) ? `${i.adults} adult${i.adults === 1 ? "" : "s"}${i.kids ? `, ${i.kids} kid${i.kids === 1 ? "" : "s"}` : ""}` : null;
+  const list = (xs: string[]) => (xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`);
   const lines = [
     party,
-    i.going && i.bringing.length ? `Bringing: ${i.bringing.join(" and ")}` : null,
+    i.going && i.bringing.length ? `Bringing: ${list(i.bringing)}` : null,
     i.note ? `Note: "${i.note}"` : null,
   ].filter((l): l is string => !!l);
   const text = [subject, "", ...lines, "", `All replies: ${i.hostUrl}`].join("\n");

@@ -12,13 +12,14 @@ export const dynamic = "force-dynamic";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const e = await getEvent((await params).slug, true);
   if (!e) return {};
-  const description = `You're invited · ${when(e)}${e.place ? ` · ${e.place}` : ""}`;
+  const preview = `You're invited: ${e.title}`;
+  const description = `${when(e)}${e.place ? ` · ${e.place}` : ""}`;
   // No cover photo: a generated card with the title, date and place, so text previews never come up blank.
   const images = [e.cover_url || `/${e.slug}/og`];
   return {
     title: e.title, description,
-    openGraph: { title: e.title, description, images },
-    twitter: { card: "summary_large_image", title: e.title, description, images },
+    openGraph: { title: preview, description, images },
+    twitter: { card: "summary_large_image", title: preview, description, images },
   };
 }
 
