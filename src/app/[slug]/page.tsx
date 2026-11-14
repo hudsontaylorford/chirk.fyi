@@ -30,6 +30,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   // If this phone already replied, the button opens their reply instead of a new one.
   const saved = (await cookies()).get(`chirk_${slug}`)?.value;
   const mine = data.households.find((h) => h.token === saved);
+  const href = mine ? `/${slug}/r/${mine.token}` : `/${slug}/rsvp`;
   return (
     <main className="mx-auto max-w-lg">
       {(await isHost()) && (
@@ -37,7 +38,8 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       )}
       <EventView
         data={data}
-        rsvp={<RsvpButton href={mine ? `/${slug}/r/${mine.token}` : `/${slug}/rsvp`} label={mine ? "Your RSVP" : "RSVP"} quiet={!!mine} />}
+        rsvpHref={href}
+        rsvp={<RsvpButton href={href} label={mine ? "Your RSVP" : "RSVP"} quiet={!!mine} />}
       />
     </main>
   );

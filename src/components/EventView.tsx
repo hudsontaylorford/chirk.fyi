@@ -6,7 +6,7 @@ import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
 /** The invite in three parts: the plan (when, where, your message, RSVP), what's still needed, and who's coming. */
-export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactNode }) {
+export function EventView({ data, rsvp, rsvpHref }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string }) {
   const { event, households } = data;
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
@@ -65,6 +65,10 @@ export function EventView({ data, rsvp }: { data: EventData; rsvp?: React.ReactN
             {open.map((i) => (
               <span key={i.id} className="rounded-full border-[1.5px] border-dashed border-line px-3 py-1.5 text-[16px]">{i.name}</span>
             ))}
+            {/* Guests can bring something that isn't listed: say so, and tapping it starts their reply. */}
+            {event.allow_own && rsvpHref && (
+              <a href={rsvpHref} className="rounded-full bg-wash px-3 py-1.5 text-[16px] text-soft">+ Add your own</a>
+            )}
           </div>
         </section>
       )}

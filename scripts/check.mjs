@@ -41,6 +41,7 @@ await c.waitForSelector("text=Someone with that name already replied");
 await a.goto(B);
 assert.match(await a.textContent("main"), /Check A\s*Rolls/);
 assert.equal((await a.locator("a.btn").first().textContent()).trim(), "Your RSVP"); // this phone remembers its reply
+assert.match(await a.getAttribute("a:text-is('+ Add your own')", "href"), /\/r\/[a-f0-9]+$/); // the chip opens their reply
 
 // Host makes a new event whose title is already taken: it gets its own web address and its list.
 const h = await phone();
