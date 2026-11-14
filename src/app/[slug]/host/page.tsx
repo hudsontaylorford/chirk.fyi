@@ -4,6 +4,7 @@ import { EventFields } from "@/components/EventFields";
 import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
+import { OpenRow } from "@/components/OpenRow";
 import { isHost } from "@/lib/auth";
 import { arrivals, bringList, getEventData, joinNames } from "@/lib/data";
 import * as act from "./actions";
@@ -97,33 +98,40 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       </ul>
 
       {event.bring_prompt && (
-        <>
-          <h2 className="mt-8 text-[20px] font-bold">Needed list</h2>
-          <ul className="mt-2 divide-y divide-line border-y border-line">
-            {needed.map((i) => (
-              <li key={i.id} className="flex items-baseline justify-between gap-3 py-3 text-[16px]">
-                <span>{i.name}</span>
-                <span className="flex items-baseline gap-3">
-                  {whoHas.get(i.id) ? <span className="text-right text-soft">{whoHas.get(i.id)}</span> : <span className="font-semibold">Open</span>}
-                  <Confirm label="✕" action={act.removeItem.bind(null, slug, i.id)} />
-                </span>
-              </li>
-            ))}
-          </ul>
-          <form action={act.addItem.bind(null, slug)} className="mt-3 flex gap-2">
-            <input name="name" className="field" placeholder="Add things, separated by commas" />
-            <SaveButton>Add</SaveButton>
-          </form>
-        </>
+        <section>
+          <div className="mt-8 flex items-baseline justify-between">
+            <h2 className="text-[20px] font-bold">What to bring</h2>
+            <OpenRow id="bring">Edit list</OpenRow>
+          </div>
+          {list.open.length > 0 && (
+            <>
+              <p className="mt-3 text-[15px] text-soft">Still needed</p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {list.open.map((i) => (
+                  <span key={i.id} className="rounded-full border-[1.5px] border-dashed border-line px-3 py-1.5 text-[16px]">{i.name}</span>
+                ))}
+              </div>
+            </>
+          )}
+          {list.claimed.length > 0 && (
+            <>
+              <p className="mt-3 text-[15px] text-soft">Covered</p>
+              <div className="mt-1 flex flex-wrap gap-2">
+                {list.claimed.map((r) => (
+                  <span key={r.item.id} className="rounded-full bg-wash px-3 py-1.5 text-[16px]">{r.item.name}</span>
+                ))}
+              </div>
+            </>
+          )}
+          {!list.open.length && !list.claimed.length && <p className="mt-2 text-soft">Nothing on the list yet.</p>}
+        </section>
       )}
 
-      <details className="mt-8 rounded-2xl bg-wash p-4">
-        <summary className="text-[17px] font-semibold">Edit event</summary>
-        <form action={act.saveEvent.bind(null, slug)} className="mt-4 space-y-3">
-          <EventFields event={event} />
-          <SaveButton className="btn w-full">Save</SaveButton>
-        </form>
-      </details>
+      <h2 className="mt-8 text-[20px] font-bold">Event</h2>
+      <form action={act.saveEvent.bind(null, slug)} className="mt-3 space-y-3">
+        <EventFields event={event} needed={needed.map((i) => ({ name: i.name, by: whoHas.get(i.id) ?? null }))} />
+        <SaveButton className="btn w-full">Save</SaveButton>
+      </form>
 
       <div className="mt-6 space-y-2">
         <form action={act.copyToNextYear.bind(null, slug)}>

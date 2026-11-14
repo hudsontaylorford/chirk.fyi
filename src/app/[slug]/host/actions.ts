@@ -95,25 +95,28 @@ export async function createEvent(f: FormData) {
   if (!fields.title || !fields.date) return;
   const slug = await freeSlug(val(f, "slug") || fields.title);
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
-  const needed = val(f, "needed").split(/[,\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 50);
-  if (fields.bring_prompt && needed.length) {
-    await sql`insert into items ${sql(needed.map((name, i) => ({ event_id: e.id, kind: "needed", name, sort: i + 1 })))}`;
-  }
+  await saveList(e.id, f);
   redirect(`/${slug}/host`);
 }
 
-export async function addItem(slug: string, f: FormData) {
-  const ev = await eventId(slug);
-  // "Chairs, grill, blankets" adds three.
-  const names = val(f, "name").split(/[,\n]/).map((s) => s.trim()).filter(Boolean).slice(0, 50);
-  const [{ max }] = await sql<{ max: number }[]>`select coalesce(max(sort), 0)::int as max from items where event_id = ${ev}`;
-  if (names.length) await sql`insert into items ${sql(names.map((name, i) => ({ event_id: ev, kind: "needed", name, sort: max + i + 1 })))}`;
-  revalidatePath(`/${slug}`, "layout");
-}
-
-export async function removeItem(slug: string, id: string) {
-  await sql`delete from items where id = ${id} and event_id = ${await eventId(slug)}`;
-  revalidatePath(`/${slug}`, "layout");
+/**
+ * The host's list from the form (one thing per line): new things are added, things taken off are removed
+ * (with anyone's claim on them), and the rest keep their claims and take the new order.
+ */
+async function saveList(eventId: string, f: FormData) {
+  const lines = val(f, "needed").split("\n").map((s) => s.trim().slice(0, 120)).filter(Boolean).slice(0, 50);
+  const names = [...new Map(lines.map((n) => [n.toLowerCase(), n])).values()];
+  await sql.begin(async (tx) => {
+    const have = await tx<{ id: string; name: string }[]>`select id, name from items where event_id = ${eventId} and kind = 'needed'`;
+    const byName = new Map(have.map((i) => [i.name.toLowerCase(), i.id]));
+    const gone = have.filter((i) => !names.some((n) => n.toLowerCase() === i.name.toLowerCase())).map((i) => i.id);
+    if (gone.length) await tx`delete from items where id in ${tx(gone)}`;
+    for (const [i, name] of names.entries()) {
+      const id = byName.get(name.toLowerCase());
+      if (id) await tx`update items set name = ${name}, sort = ${i + 1} where id = ${id}`;
+      else await tx`insert into items ${tx({ event_id: eventId, kind: "needed", name, sort: i + 1 })}`;
+    }
+  });
 }
 
 export async function removeHousehold(slug: string, id: string) {
@@ -129,7 +132,8 @@ export async function saveEvent(slug: string, f: FormData) {
   await eventId(slug);
   const fields = eventFields(f);
   if (!fields.title || !fields.date) return;
-  await sql`update events set ${sql(fields)} where slug = ${slug}`;
+  const [e] = await sql<{ id: string }[]>`update events set ${sql(fields)} where slug = ${slug} returning id`;
+  await saveList(e.id, f);
   revalidatePath(`/${slug}`, "layout");
 }
 

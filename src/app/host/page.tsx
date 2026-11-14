@@ -36,14 +36,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
       <details className="mt-8 rounded-2xl bg-wash p-4" open={events.length === 0}>
         <summary className="text-[17px] font-semibold">+ New event</summary>
         <form action={createEvent} className="mt-4 space-y-3">
-          <EventFields
-            moreOptions={
-              <label className="block">
-                <span className="text-[15px] text-soft">Web address (made from the title if blank)</span>
-                <input name="slug" className="field mt-1" placeholder="e.g. molly-birthday" />
-              </label>
-            }
-          />
+          <EventFields />
           <SaveButton className="btn w-full">Create event</SaveButton>
         </form>
       </details>

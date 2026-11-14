@@ -32,7 +32,7 @@ export function CoverInput({ value, canUpload }: { value: string | null; canUplo
 
   return (
     <div>
-      <span className="text-[15px] text-soft">Cover photo (optional)</span>
+      <span className="sr-only">Cover photo</span>
       <input type="hidden" name="cover_url" value={url} />
       {url && <div className="mt-2"><Cover src={url} host /></div>}
       {canUpload && (

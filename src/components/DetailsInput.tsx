@@ -12,7 +12,7 @@ export function DetailsInput({ value }: { value: string }) {
   return (
     <div>
       <label className="block">
-        <span className="text-[15px] text-soft">Details</span>
+        <span className="sr-only">Message</span>
         <textarea name="details" rows={8} value={text} onChange={(e) => setText(e.target.value)} className="field mt-1" />
       </label>
       <p className="mt-1 text-[13px] text-soft">
