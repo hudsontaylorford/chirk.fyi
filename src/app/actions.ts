@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type postgres from "postgres";
 import { cookies } from "next/headers";
 import { isHost } from "@/lib/auth";
-import { joinNames } from "@/lib/data";
+import { bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { sql } from "@/lib/db";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
@@ -186,16 +186,18 @@ export async function emailMyLink(slug: string, _prev: string | null, f: FormDat
 async function notifyHost(slug: string, token: string, changed: boolean) {
   const to = process.env.EMAIL_REPLY_TO;
   if (!to) return;
-  const [r] = await sql<{ id: string; names: string[]; going: boolean; kids: number; note: string | null; email: string | null; title: string; bringing: string[] }[]>`
-    select h.id, h.names, h.going, h.kids, h.note, h.email, e.title,
-      coalesce((select array_agg(i.name order by c.created_at) from claims c join items i on i.id = c.item_id where c.household_id = h.id), '{}') as bringing
-    from households h join events e on e.id = h.event_id where e.slug = ${slug} and h.token = ${token}`;
-  if (!r) return;
+  const data = await getEventData(slug);
+  const h = data?.households.find((x) => x.token === token);
+  if (!data || !h || h.going === null) return;
+  const bringing = bringList(data).claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
+  const going = data.households.filter((x) => x.going);
   const mail = replyEmail({
-    title: r.title, names: joinNames(r.names), going: r.going, adults: r.names.length, kids: r.kids,
-    bringing: r.bringing, note: r.note, changed, hostUrl: `${await siteUrl()}/${slug}/host`,
+    title: data.event.title, date: data.event.date, names: joinNames(h.names), going: h.going, adults: h.names.length, kids: h.kids,
+    parts: partsOf(data.event, h), bringing, bringOn: !!data.event.bring_prompt, note: h.note, changed,
+    coming: going.reduce((n, x) => n + x.names.length + x.kids, 0), waiting: data.households.filter((x) => x.going === null).length,
+    hostUrl: `${await siteUrl()}/${slug}/host`,
   });
-  await sendEmail({ to, ...mail, replyTo: r.email, idempotencyKey: `reply-note-${r.id}-${Math.floor(Date.now() / 60_000)}` });
+  await sendEmail({ to, ...mail, replyTo: h.email, idempotencyKey: `reply-note-${h.id}-${Math.floor(Date.now() / 60_000)}` });
 }
 
 /** "Keep your link": saves an email on a reply and sends the link there. */

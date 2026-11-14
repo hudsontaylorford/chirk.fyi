@@ -2,25 +2,28 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { replyEmail } from "./reply-email.ts";
 
-const base = { title: "Thanksgiving", names: "Sally & Bo", adults: 2, kids: 1, bringing: ["Pie"], note: "Nut allergy", changed: false, hostUrl: "https://chirk.fyi/t/host" };
+const base = {
+  title: "Thanksgiving", date: "2026-11-26", names: "Sally & Bo", adults: 2, kids: 0, parts: [], bringing: ["Pie"], bringOn: true,
+  note: "Nut allergy", changed: false, coming: 14, waiting: 6, hostUrl: "https://chirk.fyi/t/host",
+};
 
-test("going: subject, party, bringing, note, escaped", () => {
-  const e = replyEmail({ ...base, going: true });
+test("going: what they said, then the tally", () => {
+  const e = replyEmail({ ...base, going: true, kids: 1, parts: ["Dinner", "Dessert"] });
   assert.equal(e.subject, "Sally & Bo are going: Thanksgiving");
-  assert.match(e.text, /2 adults, 1 kid\nBringing: Pie\nNote: "Nut allergy"/);
+  assert.match(e.text, /Thanksgiving · Thu, Nov 26\n\nPlus 1 kid\nComing to: Dinner and Dessert\nBringing: Pie\nNote: "Nut allergy"\n\nThat's 14 coming so far, and 6 invites haven't replied yet\./);
   assert.match(e.html, /Sally &amp; Bo are going/);
+  assert.doesNotMatch(e.text, /adult/); // head counts only matter with kids
 });
 
-test("two people in one name box, one-person replies, and a list of several things", () => {
-  const e = replyEmail({ ...base, names: "Graham and Ellen", adults: 1, kids: 0, going: true, bringing: ["Ham", "Salad", "Apple pie"] });
-  assert.equal(e.subject, "Graham and Ellen are going: Thanksgiving");
-  assert.doesNotMatch(e.text, /adult/);
-  assert.match(e.text, /Bringing: Ham, Salad and Apple pie/);
-  assert.equal(replyEmail({ ...base, names: "Sally", adults: 1, kids: 0, going: true }).subject, "Sally is going: Thanksgiving");
+test("a bare reply still says something", () => {
+  const e = replyEmail({ ...base, names: "Hans", adults: 1, going: true, bringing: [], note: null, waiting: 1 });
+  assert.equal(e.subject, "Hans is going: Thanksgiving");
+  assert.match(e.text, /Not bringing anything yet\n\nThat's 14 coming so far, and 1 invite hasn't replied yet\./);
+  assert.doesNotMatch(replyEmail({ ...base, going: true, bringOn: false, waiting: 0 }).text, /Bringing|replied yet/);
 });
 
 test("can't make it, and changed replies", () => {
   assert.equal(replyEmail({ ...base, going: false }).subject, "Sally & Bo can't make it: Thanksgiving");
-  assert.doesNotMatch(replyEmail({ ...base, going: false }).text, /Bringing|adults/);
+  assert.doesNotMatch(replyEmail({ ...base, going: false }).text, /Bringing/);
   assert.equal(replyEmail({ ...base, going: true, changed: true }).subject, "Sally & Bo updated: going: Thanksgiving");
 });
