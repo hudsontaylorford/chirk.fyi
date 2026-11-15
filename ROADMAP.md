@@ -1,6 +1,50 @@
 # chirk + Postup: roadmap
 
 *Written Nov 13, 2026. Thinking, not commitments. Revisit after Thanksgiving.*
+*Language and positioning: LANGUAGE.md. The numbered items further down are the detailed notes; this section is the order.*
+
+## Phases (Nov 15)
+
+**Built so far (Nov 13–15):** the invite and RSVP, bring list (Still needed / Covered, doubling up), photo upload, end times, all-day schedule with "which parts are you coming to", named invitations with personal links, email invites, reminders and "Message your guests", fuller reply and RSVP emails, guest notes, copy to next year (with the guest list), privacy and terms, and host accounts with co-hosts (items 4, 8, 10, 11, 13, 18, 19, 20 and the photo upload).
+
+**Phase 1: make invitations exceptionally good (now → ~2 months)**
+- Place autocomplete (14) and better location lookup.
+- Bulk edits and bulk guest actions; easier text invitations; fewer email-only steps.
+- Several photos (7); a calendar subscription for all your chirks; replies to guests' notes.
+- Signed-in devices (23); a line for guests under Send RSVP (27); share to an Instagram story (21).
+- Shared costs: split a bill, a pool, a poker game (28).
+- Goal: hosting something detailed is already much easier in chirk than coordinating it by hand.
+
+**Phase 2: remember your people (~2–4 months)**
+- Your people (12, 24), reusable guest lists, faster repeat invitations, contacts (25).
+- Templates, including your own (9, 29), and gift exchanges (30).
+- Recurring and standing chirks (17); data housekeeping (26); early circles.
+- Goal: the second thing you host is much easier than the first.
+
+**Phase 3: make creation nearly instant (~4–6 months)**
+- Screenshot, file or pasted text → a chirk (date, time and place filled in, shown for you to confirm).
+- Ticket and reservation recognition; wrappers for the invite (16).
+- Goal: anything you're already doing is easy to turn into something your friends can join.
+
+**Phase 4: light chirks (~6–9 months)**
+- "Posted up": a place and a time window ("now → 2"), one-tap Going, a map pin (intent, never tracking).
+- Shared photo albums (31); maybe a "Maybe" answer (32).
+- Goal: a chirk is useful for an hour at a coffee shop, not just a dinner two weeks out.
+
+**Phase 5: your people's plans (~9–12 months)**
+- Friends, circles, a calm chronological list of what your people are doing, a map view, calendar integration.
+- Goal: open chirk and see what's happening among the people you actually know.
+
+### New ideas (Nov 15)
+28. **Shared costs.** One switch on the event ("Split costs"), shown on the invite when the host turns it on. Two modes, same idea: who paid what, who owes whom, settled in the fewest payments.
+    - *Split:* dinner, game tickets, a trip. Add what was spent and by whom; chirk works out each person's share (even, or by person).
+    - *Pool:* everyone chips in toward one thing ("$163 each for tickets"), with a paid ✓ the host ticks.
+    - *Poker:* buy-ins and rebuys during the night, cash-outs at the end, then the payouts.
+    - chirk never holds money (that would make it a payments business). Each "you owe Sam $42" has a **Pay with Venmo** button that opens Venmo with the amount and note filled in, plus copy-to-clipboard for Zelle or Cash App.
+29. **Templates, including your own.** Start from Dinner, Party, Quick hang, Gift exchange, or save any chirk as a template ("Our Friendsgiving"). A template only fills in fields you can still change. "Copy to next year" is already a one-off version of this.
+30. **Gift exchange.** On a chirk, a "Gift exchange" switch: guests opt in, the host adds rules ("Hudson can't draw Molly", couples never draw each other), chirk draws names and emails each person their match privately (or shows it on their personal reply page). An optional budget and wish-list note per person.
+31. **Shared photo album.** A "Photos" link on the invite after the event. Google Photos, Amazon Photos and iCloud don't let other apps create shared albums for you, so the realistic version is: the host makes the album in their photos app and pastes its share link into the chirk (and chirk can nudge guests to add theirs). Revisit if any of them open an API for it.
+32. **"Maybe" (later, perhaps).** Fine to leave out for now; revisit if hosts ask for it, possibly as a per-chirk switch.
 
 ## The one idea
 
@@ -232,7 +276,7 @@ The Craigslist version's *look* is great, but its table columns are what make it
 - Multi-day plans.
 - A map *link* (Apple/Google Maps), not a map provider.
 
-**Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing or payments, push notifications, ads.
+**Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing, holding or moving money (shared costs only calculate and hand off to Venmo and the like), push notifications, ads.
 
 ## Migration notes (from the Postup chat, Nov 13)
 - **No data to move.** Postup's Supabase only holds 4 demo plans and Hudson's own test sign-ups. Copy nothing; retire the project after the merge.

@@ -1,5 +1,7 @@
 # chirk: design notes (as of Nov 15, 2026)
 
+*What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
+
 chirk is a tiny, phone-first invite and RSVP site, a DIY Partiful. A host makes an event, texts one link, and guests reply in under a minute with no app and no account. The current look is deliberately plain: a placeholder chosen so it can't get in the way until a real design direction is decided. Live example: https://chirk.fyi/thanksgiving-2026
 
 ## Who it's for
