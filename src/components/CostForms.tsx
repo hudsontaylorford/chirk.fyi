@@ -55,3 +55,30 @@ export function VenmoForm({ action, venmo }: { action: Send; venmo: string | nul
     </form>
   );
 }
+
+/** Poker: a buy-in or a cash-out for a player (hosts pick anyone; players enter their own). */
+export function PokerForm({ action, host, me, players }: { action: Send; host: boolean; me: string | null; players: { id: string; name: string }[] }) {
+  const [result, add, adding] = useActionState(action, null);
+  return (
+    <form action={add} className="mt-3 space-y-2">
+      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Buy-in or cash-out">
+        <label className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+          <input type="radio" name="kind" value="buyin" defaultChecked className="h-4 w-4" /> Buy-in
+        </label>
+        <label className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+          <input type="radio" name="kind" value="cashout" className="h-4 w-4" /> Cash-out
+        </label>
+      </div>
+      <div className="flex gap-2">
+        {host && (
+          <select name="who" defaultValue={me ?? players[0]?.id} className="field" aria-label="Player">
+            {players.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+        )}
+        <input name="amount" className="field w-28 shrink-0" inputMode="decimal" placeholder="$20" aria-label="Poker amount" required />
+        <button className="btn shrink-0 px-4" disabled={adding}>{adding ? "…" : "Add"}</button>
+      </div>
+      {result && <p role="status" className="text-[14px] text-soft">{result}</p>}
+    </form>
+  );
+}

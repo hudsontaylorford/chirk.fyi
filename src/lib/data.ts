@@ -6,7 +6,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
 /** `forGuest`: drafts stay hidden from everyone but the host. */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   return e;
@@ -73,13 +73,15 @@ export type CostRow = { id: string; what: string; amount: number; paid_by: strin
 
 /** An event's shared costs (with who each is split between) and the payments marked as made. */
 export async function getCosts(eventId: string) {
-  const [costs, payments] = await Promise.all([
+  const [costs, payments, poker] = await Promise.all([
     sql<CostRow[]>`
       select c.id, c.what, c.amount, c.paid_by,
         coalesce((select json_agg(json_build_object('who', s.household_id, 'shares', s.shares)) from cost_shares s where s.cost_id = c.id), '[]') as split
       from costs c where c.event_id = ${eventId} order by c.created_at`,
     sql<{ from_household: string; to_household: string; amount: number }[]>`
       select from_household, to_household, amount from payments where event_id = ${eventId} order by created_at`,
+    sql<{ id: string; who: string; kind: "buyin" | "cashout"; amount: number }[]>`
+      select id, household_id as who, kind, amount from poker_entries where event_id = ${eventId} order by created_at`,
   ]);
-  return { costs, payments: payments.map((p) => ({ from: p.from_household, to: p.to_household, amount: p.amount })) };
+  return { costs, poker, payments: payments.map((p) => ({ from: p.from_household, to: p.to_household, amount: p.amount })) };
 }

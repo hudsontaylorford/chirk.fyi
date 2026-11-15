@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { balances, money, parseMoney, settle, shareOut, venmoUrl } from "./costs.ts";
+import { balances, money, parseMoney, poker, settle, shareOut, venmoUrl } from "./costs.ts";
 
 test("splits cents exactly, by person", () => {
   assert.deepEqual([...shareOut(1000, [{ who: "a", shares: 1 }, { who: "b", shares: 1 }, { who: "c", shares: 1 }])], [["a", 334], ["b", 333], ["c", 333]]);
@@ -39,4 +39,30 @@ test("money in and out", () => {
   assert.equal(parseMoney("12.345"), null);
   assert.equal(parseMoney("abc"), null);
   assert.equal(venmoUrl("@sam-k", 16300, "Jets · tickets"), "https://venmo.com/sam-k?txn=pay&amount=163.00&note=Jets%20%C2%B7%20tickets");
+});
+
+test("poker: rebuys, cash-outs, ready only when the chips add up", () => {
+  const game = poker([
+    { who: "a", kind: "buyin", amount: 2000 }, { who: "b", kind: "buyin", amount: 2000 }, { who: "c", kind: "buyin", amount: 2000 },
+    { who: "c", kind: "buyin", amount: 2000 }, // c rebuys
+    { who: "a", kind: "cashout", amount: 5500 }, { who: "b", kind: "cashout", amount: 2500 },
+  ]);
+  assert.equal(game.totalIn, 8000);
+  assert.equal(game.allOut, false); // c hasn't cashed out
+  assert.equal(game.ready, false);
+  const short = poker([...[{ who: "a", kind: "buyin", amount: 2000 }, { who: "a", kind: "cashout", amount: 1500 }] as const]);
+  assert.equal(short.ready, false); // $5 missing from the count
+  const done = poker([
+    { who: "a", kind: "buyin", amount: 2000 }, { who: "b", kind: "buyin", amount: 2000 }, { who: "c", kind: "buyin", amount: 4000 },
+    { who: "a", kind: "cashout", amount: 5500 }, { who: "b", kind: "cashout", amount: 2500 }, { who: "c", kind: "cashout", amount: 0 },
+  ]);
+  assert.equal(done.ready, true);
+  assert.deepEqual(Object.fromEntries(done.nets), { a: 3500, b: 500, c: -4000 });
+  // Poker joins the same settle-up as the night's costs: c pays a and b.
+  assert.deepEqual(settle(balances([], [], done.nets)), [
+    { from: "c", to: "a", amount: 3500 },
+    { from: "c", to: "b", amount: 500 },
+  ]);
+  // A corrected cash-out replaces the earlier one.
+  assert.equal(poker([{ who: "a", kind: "buyin", amount: 100 }, { who: "a", kind: "cashout", amount: 50 }, { who: "a", kind: "cashout", amount: 100 }]).ready, true);
 });

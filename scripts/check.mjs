@@ -242,6 +242,35 @@ assert.match(await s1.textContent("body"), /You're all square ✓/);
 await h.reload();
 assert.match(await h.textContent("main"), /Settle up[\s\S]*owes Zed/);
 
+// Poker: buy-ins (a player can add their own rebuy), cash-outs, and settling only once the chips add up.
+await h.click("summary:has-text('Shared costs')");
+await h.check("input[name=poker_on]");
+await h.click("form:has(input[name=poker_on]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const pokerIn = async (page, who, amount, kind = "buyin") => {
+  await page.check(`input[name=kind][value=${kind}]`);
+  if (who) await page.selectOption("select[aria-label=Player]", { label: who });
+  await page.fill("input[aria-label='Poker amount']", amount);
+  await page.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
+  await page.waitForSelector(`text=${kind === "buyin" ? "Buy-in added ✓" : "Cash-out saved ✓"}`);
+};
+await h.reload();
+await pokerIn(h, "Zed", "20");
+await h.reload();
+await pokerIn(h, "Early Bird", "20");
+await s1.goto(invite);
+await pokerIn(s1, null, "20"); // Early Bird rebuys from their own phone
+await h.reload();
+await pokerIn(h, "Zed", "50", "cashout");
+await h.reload();
+assert.match(await h.textContent("main"), /In \$60 · Out \$50 · waiting on 1 to cash out/);
+await pokerIn(h, "Early Bird", "10", "cashout");
+await h.reload();
+assert.match(await h.textContent("main"), /In \$60 · Out \$60 ✓ Added to settle up\./);
+assert.match(await h.textContent("main"), /Zed\s*\$20\s*\$50\s*\+\$30[\s\S]*Early Bird\s*\$40\s*\$10\s*−\$30/);
+await s1.reload();
+assert.match(await s1.textContent("body"), /You owe Zed \$30/);
+
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("button.pill:has-text('Everyone')");

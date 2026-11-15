@@ -36,6 +36,7 @@ begin
     hosted_by text,                      -- "Hudson & Molly", shown on the invite (accounts later)
     long_times boolean not null default false,    -- times as 3:00 PM instead of 3 pm
     costs_on boolean not null default false,      -- shared costs on this event
+    poker_on boolean not null default false,      -- poker buy-ins and cash-outs
     created_at timestamptz not null default now()
   );
 
@@ -123,6 +124,16 @@ begin
     created_at timestamptz not null default now()
   );
 
+  -- Poker night: buy-ins (rebuys are more of them) and each player's cash-out.
+  create table if not exists poker_entries (
+    id uuid primary key default gen_random_uuid(),
+    event_id uuid not null references events(id) on delete cascade,
+    household_id uuid not null references households(id) on delete cascade,
+    kind text not null check (kind in ('buyin', 'cashout')),
+    amount int not null check (amount >= 0),             -- cents
+    created_at timestamptz not null default now()
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;
@@ -135,6 +146,7 @@ begin
   alter table costs enable row level security;
   alter table cost_shares enable row level security;
   alter table payments enable row level security;
+  alter table poker_entries enable row level security;
 
   -- Upgrades for databases made before these existed (each does nothing once applied).
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
@@ -157,6 +169,7 @@ begin
   alter table events add column if not exists hosted_by text;
   alter table users add column if not exists terms_version text;
   alter table events add column if not exists costs_on boolean not null default false;
+  alter table events add column if not exists poker_on boolean not null default false;
   alter table households add column if not exists venmo text;
   alter table users add column if not exists terms_accepted_at timestamptz;
   alter table events add column if not exists long_times boolean not null default false;

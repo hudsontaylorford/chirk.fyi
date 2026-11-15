@@ -13,10 +13,14 @@ export function shareOut(amount: number, split: { who: string; shares: number }[
   return new Map(parts.map((p) => [p.who, p.cents]));
 }
 
-/** Each person's balance: positive = they're owed money, negative = they owe. Payments made count toward it. */
-export function balances(costs: Cost[], payments: Payment[]) {
+/**
+ * Each person's balance: positive = they're owed money, negative = they owe. Payments made count toward it.
+ * `extra` adds other results to the same balances (a finished poker game's nets).
+ */
+export function balances(costs: Cost[], payments: Payment[], extra = new Map<string, number>()) {
   const b = new Map<string, number>();
   const add = (who: string, cents: number) => b.set(who, (b.get(who) ?? 0) + cents);
+  for (const [who, cents] of extra) add(who, cents);
   for (const c of costs) {
     add(c.paidBy, c.amount);
     for (const [who, cents] of shareOut(c.amount, c.split)) add(who, -cents);
@@ -59,4 +63,26 @@ export function parseMoney(text: string) {
 export function venmoUrl(handle: string, cents: number, note: string) {
   const user = handle.replace(/^@/, "").trim();
   return `https://venmo.com/${encodeURIComponent(user)}?txn=pay&amount=${(cents / 100).toFixed(2)}&note=${encodeURIComponent(note)}`;
+}
+
+export type PokerEntry = { who: string; kind: "buyin" | "cashout"; amount: number };
+
+/**
+ * A poker game from its buy-ins (rebuys are more buy-ins) and cash-outs (each player's latest one counts).
+ * It's ready to settle once everyone who bought in has cashed out and the money in equals the money out.
+ */
+export function poker(entries: PokerEntry[]) {
+  const players = new Map<string, { in: number; out: number | null }>();
+  for (const e of entries) {
+    const p = players.get(e.who) ?? { in: 0, out: null };
+    if (e.kind === "buyin") p.in += e.amount;
+    else p.out = e.amount;
+    players.set(e.who, p);
+  }
+  const totalIn = [...players.values()].reduce((n, p) => n + p.in, 0);
+  const totalOut = [...players.values()].reduce((n, p) => n + (p.out ?? 0), 0);
+  const allOut = [...players.values()].every((p) => p.out !== null || p.in === 0);
+  const ready = players.size > 0 && allOut && totalIn === totalOut;
+  const nets = new Map([...players].map(([who, p]) => [who, (p.out ?? 0) - p.in]));
+  return { players, totalIn, totalOut, allOut, ready, nets };
 }

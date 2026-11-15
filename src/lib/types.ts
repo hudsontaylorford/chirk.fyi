@@ -25,6 +25,7 @@ export interface Event {
   hosted_by: string | null;
   long_times: boolean; // 3:00 PM instead of 3 pm
   costs_on: boolean; // shared costs
+  poker_on: boolean; // poker buy-ins and cash-outs
 }
 
 export interface Household {

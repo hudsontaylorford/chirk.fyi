@@ -85,8 +85,9 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
           <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
           <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
         </Row>
-        <Row id="costs" label="Shared costs" value={event?.costs_on ? "On" : "Off"}>
+        <Row id="costs" label="Shared costs" value={[event?.costs_on && "Split costs", event?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
           <Check name="costs_on" checked={event?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
+          <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
           <p className="text-[14px] text-soft">Guests going can add what they paid; chirk works out who owes whom and links to Venmo. No money goes through chirk.</p>
         </Row>
         {!event && (

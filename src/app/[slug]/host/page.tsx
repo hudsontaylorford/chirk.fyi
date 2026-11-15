@@ -191,7 +191,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         </section>
       )}
 
-      {event.costs_on && <Costs data={data} token={null} host inside />}
+      {(event.costs_on || event.poker_on) && <Costs data={data} token={null} host inside />}
 
       <h2 className="mt-8 text-[20px] font-bold">Event</h2>
       <form action={act.saveEvent.bind(null, slug)} className="mt-3 space-y-3">

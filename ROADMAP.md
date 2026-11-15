@@ -49,6 +49,7 @@
     - *Cash App:* same story: Cash App Pay is for businesses. But `cash.app/$cashtag/42` opens a prefilled payment, so a **Pay with Cash App** button (guests add their $cashtag) is easy to add whenever it's wanted.
     - *Zelle:* lives inside each bank's app, with no links or API, so copy-the-amount plus Mark paid is the best there is.
     - Revisit if any of them open a friends-and-family API; until then chirk keeps doing the math, opening the app, and letting people mark it paid.
+34. **Add a payment account from a screenshot or a link.** Paste `venmo.com/u/sam-k` or `cash.app/$sam` into the payment box and chirk fills in the username (a quick add). Later: upload a screenshot of your Venmo or Cash App QR code and chirk reads it (decoding the QR in the browser).
 32. **"Maybe" (later, perhaps).** Fine to leave out for now; revisit if hosts ask for it, possibly as a per-chirk switch.
 
 ## The one idea

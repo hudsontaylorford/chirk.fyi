@@ -10,14 +10,14 @@ import { sql } from "@/lib/db";
  * Guests count only if they're going. Nothing works unless the event has shared costs on.
  */
 async function actor(slug: string, token: string | null) {
-  const [e] = await sql<{ id: string; costs_on: boolean }[]>`select id, costs_on from events where slug = ${slug}`;
-  if (!e?.costs_on) return null;
+  const [e] = await sql<{ id: string; costs_on: boolean; poker_on: boolean }[]>`select id, costs_on, poker_on from events where slug = ${slug}`;
+  if (!e?.costs_on && !e?.poker_on) return null;
   const host = !!(await hostRole(slug));
   const [h] = token
     ? await sql<{ id: string }[]>`select id from households where token = ${token} and event_id = ${e.id} and going is true`
     : [];
   if (!host && !h) return null;
-  return { eventId: e.id, host, household: h?.id ?? null };
+  return { eventId: e.id, host, household: h?.id ?? null, costs: e.costs_on, poker: e.poker_on };
 }
 
 const done = (slug: string) => revalidatePath(`/${slug}`, "layout");
@@ -28,7 +28,7 @@ const done = (slug: string) => revalidatePath(`/${slug}`, "layout");
  */
 export async function addCost(slug: string, token: string | null, _prev: string | null, f: FormData): Promise<string> {
   const a = await actor(slug, token);
-  if (!a) return "Only people who are going can add costs.";
+  if (!a?.costs) return "Only people who are going can add costs.";
   const what = String(f.get("what") ?? "").trim().replace(/\s+/g, " ").slice(0, 80);
   const amount = parseMoney(String(f.get("amount") ?? ""));
   if (!what) return "What was it for?";
@@ -75,4 +75,35 @@ export async function saveVenmo(slug: string, token: string, _prev: string | nul
   await sql`update households set venmo = ${venmo || null} where id = ${a.household}`;
   done(slug);
   return "Saved ✓";
+}
+
+/**
+ * Poker: a buy-in (rebuys are more buy-ins) or a cash-out (what their chips are worth at the end; a new one replaces the old).
+ * Hosts enter for any player; players enter their own.
+ */
+export async function addPoker(slug: string, token: string | null, _prev: string | null, f: FormData): Promise<string> {
+  const a = await actor(slug, token);
+  if (!a?.poker) return "Only people who are going can play.";
+  const kind = f.get("kind") === "cashout" ? "cashout" : "buyin";
+  const typed = String(f.get("amount") ?? "").trim();
+  const amount = kind === "cashout" && /^\$?0+(\.0+)?$/.test(typed) ? 0 : parseMoney(typed);
+  if (amount === null) return "Add the amount, like 20.";
+  const [player] = await sql<{ id: string }[]>`
+    select id from households where event_id = ${a.eventId} and going is true and id = ${a.host ? String(f.get("who") ?? a.household ?? "") : a.household ?? ""}`
+    .catch(() => []);
+  if (!player) return "Pick a player.";
+  await sql.begin(async (tx) => {
+    if (kind === "cashout") await tx`delete from poker_entries where event_id = ${a.eventId} and household_id = ${player.id} and kind = 'cashout'`;
+    await tx`insert into poker_entries ${tx({ event_id: a.eventId, household_id: player.id, kind, amount })}`;
+  });
+  done(slug);
+  return kind === "cashout" ? "Cash-out saved ✓" : "Buy-in added ✓";
+}
+
+/** Removes a poker entry: a host, or the player it belongs to. */
+export async function removePoker(slug: string, token: string | null, id: string) {
+  const a = await actor(slug, token);
+  if (!a) return;
+  await sql`delete from poker_entries where id = ${id} and event_id = ${a.eventId} and (${a.host} or household_id = ${a.household})`;
+  done(slug);
 }

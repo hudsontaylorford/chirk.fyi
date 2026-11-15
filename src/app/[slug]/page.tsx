@@ -47,7 +47,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         rsvp={<RsvpButton href={href} label={mine?.going != null ? "Your RSVP" : "RSVP"} quiet={mine?.going != null} />}
       />
     </main>
-    {data.event.costs_on && <Costs data={data} token={mine?.token ?? null} host={host} />}
+    {(data.event.costs_on || data.event.poker_on) && <Costs data={data} token={mine?.token ?? null} host={host} />}
     <Footer />
     </>
   );
