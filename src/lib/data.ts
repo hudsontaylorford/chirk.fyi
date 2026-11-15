@@ -3,12 +3,21 @@ import { sql } from "./db";
 import type { Claim, Event, EventData, Household, Item } from "./types";
 import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
 
-/** `forGuest`: drafts stay hidden from everyone but the host. */
+/**
+ * `forGuest`: what guests see. Drafts stay hidden from everyone but the hosts, and an empty "Hosted by"
+ * falls back to the hosts' names (owner first). The host's own form gets the raw value.
+ */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
     select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
+  if (forGuest && !e.hosted_by) {
+    const hosts = await sql<{ name: string }[]>`
+      select u.name from event_hosts h join users u on u.id = h.user_id
+      where h.event_id = ${e.id} and u.name is not null order by h.role desc, h.created_at`;
+    e.hosted_by = hosts.length ? joinNames(hosts.map((h) => h.name)) : null;
+  }
   return e;
 }
 

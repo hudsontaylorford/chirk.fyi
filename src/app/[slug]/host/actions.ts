@@ -189,7 +189,7 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
   const to = val(f, "to") as Audience;
   if (!note) return "Write your note first.";
   if (!(to in audienceSql)) return "Pick who it's for.";
-  const e = await getEvent(slug);
+  const e = await getEvent(slug, true); // as guests see it (Hosted by falls back to the hosts' names)
   if (!e) return "Something went wrong. Try again?";
   const rows = await sql<{ token: string; names: string[]; email: string }[]>`
     select token, names, email from households where event_id = ${ev} and email is not null and ${sql.unsafe(audienceSql[to])}`;
@@ -234,7 +234,7 @@ export async function removeCohost(slug: string, userId: string) {
 }
 
 async function sendTo(slug: string, h: { token: string; names: string[]; email: string }, kind: "invite" | "reminder") {
-  const e = await getEvent(slug);
+  const e = await getEvent(slug, true); // as guests see it (Hosted by falls back to the hosts' names)
   if (!e) return false;
   const url = await personalUrl(slug, h.token);
   const names = joinNames(h.names);

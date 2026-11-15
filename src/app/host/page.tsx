@@ -24,7 +24,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
   const events = await sql<Row[]>`
     select e.slug, e.title, e.date::text, e.status, e.hosted_by,
       e.date < (now() at time zone 'America/New_York')::date as past,
-      (select coalesce(sum(cardinality(h.names) + h.kids), 0)::int from households h where h.event_id = e.id and h.going) as going
+      (select coalesce(sum((select count(*) from unnest(h.names) n, regexp_split_to_table(n, '\s+(&|and)\s+|\s*&\s*', 'i') p where p <> '') + h.kids), 0)::int from households h where h.event_id = e.id and h.going) as going -- couples typed in one box count as two, like headcount()
     from events e join event_hosts eh on eh.event_id = e.id and eh.user_id = ${me.id}
     order by e.date`;
   const archived = events.filter((e) => e.status === "archived").reverse();

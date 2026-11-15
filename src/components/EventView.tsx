@@ -1,7 +1,7 @@
 import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
-import { mapsUrl, shortDate, when } from "@/lib/format";
+import { headcount, mapsUrl, shortDate, when } from "@/lib/format";
 import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
@@ -9,7 +9,7 @@ import type { EventData } from "@/lib/types";
 export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string; greeting?: string }) {
   const { event, households } = data;
   const going = households.filter((h) => h.going);
-  const people = going.reduce((n, h) => n + h.names.length + h.kids, 0);
+  const people = going.reduce((n, h) => n + headcount(h.names) + h.kids, 0);
   const { claimed, open } = bringList(data);
   const stages = parseSchedule(event.schedule, event.time, event.long_times);
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);

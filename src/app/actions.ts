@@ -6,6 +6,7 @@ import { cookies } from "next/headers";
 import { hostRole } from "@/lib/auth";
 import { bringList, getEventData, joinNames, partsOf } from "@/lib/data";
 import { sql } from "@/lib/db";
+import { headcount, splitNames } from "@/lib/format";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
 import { replyEmail } from "@/lib/reply-email";
@@ -34,7 +35,7 @@ class Oops extends Error {}
 const tidy = (s: string, max = 120) => s.trim().replace(/\s+/g, " ").slice(0, max);
 
 export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
-  const names = input.names.map((n) => tidy(n, 60)).filter(Boolean).slice(0, 8);
+  const names = splitNames(input.names.map((n) => tidy(n, 60))).slice(0, 8); // "Graham and Ellen" → two people
   if (!names.length) return { ok: false, error: "Add your name." };
   const email = input.email === undefined ? undefined : input.email.trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
@@ -192,9 +193,9 @@ async function notifyHost(slug: string, token: string, changed: boolean) {
   const bringing = bringList(data).claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
   const going = data.households.filter((x) => x.going);
   const mail = replyEmail({
-    title: data.event.title, date: data.event.date, names: joinNames(h.names), going: h.going, adults: h.names.length, kids: h.kids,
+    title: data.event.title, date: data.event.date, names: joinNames(h.names), going: h.going, adults: headcount(h.names), kids: h.kids,
     parts: partsOf(data.event, h), bringing, bringOn: !!data.event.bring_prompt, note: h.note, changed,
-    coming: going.reduce((n, x) => n + x.names.length + x.kids, 0), waiting: data.households.filter((x) => x.going === null).length,
+    coming: going.reduce((n, x) => n + headcount(x.names) + x.kids, 0), waiting: data.households.filter((x) => x.going === null).length,
     hostUrl: `${await siteUrl()}/${slug}/host`,
   });
   // To each of the event's hosts (or the site's own inbox for an event nobody hosts yet).

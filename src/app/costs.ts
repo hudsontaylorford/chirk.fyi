@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { hostRole } from "@/lib/auth";
 import { parseMoney } from "@/lib/costs";
+import { headcount } from "@/lib/format";
 import { sql } from "@/lib/db";
 
 /**
@@ -34,8 +35,8 @@ export async function addCost(slug: string, token: string | null, _prev: string 
   const amount = parseMoney(String(f.get("amount") ?? ""));
   if (!what) return "What was it for?";
   if (!amount) return "Add the amount, like 42.50.";
-  const going = await sql<{ id: string; size: number }[]>`
-    select id, cardinality(names) + kids as size from households where event_id = ${a.eventId} and going is not false`;
+  const going = (await sql<{ id: string; names: string[]; kids: number }[]>`
+    select id, names, kids from households where event_id = ${a.eventId} and going is not false`).map((g) => ({ id: g.id, size: headcount(g.names) + g.kids }));
   const ids = new Set(going.map((g) => g.id));
   const paidBy = a.host && ids.has(String(f.get("paid_by"))) ? String(f.get("paid_by")) : a.household;
   if (!paidBy) return "Pick who paid.";

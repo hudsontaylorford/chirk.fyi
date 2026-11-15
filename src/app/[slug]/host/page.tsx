@@ -14,7 +14,7 @@ import { currentUser, hostRole } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { AddCohost } from "@/components/AddCohost";
 import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
-import { listText } from "@/lib/format";
+import { headcount, listText } from "@/lib/format";
 import * as act from "./actions";
 import { Footer } from "@/components/Footer";
 
@@ -40,13 +40,13 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const answered = households.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
   const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email).length, total: hs.length });
-  const adults = going.reduce((n, h) => n + h.names.length, 0);
+  const adults = going.reduce((n, h) => n + headcount(h.names), 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
   const open = list.open.length;
   // People coming to each part of the day, from what each reply picked; replies that didn't pick are counted apart.
   const stages = arrivals(event);
-  const size = (h: (typeof going)[number]) => h.names.length + h.kids;
+  const size = (h: (typeof going)[number]) => headcount(h.names) + h.kids;
   const perPart = stages.map((s) => going.filter((h) => partsOf(event, h).includes(s)).reduce((n, h) => n + size(h), 0));
   const unsaid = going.filter((h) => !partsOf(event, h).length).reduce((n, h) => n + size(h), 0);
 
@@ -103,7 +103,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         </div>
       )}
 
-      {event.status !== "draft" && <div className="mt-6"><CopyInvite event={event} /></div>}
+      {event.status !== "draft" && <div className="mt-6"><CopyInvite event={{ ...event, hosted_by: event.hosted_by || joinNames(hosts.filter((h) => h.name).map((h) => h.name!)) || null }} /></div>}
 
       {/* Everyone you've named and everyone who replied, in one list. */}
       <h2 className="mt-8 text-[20px] font-bold">Guests</h2>

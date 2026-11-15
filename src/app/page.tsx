@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { Footer } from "@/components/Footer";
 import { isHost } from "@/lib/auth";
@@ -19,13 +20,15 @@ export default async function Home() {
         where h.token = any(${tokens}) and e.status = 'live' and e.date >= current_date - 1
         order by e.date`
     : [];
-  const known = tokens.length > 0 || (await isHost());
+  const host = await isHost();
+  const known = tokens.length > 0 || host;
 
   return (
     <>
     <main className={`mx-auto flex max-w-lg flex-col justify-center px-5 py-12 ${known ? "min-h-[75dvh]" : "min-h-dvh"}`}>
       <div className="text-center">
         <h1 className="text-2xl font-semibold">chirk*</h1>
+        {host && <Link href="/host" className="mt-2 inline-block text-[15px] font-semibold underline underline-offset-2">Your events ›</Link>}
       </div>
       {plans.length > 0 && (
         <section className="mt-10">

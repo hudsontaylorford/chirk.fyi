@@ -332,6 +332,26 @@ await h.waitForSelector("#hosts summary:text-is('Remove')", { state: "detached" 
 await m.goto(kidless.replace(/\/rsvp$/, "/host"));
 assert.equal(new URL(m.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, "")); // no longer a host
 
+// Head counts: "Graham and Ellen" typed in one box is two people; hosts' names sign an invite with no Hosted by.
+const ge = await phone();
+await ge.goto(pokerHost.replace(/\/host$/, "/rsvp")); // an event with no limit on extra guests
+await ge.click("text=Going");
+await ge.fill('input[aria-label="Your name"]', "Gil and Eve");
+await ge.click("text=Send RSVP");
+await ge.waitForURL(/\/r\//);
+await h.goto(pokerHost);
+assert.match(await h.textContent("main"), /Gil & Eve/); // saved as two people
+await h.goto(ORIGIN + "/");
+assert.equal(await h.locator("a:text-is('Your events ›')").count(), 1);
+const nobodyHome = await phone();
+await nobodyHome.goto(ORIGIN + "/");
+assert.equal(await nobodyHome.locator("a:text-is('Your events ›')").count(), 0);
+await h.goto(ORIGIN + "/host");
+if (await h.locator("input#name").count()) { await h.fill("input#name", "Hostie"); await h.click("form:has(input#name) button:text-is('Save')"); await h.waitForSelector("input#name", { state: "detached" }); }
+const signer = await phone();
+await signer.goto(pokerHost.replace(/\/host$/, ""));
+assert.match(await signer.textContent("header"), /Hosted by Hostie/);
+
 // Hosted by signs the message; notes show in italics; 3:00 PM style when asked for.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("summary:has-text('Basics')");
