@@ -272,6 +272,11 @@ for (const path of ["", "/rsvp"]) {
 }
 await stranger.goto(B.replace("/thanksgiving-2026", "/privacy"));
 assert.equal(await stranger.locator("footer").count(), 1);
+await stranger.goto(B.replace("/thanksgiving-2026", "/terms"));
+assert.match(await stranger.textContent("main"), /Use it kindly/);
+assert.match(await stranger.textContent("footer"), /Privacy · Terms/);
+await stranger.goto(B.replace("/thanksgiving-2026", "/host"));
+assert.match(await stranger.textContent("main"), /By continuing, you agree to the Terms and Privacy policy\./);
 await h.goto(B.replace("/thanksgiving-2026", "/host"));
 assert.equal(await h.locator("footer").count(), 1);
 await h.goto(B.replace("/thanksgiving-2026", "/"));

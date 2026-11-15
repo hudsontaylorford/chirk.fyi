@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { legacySignIn, sendCode, verifyCode, type SignInState } from "@/app/host/sign-in";
 
@@ -24,6 +25,7 @@ export function HostSignIn({ claiming, legacy, wrong, email: preset }: { claimin
           <input name="email" type="email" inputMode="email" autoComplete="email" defaultValue={sent.email} placeholder="you@example.com" className="field" aria-label="Your email" autoFocus required />
           {sent.message && <p className="text-[15px] text-red-700">{sent.message}</p>}
           <button className="btn w-full" disabled={sending}>{sending ? "Sending…" : "Email me a code"}</button>
+          <Agree />
         </form>
       ) : (
         <form action={check} className="mt-5 space-y-3">
@@ -50,5 +52,14 @@ export function HostSignIn({ claiming, legacy, wrong, email: preset }: { claimin
         </details>
       )}
     </main>
+  );
+}
+
+function Agree() {
+  return (
+    <p className="text-center text-[13px] text-soft">
+      By continuing, you agree to the <Link href="/terms" className="underline underline-offset-2">Terms</Link> and{" "}
+      <Link href="/privacy" className="underline underline-offset-2">Privacy</Link> policy.
+    </p>
   );
 }

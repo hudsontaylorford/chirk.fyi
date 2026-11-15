@@ -49,7 +49,7 @@ const eventFields = (f: FormData) => ({
 });
 
 // Static routes that an event's web address must not shadow.
-const RESERVED = new Set(["host", "privacy"]);
+const RESERVED = new Set(["host", "privacy", "terms"]);
 
 /** "Thanksgiving 2026" → "thanksgiving-2026"; if taken, "thanksgiving-2026-2", and so on. */
 async function freeSlug(text: string) {

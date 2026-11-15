@@ -4,7 +4,8 @@ import { SaveButton } from "@/components/SaveButton";
 import { currentUser, hasLegacyCookie, unclaimedEvents } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { shortDate } from "@/lib/format";
-import { saveName, signOut } from "./sign-in";
+import { acceptTerms, saveName, signOut } from "./sign-in";
+import { TERMS_VERSION } from "@/lib/terms";
 import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
@@ -38,6 +39,12 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
       </div>
       <h1 className="mt-4 text-[28px] font-bold">Your events</h1>
       <p className="text-[15px] text-soft">Signed in as {me.email}</p>
+      {me.terms_version !== TERMS_VERSION && (
+        <form action={acceptTerms} className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-wash p-4 text-[15px]">
+          <span>chirk now has <Link href="/terms" className="underline underline-offset-2">Terms</Link>. Using chirk means you agree to them and the <Link href="/privacy" className="underline underline-offset-2">Privacy</Link> policy.</span>
+          <SaveButton className="btn shrink-0 whitespace-nowrap px-4">Got it</SaveButton>
+        </form>
+      )}
       {!me.name && (
         <form action={saveName} className="mt-4 rounded-2xl bg-wash p-4">
           <label className="text-[15px] font-semibold" htmlFor="name">What should co-hosts see you as?</label>

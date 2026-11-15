@@ -14,7 +14,7 @@ const sign = (v: string) => createHmac("sha256", secret()).update(v).digest("bas
 const same = (a: string, b: string) => a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
 const cookieOpts = { httpOnly: true, sameSite: "lax" as const, secure: process.env.NODE_ENV === "production", path: "/" };
 
-export type User = { id: string; email: string; name: string | null };
+export type User = { id: string; email: string; name: string | null; terms_version: string | null };
 
 /** The signed-in host, or null. */
 export async function currentUser(): Promise<User | null> {
@@ -22,7 +22,7 @@ export async function currentUser(): Promise<User | null> {
   if (!raw || !secret()) return null;
   const [id, sig] = raw.split(".");
   if (!id || !sig || !same(sig, sign(id))) return null;
-  const [u] = await sql<User[]>`select id, email, name from users where id = ${id}`;
+  const [u] = await sql<User[]>`select id, email, name, terms_version from users where id = ${id}`;
   return u ?? null;
 }
 

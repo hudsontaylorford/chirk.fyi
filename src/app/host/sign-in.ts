@@ -8,6 +8,7 @@ import {
 import { codeEmail } from "@/lib/code-email";
 import { sql } from "@/lib/db";
 import { sendEmail } from "@/lib/email";
+import { TERMS_VERSION } from "@/lib/terms";
 
 export type SignInState = { email: string; step: "email" | "code"; message: string | null };
 
@@ -64,7 +65,9 @@ export async function verifyCode(_prev: SignInState, f: FormData): Promise<SignI
   }
 
   const [user] = await sql<{ id: string }[]>`
-    insert into users (email) values (${email}) on conflict (email) do update set email = excluded.email returning id`;
+    insert into users (email, terms_version, terms_accepted_at) values (${email}, ${TERMS_VERSION}, now())
+    on conflict (email) do update set terms_version = excluded.terms_version, terms_accepted_at = excluded.terms_accepted_at
+    returning id`;
   // First account after the old password: every event from before accounts becomes theirs.
   if (await hasLegacyCookie()) {
     await sql`insert into event_hosts (event_id, user_id, role)
@@ -86,6 +89,13 @@ export async function saveName(f: FormData) {
   const u = await requireUser();
   const name = String(f.get("name") ?? "").trim().replace(/\s+/g, " ").slice(0, 60);
   if (name) await sql`update users set name = ${name} where id = ${u.id}`;
+  revalidatePath("/host");
+}
+
+/** "Got it" on the Terms note, for hosts who signed in before the current Terms. */
+export async function acceptTerms() {
+  const u = await requireUser();
+  await sql`update users set terms_version = ${TERMS_VERSION}, terms_accepted_at = now() where id = ${u.id}`;
   revalidatePath("/host");
 }
 

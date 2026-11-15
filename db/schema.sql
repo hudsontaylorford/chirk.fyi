@@ -78,6 +78,8 @@ begin
     id uuid primary key default gen_random_uuid(),
     email text not null unique,
     name text,
+    terms_version text,                  -- which Terms they agreed to (src/lib/terms.ts)
+    terms_accepted_at timestamptz,
     created_at timestamptz not null default now()
   );
   create table if not exists login_codes (
@@ -124,6 +126,8 @@ begin
   alter table households add column if not exists parts text[];
   alter table households alter column going drop not null;
   alter table events add column if not exists hosted_by text;
+  alter table users add column if not exists terms_version text;
+  alter table users add column if not exists terms_accepted_at timestamptz;
   alter table events add column if not exists long_times boolean not null default false;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,
   -- then clear it on list items so a later re-run can't bring back something a guest un-picked.
