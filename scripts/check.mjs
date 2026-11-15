@@ -414,5 +414,74 @@ await h.click("details:has(summary:has-text('Delete this event')) button:text-is
 await h.waitForURL(/\/host$/);
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 
+// Gift exchange: names in, a "never draw each other" rule, a draw, and each person seeing only their own match.
+await h.goto(ORIGIN + "/host/new");
+await h.fill("input[name=title]", "Gift test");
+await h.fill("input[name=date]", "2026-12-20");
+await h.click("button:text-is('Create event')");
+await h.waitForURL(/\/gift-test(-\d+)?\/host$/);
+const giftHost = h.url();
+await h.fill("input[aria-label='Add guests']", "Ann, Ben, Cal, Dee & Eve");
+await h.click("form:has(input[aria-label='Add guests']) button:text-is('Add')");
+await h.waitForSelector("li:has-text('Dee & Eve')");
+await h.click("summary:has-text('Gift exchange')");
+await h.check("input[name=gift_on]");
+await h.fill("input[name=gift_budget]", "$30");
+await h.click("form:has(input[name=gift_on]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+await h.goto(giftHost);
+await h.selectOption("select[aria-label='First person']", { label: "Ann" });
+await h.selectOption("select[aria-label='Second person']", { label: "Ben" });
+await h.click("form:has(select[aria-label='First person']) button:text-is('Add')");
+await h.waitForSelector("text=Ann ↔ Ben");
+await h.click("button:text-is('Draw names')");
+await h.waitForSelector("text=Names drawn for 4 ✓");
+const annLink = await h.getAttribute("li:has-text('Ann') a:text-is('Edit')", "href");
+const ann = await phone();
+await ann.goto(new URL(annLink + "/remember?to=invite", h.url()).href);
+const match = (await ann.textContent("section:has(h2:has-text('Gift exchange'))")).match(/giving a gift to(.+?)(Their ideas|They haven)/)[1].trim();
+assert.ok(["Cal", "Dee & Eve"].includes(match), `Ann drew ${match}`); // never herself, never Ben
+assert.match(await ann.textContent("body"), /Gift exchange · \$30/);
+await ann.fill("#wish", "Books, hot sauce");
+await ann.click("button:text-is('Save ideas')");
+await ann.waitForSelector("text=Saved ✓");
+await h.goto(giftHost);
+await h.click("button:text-is('Email everyone their match')");
+await h.waitForSelector("text=Email only sends from the live site.");
+assert.equal(await h.locator("text=giving a gift to").count(), 0); // hosts aren't spoiled
+await h.uncheck("label:has-text('Cal') input[name=in]");
+await h.click('button:has-text("Save who")');
+await h.waitForSelector("text=draw again to include everyone");
+
+// Select several: guests (email them, then remove them), and events (archive, then unarchive).
+await h.goto(pokerHost);
+await h.fill("input[aria-label='Add guests']", "Bulk One, Bulk Two bulk2@example.com");
+await h.click("form:has(input[aria-label='Add guests']) button:text-is('Add')");
+await h.waitForSelector("li:has-text('Bulk Two')");
+assert.equal(await h.locator("input[aria-label='Select Bulk One']").isVisible(), false); // hidden until Select
+await h.click("details.bulk summary:text-is('Select')");
+await h.check("input[aria-label='Select Bulk One']");
+await h.check("input[aria-label='Select Bulk Two']");
+await h.click("#bulk-guests button:text-is('Email reminder')");
+await h.waitForSelector("text=Email only sends from the live site. 1 had no email.");
+await h.check("input[aria-label='Select Bulk One']"); // ticks clear after each action
+await h.check("input[aria-label='Select Bulk Two']");
+h.once("dialog", (d) => d.accept());
+await h.click("#bulk-guests button:text-is('Remove')");
+await h.waitForSelector("li:has-text('Bulk One')", { state: "detached" });
+assert.equal(await h.locator("li:has-text('Bulk Two')").count(), 0);
+await h.goto(ORIGIN + "/host");
+await h.click("details.bulk summary:text-is('Select')");
+await h.check("input[aria-label='Select Poker test']");
+await h.click("#bulk-events button:text-is('Archive')");
+await h.waitForSelector("text=Archived 1 ✓");
+await h.reload();
+assert.match(await h.textContent("main"), /Archived \(\d+\)/);
+await h.click("summary:has-text('Archived')");
+await h.click("details.bulk summary:text-is('Select')");
+await h.check("input[aria-label='Select Poker test']");
+await h.click("#bulk-events button:text-is('Unarchive')");
+await h.waitForSelector("text=Unarchived 1 ✓");
+
 await browser.close();
 console.log("✓ RSVP checks passed (delete the 'Check' guests and the extra event afterwards)");

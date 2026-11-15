@@ -26,6 +26,9 @@ export interface Event {
   long_times: boolean; // 3:00 PM instead of 3 pm
   costs_on: boolean; // shared costs
   poker_on: boolean; // poker buy-ins and cash-outs
+  gift_on: boolean; // gift exchange
+  gift_budget: string | null;
+  gift_never: [string, string][]; // pairs of replies who never draw each other
 }
 
 export interface Household {
@@ -40,6 +43,8 @@ export interface Household {
   arrival: string | null; // old: the one part they said they'd arrive for (see `parts`)
   parts: string[] | null; // the parts of the day they're coming to
   venmo: string | null;
+  gift_in: boolean;
+  gift_wish: string | null;
 }
 
 export interface Item {

@@ -5,6 +5,7 @@ import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/
 import { listText } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { Costs } from "@/components/Costs";
+import { Gifts } from "@/components/Gifts";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your RSVP", robots: { index: false } };
@@ -98,6 +99,7 @@ export default async function YourRsvp({
       )}
     </main>
     {(data.event.costs_on || data.event.poker_on) && h.going !== false && <Costs data={data} token={token} host={false} />}
+    {data.event.gift_on && <Gifts data={data} token={token} host={false} />}
     <Footer />
     </>
   );

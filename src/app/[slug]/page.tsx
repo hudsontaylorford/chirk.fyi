@@ -7,6 +7,7 @@ import { getEvent, getEventData, joinNames } from "@/lib/data";
 import { when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { Costs } from "@/components/Costs";
+import { Gifts } from "@/components/Gifts";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
       />
     </main>
     {(data.event.costs_on || data.event.poker_on) && <Costs data={data} token={mine?.token ?? null} host={host} />}
+    {data.event.gift_on && <Gifts data={data} token={mine?.token ?? null} host={false} />}
     <Footer />
     </>
   );

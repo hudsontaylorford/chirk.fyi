@@ -48,6 +48,8 @@ const eventFields = (f: FormData) => ({
   long_times: f.get("long_times") === "on",
   costs_on: f.get("costs_on") === "on",
   poker_on: f.get("poker_on") === "on",
+  gift_on: f.get("gift_on") === "on",
+  gift_budget: val(f, "gift_budget").slice(0, 40) || null,
 });
 
 // Static routes that an event's web address must not shadow.
@@ -71,7 +73,7 @@ export async function copyToNextYear(slug: string) {
   const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));
@@ -242,6 +244,46 @@ async function sendTo(slug: string, h: { token: string; names: string[]; email: 
   // The same invite within a minute, or a second reminder the same day, is only sent once.
   const when = kind === "invite" ? Math.floor(Date.now() / 60_000) : new Date().toISOString().slice(0, 10);
   return sendEmail({ to: h.email, ...mail, replyTo: await ownerEmail(e.id), idempotencyKey: `${kind}-${h.token}-${when}` });
+}
+
+/** "Select" on the guest list: email invites or reminders to the ticked guests (those with an email), or remove them. */
+export async function bulkGuests(slug: string, _prev: string | null, f: FormData): Promise<string> {
+  const ev = await eventId(slug);
+  const ids = f.getAll("pick").map(String);
+  if (!ids.length) return "Tick some guests first.";
+  const rows = await sql<{ id: string; token: string; names: string[]; email: string | null }[]>`
+    select id, token, names, email from households where event_id = ${ev} and id in ${sql(ids)}`;
+  const what = String(f.get("do"));
+  if (what === "remove") {
+    for (const h of rows) await removeHousehold(slug, h.id);
+    return `Removed ${rows.length} ✓`;
+  }
+  const kind = what === "reminder" ? "reminder" : "invite";
+  const withEmail = rows.filter((h): h is typeof h & { email: string } => !!h.email);
+  let sent = 0;
+  for (const h of withEmail) if (await sendTo(slug, h, kind)) sent++;
+  const skipped = rows.length - withEmail.length;
+  const note = skipped ? ` ${skipped} had no email.` : "";
+  if (process.env.VERCEL_ENV !== "production") return `Email only sends from the live site.${note}`;
+  return `${kind === "invite" ? "Invites" : "Reminders"} sent to ${sent} ✓${note}`;
+}
+
+/** "Select" on Your events: archive the ticked events, or delete the ones you own. */
+export async function bulkEvents(_prev: string | null, f: FormData): Promise<string> {
+  const slugs = f.getAll("pick").map(String);
+  if (!slugs.length) return "Tick some events first.";
+  const what = String(f.get("do"));
+  let done = 0, skipped = 0;
+  for (const slug of slugs) {
+    const role = await hostRole(slug);
+    if (!role || (what === "delete" && role !== "owner")) { skipped++; continue; }
+    if (what === "delete") await sql`delete from events where slug = ${slug}`;
+    else await sql`update events set status = ${what === "unarchive" ? "live" : "archived"} where slug = ${slug}`;
+    done++;
+  }
+  revalidatePath("/host");
+  const verb = what === "delete" ? "Deleted" : what === "unarchive" ? "Unarchived" : "Archived";
+  return `${verb} ${done} ✓${skipped ? ` (${skipped} skipped: only the owner can delete)` : ""}`;
 }
 
 export async function removeHousehold(slug: string, id: string) {

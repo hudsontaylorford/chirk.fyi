@@ -37,6 +37,9 @@ begin
     long_times boolean not null default false,    -- times as 3:00 PM instead of 3 pm
     costs_on boolean not null default false,      -- shared costs on this event
     poker_on boolean not null default false,      -- poker buy-ins and cash-outs
+    gift_on boolean not null default false,       -- gift exchange
+    gift_budget text,                    -- "$30"
+    gift_never jsonb not null default '[]',       -- pairs of replies who never draw each other
     created_at timestamptz not null default now()
   );
 
@@ -53,6 +56,8 @@ begin
     arrival text,                        -- old: one arrival part (replaced by parts)
     parts text[],                        -- the parts of the day they're coming to (when the event asks)
     venmo text,                          -- their Venmo username, so people can pay them back
+    gift_in boolean not null default true,        -- in the gift exchange (when the event has one)
+    gift_wish text,                      -- gift ideas for whoever draws them
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -134,6 +139,15 @@ begin
     created_at timestamptz not null default now()
   );
 
+  -- Gift exchange: who gives to whom (the latest draw).
+  create table if not exists gift_draws (
+    event_id uuid not null references events(id) on delete cascade,
+    giver uuid not null references households(id) on delete cascade,
+    receiver uuid not null references households(id) on delete cascade,
+    created_at timestamptz not null default now(),
+    primary key (event_id, giver)
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;
@@ -147,6 +161,7 @@ begin
   alter table cost_shares enable row level security;
   alter table payments enable row level security;
   alter table poker_entries enable row level security;
+  alter table gift_draws enable row level security;
 
   -- Upgrades for databases made before these existed (each does nothing once applied).
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
@@ -170,6 +185,11 @@ begin
   alter table users add column if not exists terms_version text;
   alter table events add column if not exists costs_on boolean not null default false;
   alter table events add column if not exists poker_on boolean not null default false;
+  alter table events add column if not exists gift_on boolean not null default false;
+  alter table events add column if not exists gift_budget text;
+  alter table events add column if not exists gift_never jsonb not null default '[]';
+  alter table households add column if not exists gift_in boolean not null default true;
+  alter table households add column if not exists gift_wish text;
   alter table households add column if not exists venmo text;
   alter table users add column if not exists terms_accepted_at timestamptz;
   alter table events add column if not exists long_times boolean not null default false;

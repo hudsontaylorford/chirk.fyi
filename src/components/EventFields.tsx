@@ -90,6 +90,11 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
           <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
           <p className="text-[14px] text-soft">Everyone on the guest list (unless they said they can&apos;t make it) can add what they paid, no reply needed. chirk works out who owes whom and links to Venmo; no money goes through chirk.</p>
         </Row>
+        <Row id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
+          <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
+          <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
+          <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
+        </Row>
         {!event && (
           <Row id="address" label="Web address" value="Made from the title">
             <Field label="chirk.fyi/…" name="slug" placeholder="e.g. molly-birthday" />

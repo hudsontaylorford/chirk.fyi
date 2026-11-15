@@ -9,7 +9,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
  */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_never
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   if (forGuest && !e.hosted_by) {
@@ -25,7 +25,7 @@ export async function getEventData(slug: string, forGuest = false): Promise<Even
   const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items, claims] = await Promise.all([
-    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival, parts, venmo from households where event_id = ${event.id} order by created_at`,
+    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival, parts, venmo, gift_in, gift_wish from households where event_id = ${event.id} order by created_at`,
     sql<Item[]>`select id, kind, name, household_id from items where event_id = ${event.id} order by sort, created_at`,
     sql<Claim[]>`select c.item_id, c.household_id from claims c join items i on i.id = c.item_id
       where i.event_id = ${event.id} order by c.created_at`,
@@ -93,4 +93,10 @@ export async function getCosts(eventId: string) {
       select id, household_id as who, kind, amount from poker_entries where event_id = ${eventId} order by created_at`,
   ]);
   return { costs, poker, payments: payments.map((p) => ({ from: p.from_household, to: p.to_household, amount: p.amount })) };
+}
+
+/** The latest gift-exchange draw: giver → receiver. */
+export async function getDraws(eventId: string) {
+  const rows = await sql<{ giver: string; receiver: string }[]>`select giver, receiver from gift_draws where event_id = ${eventId}`;
+  return new Map(rows.map((r) => [r.giver, r.receiver]));
 }

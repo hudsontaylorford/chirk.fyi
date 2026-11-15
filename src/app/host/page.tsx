@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { HostSignIn } from "@/components/HostSignIn";
+import { BulkBar, Pick } from "@/components/BulkBar";
 import { SaveButton } from "@/components/SaveButton";
 import { currentUser, hasLegacyCookie, unclaimedEvents } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { shortDate } from "@/lib/format";
 import { acceptTerms, saveName, signOut } from "./sign-in";
+import { bulkEvents } from "../[slug]/host/actions";
 import { TERMS_VERSION } from "@/lib/terms";
 import { Footer } from "@/components/Footer";
 
@@ -56,6 +58,19 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
       )}
       <Link href="/host/new" className="btn mt-4 w-full">+ New event</Link>
 
+      {/* "Select" shows a checkbox on each event (in every section); archive or delete the ticked ones. */}
+      <div className="[&_.pick]:hidden [&:has(details.bulk[open])_.pick]:flex">
+      {events.length > 0 && (
+        <BulkBar
+          formId="bulk-events"
+          action={bulkEvents}
+          actions={[
+            { value: "archive", label: "Archive" },
+            { value: "unarchive", label: "Unarchive" },
+            { value: "delete", label: "Delete", confirm: "Delete the ticked events, with every reply on them? This can't be undone." },
+          ]}
+        />
+      )}
       {upcoming.length ? <EventList events={upcoming} /> : <p className="mt-4 text-soft">Nothing coming up.</p>}
       {past.length > 0 && (
         <details className="mt-6">
@@ -69,6 +84,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
           <EventList events={archived} />
         </details>
       )}
+      </div>
     </main>
     <Footer />
     </>
@@ -79,8 +95,9 @@ function EventList({ events }: { events: Row[] }) {
   return (
     <ul className="mt-3 divide-y divide-line border-y border-line">
       {events.map((e) => (
-        <li key={e.slug}>
-          <a href={`/${e.slug}/host`} className="flex items-baseline justify-between gap-3 py-4">
+        <li key={e.slug} className="flex items-center">
+          <Pick formId="bulk-events" value={e.slug} label={e.title} />
+          <a href={`/${e.slug}/host`} className="flex min-w-0 flex-1 items-baseline justify-between gap-3 py-4">
             <span className="min-w-0">
               <span className="block text-[17px] font-semibold">
                 {e.title}

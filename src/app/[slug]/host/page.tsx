@@ -7,6 +7,8 @@ import { CopyLink } from "@/components/YourLink";
 import { OpenRow } from "@/components/OpenRow";
 import { Confirm } from "@/components/Confirm";
 import { Costs } from "@/components/Costs";
+import { Gifts } from "@/components/Gifts";
+import { BulkBar, Pick } from "@/components/BulkBar";
 import { GuestSend } from "@/components/GuestSend";
 import { RemindAll } from "@/components/RemindAll";
 import { MessageGuests } from "@/components/MessageGuests";
@@ -117,6 +119,19 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       {waiting.some((h) => h.email) && (
         <RemindAll count={waiting.filter((h) => h.email).length} action={act.remindAll.bind(null, slug)} />
       )}
+      {/* "Select" shows a checkbox on each guest; the buttons act on the ticked ones. */}
+      <div className="[&_.pick]:hidden [&:has(details.bulk[open])_.pick]:flex">
+      {households.length > 0 && (
+        <BulkBar
+          formId="bulk-guests"
+          action={act.bulkGuests.bind(null, slug)}
+          actions={[
+            { value: "invite", label: "Email invite" },
+            { value: "reminder", label: "Email reminder" },
+            { value: "remove", label: "Remove", confirm: "Remove the ticked guests and their replies?" },
+          ]}
+        />
+      )}
       <ul className="mt-3 divide-y divide-line border-y border-line">
         {households.length === 0 && <li className="py-3 text-soft">Nobody yet.</li>}
         {households.map((h) => {
@@ -124,7 +139,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           return (
             <li key={h.id} className="py-3 text-[16px]">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="text-[17px] font-semibold">
+                <Pick formId="bulk-guests" value={h.id} label={joinNames(h.names)} />
+                <span className="mr-auto text-[17px] font-semibold">
                   {joinNames(h.names)}
                   {h.kids > 0 && <span className="font-normal text-soft"> +{h.kids} kid{h.kids > 1 ? "s" : ""}</span>}
                 </span>
@@ -153,6 +169,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           );
         })}
       </ul>
+      </div>
 
       {households.length > 0 && (
         <MessageGuests
@@ -192,6 +209,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       )}
 
       {(event.costs_on || event.poker_on) && <Costs data={data} token={null} host inside />}
+      {event.gift_on && <Gifts data={data} token={null} host inside />}
 
       <h2 className="mt-8 text-[20px] font-bold">Event</h2>
       <form action={act.saveEvent.bind(null, slug)} className="mt-3 space-y-3">
