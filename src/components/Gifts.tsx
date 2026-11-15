@@ -2,7 +2,9 @@ import { addNever, drawGifts, emailMatches, removeNever, saveGiftPeople, saveWis
 import { Confirm } from "@/components/Confirm";
 import { GiftButton, WishForm } from "@/components/GiftForms";
 import { SaveButton } from "@/components/SaveButton";
-import { getDraws, joinNames } from "@/lib/data";
+import { getDraws, getSentJobs, joinNames } from "@/lib/data";
+import { daysBefore } from "@/lib/due";
+import { shortDate } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
 /**
@@ -11,7 +13,7 @@ import type { EventData } from "@/lib/types";
  */
 export async function Gifts({ data, token, host, inside = false }: { data: EventData; token: string | null; host: boolean; inside?: boolean }) {
   const { event, households } = data;
-  const draws = await getDraws(event.id);
+  const [draws, sent] = await Promise.all([getDraws(event.id), getSentJobs(event.id)]);
   const coming = households.filter((h) => h.going !== false);
   const me = coming.find((h) => h.token === token) ?? null;
   if (!host && !me) return null; // only people on the list see it
@@ -19,6 +21,9 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
   const inNow = coming.filter((h) => h.gift_in).map((h) => h.id).sort();
   const changed = draws.size > 0 && JSON.stringify([...draws.keys()].sort()) !== JSON.stringify(inNow);
   const slug = event.slug;
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  // A scheduled send: sent, or still to come, or its window passed (set up too late for it).
+  const status = (job: string, lastDay: string) => (sent.has(job) ? " · sent ✓" : today > lastDay ? " · skipped (too late)" : "");
 
   return (
     <section className={inside ? "mt-8" : "mx-auto mt-10 max-w-lg px-5"}>
@@ -83,6 +88,20 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
             </form>
             <p className="mt-1 text-[14px] text-soft">A couple who replied together is one giver, so they never draw each other anyway.</p>
           </div>
+
+          {event.gift_draw_on && (
+            // What's scheduled, and what's already gone out.
+            <ul className="mt-5 space-y-1 rounded-2xl bg-wash p-3 text-[15px]">
+              {event.gift_remind_ideas && (
+                <li>Ideas reminder: {shortDate(daysBefore(event.gift_draw_on, 3))}{status("gift_ideas", daysBefore(event.gift_draw_on, 1))}</li>
+              )}
+              <li>Names drawn and emailed: {shortDate(event.gift_draw_on)}, 9 am{sent.has("gift_draw") && " · done ✓"}</li>
+              {event.gift_remind_givers && (
+                <li>&ldquo;You&apos;re giving to…&rdquo; reminder: {shortDate(daysBefore(event.date, 7))}{status("gift_givers", daysBefore(event.date, 1))}</li>
+              )}
+              {event.status !== "live" && <li className="text-soft">Nothing sends until the event is published.</li>}
+            </ul>
+          )}
 
           <div className="mt-5 space-y-3">
             {draws.size > 0 && (

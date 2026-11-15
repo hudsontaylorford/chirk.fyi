@@ -64,6 +64,7 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         </Row>
         <Row id="reply-by" label="Reply by" value={event?.rsvp_by ? shortDate(event.rsvp_by) : "No deadline"}>
           <Field label="Reply deadline" name="rsvp_by" type="date" value={event?.rsvp_by} />
+          <Check name="remind_replies" checked={event?.remind_replies ?? false} label="Email a reminder to anyone who hasn't replied, 3 days before" />
         </Row>
         <Row id="guests" label="Guest options" value={extras.length ? extras.join(", ").replace(/^./, (c) => c.toUpperCase()) : "Notes, plus-ones"}>
           <div className="grid grid-cols-2 gap-3">
@@ -93,6 +94,9 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         <Row id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
           <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
           <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
+          <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
+          <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
+          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before" />
           <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
         </Row>
         {!event && (

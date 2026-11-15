@@ -40,6 +40,10 @@ begin
     gift_on boolean not null default false,       -- gift exchange
     gift_budget text,                    -- "$30"
     gift_never jsonb not null default '[]',       -- pairs of replies who never draw each other
+    gift_draw_on date,                   -- names drawn automatically that morning
+    gift_remind_ideas boolean not null default true,  -- nudge to add ideas 3 days before the draw
+    gift_remind_givers boolean not null default true, -- nudge givers a week before the event
+    remind_replies boolean not null default false,    -- nudge anyone who hasn't replied, 3 days before reply-by
     created_at timestamptz not null default now()
   );
 
@@ -148,6 +152,14 @@ begin
     primary key (event_id, giver)
   );
 
+  -- Scheduled sends (the morning job): each one recorded once it's done, so nothing goes out twice.
+  create table if not exists sent_jobs (
+    event_id uuid not null references events(id) on delete cascade,
+    job text not null,                   -- gift_draw, gift_ideas, gift_givers, reply_reminder (src/lib/due.ts)
+    sent_at timestamptz not null default now(),
+    primary key (event_id, job)
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;
@@ -162,6 +174,7 @@ begin
   alter table payments enable row level security;
   alter table poker_entries enable row level security;
   alter table gift_draws enable row level security;
+  alter table sent_jobs enable row level security;
 
   -- Upgrades for databases made before these existed (each does nothing once applied).
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
@@ -188,6 +201,10 @@ begin
   alter table events add column if not exists gift_on boolean not null default false;
   alter table events add column if not exists gift_budget text;
   alter table events add column if not exists gift_never jsonb not null default '[]';
+  alter table events add column if not exists gift_draw_on date;
+  alter table events add column if not exists gift_remind_ideas boolean not null default true;
+  alter table events add column if not exists gift_remind_givers boolean not null default true;
+  alter table events add column if not exists remind_replies boolean not null default false;
   alter table households add column if not exists gift_in boolean not null default true;
   alter table households add column if not exists gift_wish text;
   alter table households add column if not exists venmo text;

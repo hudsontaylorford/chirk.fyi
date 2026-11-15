@@ -453,6 +453,38 @@ await h.uncheck("label:has-text('Cal') input[name=in]");
 await h.click('button:has-text("Save who")');
 await h.waitForSelector("text=draw again to include everyone");
 
+// The morning job: draws today's gift exchange and sends due reminders, once; without the secret it does nothing.
+const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+const cron = (auth) => fetch(ORIGIN + "/api/cron", { headers: auth ? { authorization: `Bearer ${process.env.CRON_SECRET ?? "testcron"}` } : {} });
+assert.equal((await cron(false)).status, 401);
+await h.goto(ORIGIN + "/host/new");
+await h.fill("input[name=title]", "Auto draw");
+await h.fill("input[name=date]", "2026-12-24");
+await h.click("button:text-is('Create event')");
+await h.waitForURL(/\/auto-draw(-\d+)?\/host$/);
+const autoHost = h.url();
+const autoSlug = new URL(autoHost).pathname.split("/")[1];
+await h.fill("input[aria-label='Add guests']", "Ana ana@example.com, Bo bo@example.com, Cy");
+await h.click("form:has(input[aria-label='Add guests']) button:text-is('Add')");
+await h.waitForSelector("li:has-text('Cy')");
+await h.click("summary:has-text('Gift exchange')");
+await h.check("input[name=gift_on]");
+await h.fill("input[name=gift_draw_on]", today);
+await h.click("summary:has-text('Reply by')");
+await h.fill("input[name=rsvp_by]", today);
+await h.check("input[name=remind_replies]");
+await h.click("form:has(input[name=gift_on]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+let ran = await (await cron(true)).json();
+assert.ok(ran.done.includes(`${autoSlug}: gift_draw (0)`), JSON.stringify(ran)); // drawn; emails don't send off the live site
+assert.ok(ran.done.includes(`${autoSlug}: reply_reminder (2)`), JSON.stringify(ran)); // Ana and Bo have emails, Cy doesn't
+ran = await (await cron(true)).json();
+assert.ok(!ran.done.some((d) => d.startsWith(`${autoSlug}:`)), "nothing twice");
+await h.goto(autoHost);
+assert.match(await h.textContent("main"), /Names drawn and emailed: [^·]+· done ✓/);
+assert.match(await h.textContent("main"), /Names drawn for 3 ✓/);
+assert.match(await h.textContent("main"), /Automatic reminder to anyone who hasn't replied: [^·]+· sent ✓/);
+
 // Select several: guests (email them, then remove them), and events (archive, then unarchive).
 await h.goto(pokerHost);
 await h.fill("input[aria-label='Add guests']", "Bulk One, Bulk Two bulk2@example.com");

@@ -15,8 +15,9 @@ import { MessageGuests } from "@/components/MessageGuests";
 import { currentUser, hostRole } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { AddCohost } from "@/components/AddCohost";
-import { arrivals, bringList, getEventData, joinNames, partsOf } from "@/lib/data";
-import { headcount, listText } from "@/lib/format";
+import { arrivals, bringList, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
+import { daysBefore } from "@/lib/due";
+import { headcount, listText, shortDate } from "@/lib/format";
 import * as act from "./actions";
 import { Footer } from "@/components/Footer";
 
@@ -41,6 +42,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const going = households.filter((h) => h.going);
   const answered = households.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
+  const sent = await getSentJobs(event.id);
   const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email).length, total: hs.length });
   const adults = going.reduce((n, h) => n + headcount(h.names), 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
@@ -116,6 +118,12 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         </div>
         <p className="mt-1 text-[14px] text-soft">Commas between invites. Add an email after a name to send it from here.</p>
       </form>
+      {event.remind_replies && event.rsvp_by && (
+        <p className="mt-2 text-[14px] text-soft">
+          Automatic reminder to anyone who hasn&apos;t replied: {shortDate(daysBefore(event.rsvp_by, 3))}
+          {sent.has("reply_reminder") ? " · sent ✓" : event.status !== "live" ? " (once published)" : ""}
+        </p>
+      )}
       {waiting.some((h) => h.email) && (
         <RemindAll count={waiting.filter((h) => h.email).length} action={act.remindAll.bind(null, slug)} />
       )}

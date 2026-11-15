@@ -9,7 +9,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
  */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_never
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_never, gift_draw_on::text, gift_remind_ideas, gift_remind_givers, remind_replies
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   if (forGuest && !e.hosted_by) {
@@ -99,4 +99,10 @@ export async function getCosts(eventId: string) {
 export async function getDraws(eventId: string) {
   const rows = await sql<{ giver: string; receiver: string }[]>`select giver, receiver from gift_draws where event_id = ${eventId}`;
   return new Map(rows.map((r) => [r.giver, r.receiver]));
+}
+
+/** Scheduled sends already done for an event: job → when. */
+export async function getSentJobs(eventId: string) {
+  const rows = await sql<{ job: string; sent_at: Date }[]>`select job, sent_at from sent_jobs where event_id = ${eventId}`;
+  return new Map(rows.map((r) => [r.job, r.sent_at]));
 }

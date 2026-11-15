@@ -11,6 +11,7 @@ import { sendEmail, siteUrl } from "@/lib/email";
 import { parseGuests } from "@/lib/guests";
 import { inviteEmail, reminderEmail } from "@/lib/invite-email";
 import { messageEmail } from "@/lib/message-email";
+import { ownerEmail } from "@/lib/jobs";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -50,6 +51,10 @@ const eventFields = (f: FormData) => ({
   poker_on: f.get("poker_on") === "on",
   gift_on: f.get("gift_on") === "on",
   gift_budget: val(f, "gift_budget").slice(0, 40) || null,
+  gift_draw_on: val(f, "gift_draw_on") || null,
+  gift_remind_ideas: f.get("gift_remind_ideas") === "on",
+  gift_remind_givers: f.get("gift_remind_givers") === "on",
+  remind_replies: f.get("remind_replies") === "on",
 });
 
 // Static routes that an event's web address must not shadow.
@@ -73,7 +78,8 @@ export async function copyToNextYear(slug: string) {
   const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget,
+      (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));
@@ -206,11 +212,6 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
   return sent === rows.length ? `Sent to ${sent} ✓` : `Sent ${sent} of ${rows.length}. Try again for the rest?`;
 }
 
-/** Guests' replies to chirk's emails go to the event's owner. */
-async function ownerEmail(eventId: string) {
-  const [o] = await sql<{ email: string }[]>`select u.email from event_hosts h join users u on u.id = h.user_id where h.event_id = ${eventId} and h.role = 'owner'`;
-  return o?.email ?? null;
-}
 
 /** Adds a co-host by email (making their account if they don't have one) and emails them. Any host can add. */
 export async function addCohost(slug: string, _prev: string | null, f: FormData): Promise<string> {

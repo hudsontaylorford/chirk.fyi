@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { giftEmail } from "./gift-email.ts";
+import { giftEmail, giftGiverEmail, giftIdeasEmail } from "./gift-email.ts";
 
 test("gift match email", () => {
   const e = giftEmail({ title: "Friendsgiving", giver: "Graham & Ellen", receiver: "Sam <3", budget: "$30", wish: "Books", url: "https://chirk.fyi/f/r/abc/remember?to=invite" });
@@ -8,4 +8,14 @@ test("gift match email", () => {
   assert.match(e.text, /^Hi Graham & Ellen,\n\nFor Friendsgiving, you're giving a gift to Sam <3\. Keep it a secret!\nBudget: \$30\nTheir ideas: Books\n\nSee it any time: https/);
   assert.match(e.html, /font-weight:700;">Sam &lt;3<\/p>/);
   assert.doesNotMatch(giftEmail({ title: "T", giver: "A", receiver: "B", budget: null, wish: null, url: "u" }).text, /Budget|ideas/);
+});
+
+test("reminder emails", () => {
+  const ideas = giftIdeasEmail({ title: "Friendsgiving", names: "Ann", drawOn: "Mon, Dec 1", url: "https://x" });
+  assert.equal(ideas.subject, "Add your gift ideas: Friendsgiving");
+  assert.match(ideas.text, /drawn on Mon, Dec 1\. Add a few gift ideas[\s\S]*Add your ideas: https:\/\/x/);
+  const g = giftGiverEmail({ title: "Friendsgiving", giver: "Ann", receiver: "Dee & Eve", budget: "$30", wish: null, when: "next Sunday, Dec 20", url: "https://x" });
+  assert.equal(g.subject, "Friendsgiving is coming up: your gift for Dee & Eve");
+  assert.match(g.html, /font-weight:700;">Dee &amp; Eve<\/p>/);
+  assert.match(g.text, /Budget: \$30\n\nSee it any time/);
 });

@@ -29,6 +29,10 @@ export interface Event {
   gift_on: boolean; // gift exchange
   gift_budget: string | null;
   gift_never: [string, string][]; // pairs of replies who never draw each other
+  gift_draw_on: string | null; // YYYY-MM-DD: names drawn automatically that morning
+  gift_remind_ideas: boolean;
+  gift_remind_givers: boolean;
+  remind_replies: boolean;
 }
 
 export interface Household {
