@@ -4,6 +4,7 @@ import { KeepLink } from "@/components/YourLink";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText } from "@/lib/format";
 import { Footer } from "@/components/Footer";
+import { Costs } from "@/components/Costs";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Your RSVP", robots: { index: false } };
@@ -96,6 +97,7 @@ export default async function YourRsvp({
         </>
       )}
     </main>
+    {data.event.costs_on && h.going && <Costs data={data} token={token} host={false} />}
     <Footer />
     </>
   );

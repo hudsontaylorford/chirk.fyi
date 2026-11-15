@@ -6,7 +6,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
 /** `forGuest`: drafts stay hidden from everyone but the host. */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   return e;
@@ -16,7 +16,7 @@ export async function getEventData(slug: string, forGuest = false): Promise<Even
   const event = await getEvent(slug, forGuest);
   if (!event) return null;
   const [households, items, claims] = await Promise.all([
-    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival, parts from households where event_id = ${event.id} order by created_at`,
+    sql<Household[]>`select id, token, names, going, kids, note, updated_by, email, arrival, parts, venmo from households where event_id = ${event.id} order by created_at`,
     sql<Item[]>`select id, kind, name, household_id from items where event_id = ${event.id} order by sort, created_at`,
     sql<Claim[]>`select c.item_id, c.household_id from claims c join items i on i.id = c.item_id
       where i.event_id = ${event.id} order by c.created_at`,
@@ -68,3 +68,18 @@ export const partsOf = (e: Event, h: Household) => {
   const choices = arrivals(e);
   return (h.parts ?? partsFromArrival(parseSchedule(e.schedule, e.time), h.arrival)).filter((p) => choices.includes(p));
 };
+
+export type CostRow = { id: string; what: string; amount: number; paid_by: string; split: { who: string; shares: number }[] };
+
+/** An event's shared costs (with who each is split between) and the payments marked as made. */
+export async function getCosts(eventId: string) {
+  const [costs, payments] = await Promise.all([
+    sql<CostRow[]>`
+      select c.id, c.what, c.amount, c.paid_by,
+        coalesce((select json_agg(json_build_object('who', s.household_id, 'shares', s.shares)) from cost_shares s where s.cost_id = c.id), '[]') as split
+      from costs c where c.event_id = ${eventId} order by c.created_at`,
+    sql<{ from_household: string; to_household: string; amount: number }[]>`
+      select from_household, to_household, amount from payments where event_id = ${eventId} order by created_at`,
+  ]);
+  return { costs, payments: payments.map((p) => ({ from: p.from_household, to: p.to_household, amount: p.amount })) };
+}

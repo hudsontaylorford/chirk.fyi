@@ -24,6 +24,7 @@ export interface Event {
   ask_arrival: boolean;
   hosted_by: string | null;
   long_times: boolean; // 3:00 PM instead of 3 pm
+  costs_on: boolean; // shared costs
 }
 
 export interface Household {
@@ -37,6 +38,7 @@ export interface Household {
   email: string | null;
   arrival: string | null; // old: the one part they said they'd arrive for (see `parts`)
   parts: string[] | null; // the parts of the day they're coming to
+  venmo: string | null;
 }
 
 export interface Item {

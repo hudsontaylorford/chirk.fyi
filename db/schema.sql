@@ -35,6 +35,7 @@ begin
     ask_arrival boolean not null default false,   -- ask guests which stage they're coming for
     hosted_by text,                      -- "Hudson & Molly", shown on the invite (accounts later)
     long_times boolean not null default false,    -- times as 3:00 PM instead of 3 pm
+    costs_on boolean not null default false,      -- shared costs on this event
     created_at timestamptz not null default now()
   );
 
@@ -50,6 +51,7 @@ begin
     email text,                          -- optional; we email them their private link
     arrival text,                        -- old: one arrival part (replaced by parts)
     parts text[],                        -- the parts of the day they're coming to (when the event asks)
+    venmo text,                          -- their Venmo username, so people can pay them back
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -97,6 +99,30 @@ begin
     primary key (event_id, user_id)
   );
 
+  -- Shared costs: what was spent and by whom, who it's split between (shares = people), and payments made.
+  create table if not exists costs (
+    id uuid primary key default gen_random_uuid(),
+    event_id uuid not null references events(id) on delete cascade,
+    what text not null,
+    amount int not null check (amount > 0),              -- cents
+    paid_by uuid not null references households(id) on delete cascade,
+    created_at timestamptz not null default now()
+  );
+  create table if not exists cost_shares (
+    cost_id uuid not null references costs(id) on delete cascade,
+    household_id uuid not null references households(id) on delete cascade,
+    shares int not null check (shares > 0),
+    primary key (cost_id, household_id)
+  );
+  create table if not exists payments (
+    id uuid primary key default gen_random_uuid(),
+    event_id uuid not null references events(id) on delete cascade,
+    from_household uuid not null references households(id) on delete cascade,
+    to_household uuid not null references households(id) on delete cascade,
+    amount int not null check (amount > 0),              -- cents
+    created_at timestamptz not null default now()
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;
@@ -106,6 +132,9 @@ begin
   alter table users enable row level security;
   alter table login_codes enable row level security;
   alter table event_hosts enable row level security;
+  alter table costs enable row level security;
+  alter table cost_shares enable row level security;
+  alter table payments enable row level security;
 
   -- Upgrades for databases made before these existed (each does nothing once applied).
   alter table events add column if not exists status text not null default 'live' check (status in ('draft', 'live', 'archived'));
@@ -127,6 +156,8 @@ begin
   alter table households alter column going drop not null;
   alter table events add column if not exists hosted_by text;
   alter table users add column if not exists terms_version text;
+  alter table events add column if not exists costs_on boolean not null default false;
+  alter table households add column if not exists venmo text;
   alter table users add column if not exists terms_accepted_at timestamptz;
   alter table events add column if not exists long_times boolean not null default false;
   -- Nov 14: claims used to live on items.household_id. Copy any that aren't in claims yet,

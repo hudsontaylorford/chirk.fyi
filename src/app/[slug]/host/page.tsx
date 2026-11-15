@@ -5,6 +5,8 @@ import { CopyInvite } from "@/components/CopyInvite";
 import { SaveButton } from "@/components/SaveButton";
 import { CopyLink } from "@/components/YourLink";
 import { OpenRow } from "@/components/OpenRow";
+import { Confirm } from "@/components/Confirm";
+import { Costs } from "@/components/Costs";
 import { GuestSend } from "@/components/GuestSend";
 import { RemindAll } from "@/components/RemindAll";
 import { MessageGuests } from "@/components/MessageGuests";
@@ -57,7 +59,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
       {/* Who hosts this: everyone here can edit and send; only the owner removes hosts or deletes the event. */}
-      <div className="mt-1 text-[15px] text-soft">
+      <div id="hosts" className="mt-1 text-[15px] text-soft">
         Hosts:{" "}
         {hosts.map((h, i) => (
           <span key={h.id}>
@@ -189,6 +191,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         </section>
       )}
 
+      {event.costs_on && <Costs data={data} token={null} host inside />}
+
       <h2 className="mt-8 text-[20px] font-bold">Event</h2>
       <form action={act.saveEvent.bind(null, slug)} className="mt-3 space-y-3">
         <EventFields event={event} needed={needed.map((i) => ({ name: i.name, by: whoHas.get(i.id) ?? null }))} />
@@ -221,17 +225,5 @@ function Stat({ n, label, sub }: { n: number; label: string; sub?: string }) {
       <div className="text-[14px] text-soft">{label}</div>
       {sub && <div className="text-[12px] text-soft">{sub}</div>}
     </div>
-  );
-}
-
-/** Two-step delete without any client code: tap, then confirm. */
-function Confirm({ label, action }: { label: string; action: () => Promise<void> }) {
-  return (
-    <details className="inline">
-      <summary className="inline cursor-pointer list-none underline underline-offset-2 [&::-webkit-details-marker]:hidden">{label}</summary>
-      <form action={action} className="inline">
-        <button className="ml-2 font-semibold text-red-700">Sure?</button>
-      </form>
-    </details>
   );
 }

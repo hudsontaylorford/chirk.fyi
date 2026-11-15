@@ -212,6 +212,36 @@ await y.fill('input[aria-label="Your name"]', "Yan");
 await y.click("text=Send RSVP");
 await y.waitForSelector("text=You're on the guest list!");
 
+// Shared costs: a guest adds what they paid, another guest sees their share and pays with Venmo,
+// the person paid marks it done, and the host sees everyone settle up.
+await h.goto(kidless.replace(/\/rsvp$/, "/host"));
+await h.click("summary:has-text('Shared costs')");
+await h.check("input[name=costs_on]");
+await h.click("form:has(input[name=costs_on]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const invite = kidless.replace(/\/rsvp$/, "");
+await z.goto(invite);
+await z.click("summary:has-text('+ Add a cost')");
+await z.fill("input[aria-label='What for']", "Pizza");
+await z.fill("input[aria-label='Amount']", "40");
+await z.click("button:text-is('Add cost')");
+await z.waitForSelector("text=Added ✓");
+await z.fill("#venmo", "@zed-v");
+await z.click("form:has(#venmo) button:text-is('Save')");
+await z.waitForSelector("text=Saved ✓");
+await s1.goto(invite);
+assert.match(await s1.textContent("body"), /Costs\s*·\s*\$40 so far[\s\S]*Pizza\s*\$40[\s\S]*Zed paid/);
+assert.match(await s1.textContent("body"), /You owe Zed \$\d+(\.\d\d)?/);
+assert.match(await s1.getAttribute("a:text-is('Pay with Venmo')", "href"), /^https:\/\/venmo\.com\/zed-v\?txn=pay&amount=\d+\.\d\d&note=/);
+assert.equal(await s1.locator("text=Mark paid ✓").count(), 0); // only the person paid (or a host) confirms
+await z.reload();
+await z.click("li:has-text('Early Bird owes you') button:text-is('Mark paid ✓')");
+await z.waitForSelector("li:has-text('Early Bird owes you')", { state: "detached" });
+await s1.reload();
+assert.match(await s1.textContent("body"), /You're all square ✓/);
+await h.reload();
+assert.match(await h.textContent("main"), /Settle up[\s\S]*owes Zed/);
+
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("button.pill:has-text('Everyone')");
@@ -240,9 +270,9 @@ await nobody.fill("input[aria-label='Code']", process.env.LOGIN_TEST_CODE ?? "12
 await nobody.click("button:text-is('Sign in')");
 await nobody.waitForSelector("text=That code didn't work");
 await h.reload();
-await h.click("summary:text-is('Remove')");
-await h.click("details:has(summary:text-is('Remove')) button:text-is('Sure?')");
-await h.waitForSelector("summary:text-is('Remove')", { state: "detached" }); // wait for the removal to finish
+await h.click("#hosts summary:text-is('Remove')");
+await h.click("#hosts details:has(summary:text-is('Remove')) button:text-is('Sure?')");
+await h.waitForSelector("#hosts summary:text-is('Remove')", { state: "detached" }); // wait for the removal to finish
 await m.goto(kidless.replace(/\/rsvp$/, "/host"));
 assert.equal(new URL(m.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, "")); // no longer a host
 
