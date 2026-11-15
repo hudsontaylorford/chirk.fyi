@@ -242,6 +242,7 @@ await nobody.waitForSelector("text=That code didn't work");
 await h.reload();
 await h.click("summary:text-is('Remove')");
 await h.click("details:has(summary:text-is('Remove')) button:text-is('Sure?')");
+await h.waitForSelector("summary:text-is('Remove')", { state: "detached" }); // wait for the removal to finish
 await m.goto(kidless.replace(/\/rsvp$/, "/host"));
 assert.equal(new URL(m.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, "")); // no longer a host
 
