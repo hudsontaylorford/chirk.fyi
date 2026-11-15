@@ -7,14 +7,15 @@ import { sql } from "@/lib/db";
 
 /**
  * Who's acting on an event's shared costs: a host (signed in, hosts this event), or a guest by their reply's token.
- * Guests count only if they're going. Nothing works unless the event has shared costs on.
+ * Everyone on the list counts unless they've said they can't make it (no reply needed: a host can just add names).
+ * Nothing works unless the event has shared costs or poker on.
  */
 async function actor(slug: string, token: string | null) {
   const [e] = await sql<{ id: string; costs_on: boolean; poker_on: boolean }[]>`select id, costs_on, poker_on from events where slug = ${slug}`;
   if (!e?.costs_on && !e?.poker_on) return null;
   const host = !!(await hostRole(slug));
   const [h] = token
-    ? await sql<{ id: string }[]>`select id from households where token = ${token} and event_id = ${e.id} and going is true`
+    ? await sql<{ id: string }[]>`select id from households where token = ${token} and event_id = ${e.id} and going is not false`
     : [];
   if (!host && !h) return null;
   return { eventId: e.id, host, household: h?.id ?? null, costs: e.costs_on, poker: e.poker_on };
@@ -24,17 +25,17 @@ const done = (slug: string) => revalidatePath(`/${slug}`, "layout");
 
 /**
  * Adds a cost: what, how much, who paid (a guest: themselves; a host: anyone going) and who it's split between
- * (anyone going; everyone going if none ticked). Each reply's share is its number of people.
+ * (anyone on the list who hasn't said can't; all of them if none ticked). Each reply's share is its number of people.
  */
 export async function addCost(slug: string, token: string | null, _prev: string | null, f: FormData): Promise<string> {
   const a = await actor(slug, token);
-  if (!a?.costs) return "Only people who are going can add costs.";
+  if (!a?.costs) return "Only people on the guest list can add costs.";
   const what = String(f.get("what") ?? "").trim().replace(/\s+/g, " ").slice(0, 80);
   const amount = parseMoney(String(f.get("amount") ?? ""));
   if (!what) return "What was it for?";
   if (!amount) return "Add the amount, like 42.50.";
   const going = await sql<{ id: string; size: number }[]>`
-    select id, cardinality(names) + kids as size from households where event_id = ${a.eventId} and going is true`;
+    select id, cardinality(names) + kids as size from households where event_id = ${a.eventId} and going is not false`;
   const ids = new Set(going.map((g) => g.id));
   const paidBy = a.host && ids.has(String(f.get("paid_by"))) ? String(f.get("paid_by")) : a.household;
   if (!paidBy) return "Pick who paid.";
@@ -69,7 +70,7 @@ export async function markPaid(slug: string, token: string | null, from: string,
 /** A guest's Venmo username, so others can pay them back. */
 export async function saveVenmo(slug: string, token: string, _prev: string | null, f: FormData): Promise<string> {
   const a = await actor(slug, token);
-  if (!a?.household) return "Only people who are going can add this.";
+  if (!a?.household) return "Only people on the guest list can add this.";
   const venmo = String(f.get("venmo") ?? "").trim().replace(/^@/, "");
   if (venmo && !/^[A-Za-z0-9_-]{2,30}$/.test(venmo)) return "That doesn't look like a Venmo username.";
   await sql`update households set venmo = ${venmo || null} where id = ${a.household}`;
@@ -83,13 +84,13 @@ export async function saveVenmo(slug: string, token: string, _prev: string | nul
  */
 export async function addPoker(slug: string, token: string | null, _prev: string | null, f: FormData): Promise<string> {
   const a = await actor(slug, token);
-  if (!a?.poker) return "Only people who are going can play.";
+  if (!a?.poker) return "Only people on the guest list can play.";
   const kind = f.get("kind") === "cashout" ? "cashout" : "buyin";
   const typed = String(f.get("amount") ?? "").trim();
   const amount = kind === "cashout" && /^\$?0+(\.0+)?$/.test(typed) ? 0 : parseMoney(typed);
   if (amount === null) return "Add the amount, like 20.";
   const [player] = await sql<{ id: string }[]>`
-    select id from households where event_id = ${a.eventId} and going is true and id = ${a.host ? String(f.get("who") ?? a.household ?? "") : a.household ?? ""}`
+    select id from households where event_id = ${a.eventId} and going is not false and id = ${a.host ? String(f.get("who") ?? a.household ?? "") : a.household ?? ""}`
     .catch(() => []);
   if (!player) return "Pick a player.";
   await sql.begin(async (tx) => {

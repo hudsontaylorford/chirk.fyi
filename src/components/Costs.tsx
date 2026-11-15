@@ -18,8 +18,9 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
   const costs = event.costs_on ? all.costs : [];
   // A poker game joins the settle-up once everyone has cashed out and the chips add up.
   const game = poker(entries);
-  const me = households.find((h) => h.token === token && h.going) ?? null;
-  const going = households.filter((h) => h.going);
+  // Everyone on the list counts unless they've said they can't make it; nobody has to reply first.
+  const me = households.find((h) => h.token === token && h.going !== false) ?? null;
+  const going = households.filter((h) => h.going !== false);
   const name = (id: string) => (id === me?.id ? "you" : joinNames(households.find((h) => h.id === id)?.names ?? ["someone"]));
   const total = costs.reduce((n, c) => n + c.amount, 0);
   const owed = settle(balances(costs.map((c) => ({ amount: c.amount, paidBy: c.paid_by, split: c.split })), payments, game.ready ? game.nets : undefined));
@@ -48,7 +49,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                 <span className="tabular-nums">{money(c.amount)}</span>
               </div>
               <p className="text-[15px] text-soft">
-                {capital(name(c.paid_by))} paid · {c.split.length === going.length ? "split between everyone going" : `split between ${people(c.split)} ${people(c.split) === 1 ? "person" : "people"}`}
+                {capital(name(c.paid_by))} paid · {c.split.length === going.length ? "split between everyone" : `split between ${people(c.split)} ${people(c.split) === 1 ? "person" : "people"}`}
                 {(host || c.paid_by === me?.id) && (
                   <> · <Confirm label="Remove" action={removeCost.bind(null, event.slug, token, c.id)} /></>
                 )}

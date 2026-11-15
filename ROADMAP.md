@@ -50,6 +50,7 @@
     - *Zelle:* lives inside each bank's app, with no links or API, so copy-the-amount plus Mark paid is the best there is.
     - Revisit if any of them open a friends-and-family API; until then chirk keeps doing the math, opening the app, and letting people mark it paid.
 34. **Add a payment account from a screenshot or a link.** Paste `venmo.com/u/sam-k` or `cash.app/$sam` into the payment box and chirk fills in the username (a quick add). Later: upload a screenshot of your Venmo or Cash App QR code and chirk reads it (decoding the QR in the browser).
+35. **Settings → Advanced options (per host).** The event form shows only what most chirks need (Basics, Message, Photo, What to bring, Schedule, Reply by). The deeper rows (Shared costs, Poker, Guest options, Web address, and future ones like gift exchange) live behind one "More" row, or appear by default for hosts who turn on "Show advanced options" in their account settings. A row that's already switched on always shows, so nothing hides a setting that's in use. Pairs with templates (29): a "Poker night" template turns its own options on.
 32. **"Maybe" (later, perhaps).** Fine to leave out for now; revisit if hosts ask for it, possibly as a per-chirk switch.
 
 ## The one idea

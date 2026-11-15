@@ -271,6 +271,33 @@ assert.match(await h.textContent("main"), /Zed\s*\$20\s*\$50\s*\+\$30[\s\S]*Earl
 await s1.reload();
 assert.match(await s1.textContent("body"), /You owe Zed \$30/);
 
+// A poker night where nobody replies: the host adds names, and they're players straight away.
+await h.goto(ORIGIN + "/host/new");
+await h.fill("input[name=title]", "Poker test");
+await h.fill("input[name=date]", "2027-01-08");
+await h.click("button:text-is('Create event')");
+await h.waitForURL(/\/poker-test(-\d+)?\/host$/);
+const pokerHost = h.url();
+await h.fill("input[aria-label='Add guests']", "Hudson, Sam, Lee");
+await h.click("form:has(input[aria-label='Add guests']) button:text-is('Add')");
+await h.waitForSelector("li:has-text('Lee')");
+await h.click("summary:has-text('Shared costs')");
+await h.check("input[name=poker_on]");
+await h.click("form:has(input[name=poker_on]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+for (const [who, amount, kind] of [["Hudson", "20"], ["Sam", "20"], ["Lee", "20"], ["Lee", "20"], ["Hudson", "55", "cashout"], ["Sam", "25", "cashout"], ["Lee", "0", "cashout"]]) {
+  await h.goto(pokerHost);
+  await pokerIn(h, who, amount, kind);
+}
+await h.goto(pokerHost);
+assert.match(await h.textContent("main"), /Poker night[\s\S]*In \$80 · Out \$80 ✓ Added to settle up\./);
+assert.match(await h.textContent("main"), /Lee owes Hudson \$35[\s\S]*Lee owes Sam \$5/);
+const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit')", "href");
+const lee = await phone();
+await lee.goto(new URL(leeLink + "/remember?to=invite", h.url()).href);
+assert.match(await lee.textContent("body"), /You owe Hudson \$35[\s\S]*You owe Sam \$5/); // no reply needed to see their share
+assert.equal(await lee.locator("text=Mark paid ✓").count(), 0);
+
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("button.pill:has-text('Everyone')");

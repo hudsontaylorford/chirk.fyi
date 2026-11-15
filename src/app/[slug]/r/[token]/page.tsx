@@ -97,7 +97,7 @@ export default async function YourRsvp({
         </>
       )}
     </main>
-    {(data.event.costs_on || data.event.poker_on) && h.going && <Costs data={data} token={token} host={false} />}
+    {(data.event.costs_on || data.event.poker_on) && h.going !== false && <Costs data={data} token={token} host={false} />}
     <Footer />
     </>
   );

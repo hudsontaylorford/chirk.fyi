@@ -66,3 +66,43 @@ test("poker: rebuys, cash-outs, ready only when the chips add up", () => {
   // A corrected cash-out replaces the earlier one.
   assert.equal(poker([{ who: "a", kind: "buyin", amount: 100 }, { who: "a", kind: "cashout", amount: 50 }, { who: "a", kind: "cashout", amount: 100 }]).ready, true);
 });
+
+// Stress: hundreds of random nights. Whatever happens, money balances to the cent, following the settle-up
+// leaves everyone square, nobody both pays and gets paid, and it never takes more payments than people minus one.
+test("random nights always balance and settle", () => {
+  let seed = 42;
+  const rand = (n: number) => ((seed = (seed * 1103515245 + 12345) % 2147483648) % n);
+  for (let round = 0; round < 500; round++) {
+    const people = Array.from({ length: 2 + rand(9) }, (_, i) => `p${i}`);
+    const costs = Array.from({ length: rand(6) }, () => {
+      const split = people.filter(() => rand(3) > 0).map((who) => ({ who, shares: 1 + rand(3) }));
+      return { amount: 1 + rand(100_000), paidBy: people[rand(people.length)], split: split.length ? split : [{ who: people[0], shares: 1 }] };
+    });
+    const entries = people.filter(() => rand(2)).flatMap((who) => [
+      { who, kind: "buyin" as const, amount: 100 * (1 + rand(50)) },
+      ...(rand(3) ? [{ who, kind: "buyin" as const, amount: 100 * (1 + rand(50)) }] : []),
+    ]);
+    const pot = entries.reduce((n, e) => n + e.amount, 0);
+    // Hand the pot back out at random so cash-outs equal buy-ins.
+    const players = [...new Set(entries.map((e) => e.who))];
+    let left = pot;
+    const outs = players.map((who, i) => {
+      const amount = i === players.length - 1 ? left : rand(left + 1);
+      left -= amount;
+      return { who, kind: "cashout" as const, amount };
+    });
+    const game = poker([...entries, ...outs]);
+    if (players.length) assert.equal(game.ready, true);
+
+    const b = balances(costs, [], game.ready ? game.nets : undefined);
+    assert.equal([...b.values()].reduce((n, v) => n + v, 0), 0, "money in = money out");
+    const pay = settle(b);
+    assert.ok(pay.length <= Math.max(0, people.length - 1), "few payments");
+    assert.ok(pay.every((p) => p.amount > 0 && p.from !== p.to));
+    const payers = new Set(pay.map((p) => p.from));
+    assert.ok(pay.every((p) => !payers.has(p.to)), "nobody both pays and gets paid");
+    assert.deepEqual(settle(balances(costs, pay, game.ready ? game.nets : undefined)), [], "after paying, everyone's square");
+    // Paying only some of it leaves exactly the rest.
+    if (pay.length > 1) assert.deepEqual(settle(balances(costs, pay.slice(1), game.ready ? game.nets : undefined)), [pay[0]]);
+  }
+});

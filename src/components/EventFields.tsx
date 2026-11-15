@@ -88,7 +88,7 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         <Row id="costs" label="Shared costs" value={[event?.costs_on && "Split costs", event?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
           <Check name="costs_on" checked={event?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
           <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
-          <p className="text-[14px] text-soft">Guests going can add what they paid; chirk works out who owes whom and links to Venmo. No money goes through chirk.</p>
+          <p className="text-[14px] text-soft">Everyone on the guest list (unless they said they can&apos;t make it) can add what they paid, no reply needed. chirk works out who owes whom and links to Venmo; no money goes through chirk.</p>
         </Row>
         {!event && (
           <Row id="address" label="Web address" value="Made from the title">
