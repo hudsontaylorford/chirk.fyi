@@ -44,6 +44,11 @@
 29. **Templates, including your own.** Start from Dinner, Party, Quick hang, Gift exchange, or save any chirk as a template ("Our Friendsgiving"). A template only fills in fields you can still change. "Copy to next year" is already a one-off version of this.
 30. **Gift exchange.** On a chirk, a "Gift exchange" switch: guests opt in, the host adds rules ("Hudson can't draw Molly", couples never draw each other), chirk draws names and emails each person their match privately (or shows it on their personal reply page). An optional budget and wish-list note per person.
 31. **Shared photo album.** A "Photos" link on the invite after the event. Google Photos, Amazon Photos and iCloud don't let other apps create shared albums for you, so the realistic version is: the host makes the album in their photos app and pastes its share link into the chirk (and chirk can nudge guests to add theirs). Revisit if any of them open an API for it.
+33. **Payment apps: what's possible (shared costs, item 28).** Built: Pay with Venmo opens Venmo with the amount and note filled in, and the person paid marks it ✓.
+    - *Venmo:* no public API for person-to-person payments (it closed in 2016). Its business side (through PayPal/Braintree) is for shops taking payments, not friends paying each other, so chirk can't confirm a Venmo payment automatically. The prefilled link stays the way.
+    - *Cash App:* same story: Cash App Pay is for businesses. But `cash.app/$cashtag/42` opens a prefilled payment, so a **Pay with Cash App** button (guests add their $cashtag) is easy to add whenever it's wanted.
+    - *Zelle:* lives inside each bank's app, with no links or API, so copy-the-amount plus Mark paid is the best there is.
+    - Revisit if any of them open a friends-and-family API; until then chirk keeps doing the math, opening the app, and letting people mark it paid.
 32. **"Maybe" (later, perhaps).** Fine to leave out for now; revisit if hosts ask for it, possibly as a per-chirk switch.
 
 ## The one idea
