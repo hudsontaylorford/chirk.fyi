@@ -51,6 +51,7 @@ const eventFields = (f: FormData) => ({
   poker_on: f.get("poker_on") === "on",
   gift_on: f.get("gift_on") === "on",
   gift_budget: val(f, "gift_budget").slice(0, 40) || null,
+  gift_rules: val(f, "gift_rules").slice(0, 1000) || null,
   gift_draw_on: val(f, "gift_draw_on") || null,
   gift_remind_ideas: f.get("gift_remind_ideas") === "on",
   gift_remind_givers: f.get("gift_remind_givers") === "on",
@@ -78,7 +79,7 @@ export async function copyToNextYear(slug: string) {
   const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget,
+      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
       (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies
     from events where slug = ${slug}`;
   if (!e) return;
@@ -93,6 +94,10 @@ export async function copyToNextYear(slug: string) {
   // The same hosts, with whoever copied it as the owner.
   await sql`insert into event_hosts (event_id, user_id, role)
     select ${copy.id}, user_id, case when user_id = ${me.id} then 'owner' else 'cohost' end from event_hosts where event_id = ${oldId}`;
+  // The hosts are going again; whoever copied it is on the list even if they weren't before.
+  await sql`update households set going = true where event_id = ${copy.id}
+    and lower(email) in (select u.email from event_hosts h join users u on u.id = h.user_id where h.event_id = ${copy.id})`;
+  await addHostAsGuest(copy.id, me);
   redirect(`/${newSlug}/host`);
 }
 
@@ -110,6 +115,7 @@ export async function createEvent(f: FormData) {
   const slug = await freeSlug(val(f, "slug") || fields.title);
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
   await sql`insert into event_hosts (event_id, user_id, role) values (${e.id}, ${me.id}, 'owner')`;
+  await addHostAsGuest(e.id, me);
   await saveList(e.id, f);
   redirect(`/${slug}/host`);
 }
@@ -200,7 +206,8 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
   const e = await getEvent(slug, true); // as guests see it (Hosted by falls back to the hosts' names)
   if (!e) return "Something went wrong. Try again?";
   const rows = await sql<{ token: string; names: string[]; email: string }[]>`
-    select token, names, email from households where event_id = ${ev} and email is not null and ${sql.unsafe(audienceSql[to])}`;
+    select token, names, email from households where event_id = ${ev} and email is not null and ${sql.unsafe(audienceSql[to])}
+      and lower(email) not in (select u.email from event_hosts eh join users u on u.id = eh.user_id where eh.event_id = ${ev})`; // not the hosts themselves
   if (!rows.length) return "Nobody in that group has an email yet.";
   const key = [...note].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7).toString(36); // same note → same key
   let sent = 0;
@@ -213,16 +220,29 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
 }
 
 
+/**
+ * Hosts are going to their own events, like any guest (Partiful does the same): added once to the guest list as Going.
+ * Skipped if they're already on it (same email, or a reply with their name), so nobody appears twice.
+ */
+async function addHostAsGuest(eventId: string, user: { email: string; name: string | null }) {
+  const name = user.name || user.email.split("@")[0];
+  const [have] = await sql`
+    select 1 from households where event_id = ${eventId}
+      and (lower(email) = ${user.email} or exists (select 1 from unnest(names) n where lower(n) = lower(${name})))`;
+  if (!have) await sql`insert into households ${sql({ event_id: eventId, names: [name], going: true, email: user.email })}`;
+}
+
 /** Adds a co-host by email (making their account if they don't have one) and emails them. Any host can add. */
 export async function addCohost(slug: string, _prev: string | null, f: FormData): Promise<string> {
   const ev = await eventId(slug);
   const me = await requireUser();
   const email = val(f, "email").toLowerCase();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";
-  const [u] = await sql<{ id: string }[]>`insert into users (email) values (${email}) on conflict (email) do update set email = excluded.email returning id`;
+  const [u] = await sql<{ id: string; name: string | null }[]>`insert into users (email) values (${email}) on conflict (email) do update set email = excluded.email returning id, name`;
   const [added] = await sql`insert into event_hosts (event_id, user_id, role) values (${ev}, ${u.id}, 'cohost') on conflict do nothing returning 1`;
   revalidatePath(`/${slug}/host`);
   if (!added) return "They're already a host.";
+  await addHostAsGuest(ev, { email, name: u.name });
   const [e] = await sql<{ title: string }[]>`select title from events where id = ${ev}`;
   const mail = cohostEmail({ by: me.name || me.email, title: e.title, url: `${await siteUrl()}/host?email=${encodeURIComponent(email)}` });
   const sent = await sendEmail({ to: email, ...mail, replyTo: me.email, idempotencyKey: `cohost-${ev}-${u.id}` });

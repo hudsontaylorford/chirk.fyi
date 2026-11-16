@@ -28,6 +28,7 @@ export interface Event {
   poker_on: boolean; // poker buy-ins and cash-outs
   gift_on: boolean; // gift exchange
   gift_budget: string | null;
+  gift_rules: string | null;
   gift_never: [string, string][]; // pairs of replies who never draw each other
   gift_draw_on: string | null; // YYYY-MM-DD: names drawn automatically that morning
   gift_remind_ideas: boolean;

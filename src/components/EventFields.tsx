@@ -94,6 +94,11 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         <Row id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
           <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
           <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
+          <label className="block">
+            <span className="text-[15px] text-soft">Rules (optional, everyone in it sees them)</span>
+            <textarea name="gift_rules" defaultValue={event?.gift_rules ?? ""} rows={3} className="field mt-1" aria-label="Gift rules"
+              placeholder="e.g. Something homemade or secondhand. Bring it wrapped, with a tag." />
+          </label>
           <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
           <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
           <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before" />

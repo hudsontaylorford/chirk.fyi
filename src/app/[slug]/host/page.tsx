@@ -43,7 +43,9 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const answered = households.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
   const sent = await getSentJobs(event.id);
-  const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email).length, total: hs.length });
+  // Who a guest message would reach: hosts are on the list (as going) but don't get their own notes.
+  const isHost = (email: string | null) => !!email && hosts.some((x) => x.email === email.toLowerCase());
+  const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email && !isHost(h.email)).length, total: hs.filter((h) => !isHost(h.email)).length });
   const adults = going.reduce((n, h) => n + headcount(h.names), 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
   const needed = items.filter((i) => i.kind === "needed");
@@ -151,6 +153,9 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                 <span className="mr-auto text-[17px] font-semibold">
                   {joinNames(h.names)}
                   {h.kids > 0 && <span className="font-normal text-soft"> +{h.kids} kid{h.kids > 1 ? "s" : ""}</span>}
+                  {isHost(h.email) && (
+                    <span className="ml-2 rounded-full bg-wash px-2 py-0.5 text-[13px] font-semibold text-soft">Host</span>
+                  )}
                 </span>
                 <span className={`shrink-0 ${h.going ? "text-green-700" : "text-soft"}`}>{h.going === null ? "No reply yet" : h.going ? "Going" : "Can't"}</span>
               </div>

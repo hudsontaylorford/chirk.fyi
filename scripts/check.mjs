@@ -263,7 +263,7 @@ await pokerIn(s1, null, "20"); // Early Bird rebuys from their own phone
 await h.reload();
 await pokerIn(h, "Zed", "50", "cashout");
 await h.reload();
-assert.match(await h.textContent("main"), /In \$60 · Out \$50 · waiting on 1 to cash out/);
+assert.match(await h.textContent("main"), /In \$60 · Out \$60 ✓ Added to settle up\.\s*Early Bird hasn't cashed out, so they're counted as the \$10 left on the table/); // worked out, no waiting
 await pokerIn(h, "Early Bird", "10", "cashout");
 await h.reload();
 assert.match(await h.textContent("main"), /In \$60 · Out \$60 ✓ Added to settle up\./);
@@ -288,7 +288,7 @@ await h.waitForSelector("text=Saved");
 await h.goto(pokerHost);
 await h.fill("input[aria-label='Buy-in for everyone']", "20");
 await h.click("button:text-is('Buy in all')");
-await h.waitForSelector("text=Bought in 3 at $20 ✓");
+await h.waitForSelector("text=Bought in 4 at $20 ✓"); // the host is at the table too
 await h.click("button:text-is('Buy in all')"); // tapping again doubles nobody
 await h.waitForSelector("text=Everyone's already bought in.");
 await h.goto(pokerHost);
@@ -297,13 +297,15 @@ await h.click("label:has(input[name=kind][value=cashout])");
 await h.selectOption("select[aria-label=Player]", { label: "Sam" });
 await h.fill("input[aria-label='Poker amount']", "10000");
 await h.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
-await h.waitForSelector("text=That's more than the whole table put in ($60). Check the amount.");
+await h.waitForSelector("text=That's more than the whole table put in ($80). Check the amount.");
+assert.equal(await h.isChecked("input[name=kind][value=cashout]"), true); // the choice stays after submitting
+assert.equal(await h.inputValue("select[aria-label=Player]"), await h.getAttribute("select[aria-label=Player] option:text-is('Sam')", "value"));
 for (const [who, amount, kind] of [["Lee", "20"], ["Hudson", "55", "cashout"], ["Sam", "25", "cashout"], ["Lee", "0", "cashout"]]) {
   await h.goto(pokerHost);
   await pokerIn(h, who, amount, kind);
 }
 await h.goto(pokerHost);
-assert.match(await h.textContent("main"), /Poker night[\s\S]*In \$80 · Out \$80 ✓ Added to settle up\./);
+assert.match(await h.textContent("main"), /Poker night[\s\S]*In \$100 · Out \$100 ✓ Added to settle up\.\s*Hostie hasn't cashed out, so they're counted as the \$20 left on the table/); // the host never cashed out: their $20 is what's left
 assert.match(await h.textContent("main"), /Lee owes Hudson \$35[\s\S]*Lee owes Sam \$5/);
 const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit')", "href");
 const lee = await phone();
@@ -425,7 +427,7 @@ await h.click("text=Copy to next year");
 await h.waitForURL(/\/thanksgiving-2027(-\d+)?\/host$/);
 assert.match(await h.textContent("main"), /Draft\./);
 assert.match(await h.textContent("main"), /Check A\s*No reply yet/); // last year's guests come along, unanswered
-assert.match(await h.textContent("main"), /0\s*of \d+ replied/);
+assert.match(await h.textContent("main"), /1\s*of \d+ replied/); // only the host, who is going
 const draftUrl = h.url().replace(/\/host$/, "");
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 await h.click("button:has-text('Publish')");
@@ -452,6 +454,7 @@ await h.waitForSelector("li:has-text('Dee & Eve')");
 await h.click("summary:has-text('Gift exchange')");
 await h.check("input[name=gift_on]");
 await h.fill("input[name=gift_budget]", "$30");
+await h.fill("textarea[name=gift_rules]", "Something secondhand. Bring it wrapped.");
 await h.click("form:has(input[name=gift_on]) button:text-is('Save')");
 await h.waitForSelector("text=Saved");
 await h.goto(giftHost);
@@ -460,13 +463,14 @@ await h.selectOption("select[aria-label='Second person']", { label: "Ben" });
 await h.click("form:has(select[aria-label='First person']) button:text-is('Add')");
 await h.waitForSelector("text=Ann ↔ Ben");
 await h.click("button:text-is('Draw names')");
-await h.waitForSelector("text=Names drawn for 4 ✓");
+await h.waitForSelector("text=Names drawn for 5 ✓"); // Ann, Ben, Cal, Dee & Eve, and the host
 const annLink = await h.getAttribute("li:has-text('Ann') a:text-is('Edit')", "href");
 const ann = await phone();
 await ann.goto(new URL(annLink + "/remember?to=invite", h.url()).href);
 const match = (await ann.textContent("section:has(h2:has-text('Gift exchange'))")).match(/giving a gift to(.+?)(Their ideas|They haven)/)[1].trim();
-assert.ok(["Cal", "Dee & Eve"].includes(match), `Ann drew ${match}`); // never herself, never Ben
+assert.ok(match && !["Ann", "Ben"].includes(match), `Ann drew ${match}`); // never herself, never Ben
 assert.match(await ann.textContent("body"), /Gift exchange · \$30/);
+assert.match(await ann.textContent("body"), /5 in: Hostie · you · Ben · Cal · Dee & Eve[\s\S]*Something secondhand\. Bring it wrapped\./); // the details and rules, for everyone in it
 await ann.fill("#wish", "Books, hot sauce");
 await ann.click("button:text-is('Save ideas')");
 await ann.waitForSelector("text=Saved ✓");
@@ -507,7 +511,7 @@ ran = await (await cron(true)).json();
 assert.ok(!ran.done.some((d) => d.startsWith(`${autoSlug}:`)), "nothing twice");
 await h.goto(autoHost);
 assert.match(await h.textContent("main"), /Names drawn and emailed: [^·]+· done ✓/);
-assert.match(await h.textContent("main"), /Names drawn for 3 ✓/);
+assert.match(await h.textContent("main"), /Names drawn for 4 ✓/); // Ana, Bo, Cy and the host
 assert.match(await h.textContent("main"), /Automatic reminder to anyone who hasn't replied: [^·]+· sent ✓/);
 
 // Select several: guests (email them, then remove them), and events (archive, then unarchive).

@@ -69,7 +69,9 @@ export type PokerEntry = { who: string; kind: "buyin" | "cashout"; amount: numbe
 
 /**
  * A poker game from its buy-ins (rebuys are more buy-ins) and cash-outs (each player's latest one counts).
- * It's ready to settle once everyone who bought in has cashed out and the money in equals the money out.
+ * It's ready to settle when the money in equals the money out. Missing cash-outs are worked out when the math allows:
+ * if the totals already match, anyone missing left with $0; if exactly one person is missing, what's left on the table is theirs.
+ * Those worked-out amounts are in `inferred` (and in each player's `out`), so the page can say so.
  */
 export function poker(entries: PokerEntry[]) {
   const players = new Map<string, { in: number; out: number | null }>();
@@ -80,9 +82,16 @@ export function poker(entries: PokerEntry[]) {
     players.set(e.who, p);
   }
   const totalIn = [...players.values()].reduce((n, p) => n + p.in, 0);
+  const counted = [...players.values()].reduce((n, p) => n + (p.out ?? 0), 0);
+  const missing = [...players].filter(([, p]) => p.out === null && p.in > 0).map(([who]) => who);
+  const left = totalIn - counted; // still on the table
+  const inferred = new Map<string, number>();
+  if (missing.length && (left === 0 || (missing.length === 1 && left > 0))) {
+    for (const who of missing) { inferred.set(who, missing.length === 1 ? left : 0); players.get(who)!.out = inferred.get(who)!; }
+  }
   const totalOut = [...players.values()].reduce((n, p) => n + (p.out ?? 0), 0);
   const allOut = [...players.values()].every((p) => p.out !== null || p.in === 0);
   const ready = players.size > 0 && allOut && totalIn === totalOut;
   const nets = new Map([...players].map(([who, p]) => [who, (p.out ?? 0) - p.in]));
-  return { players, totalIn, totalOut, allOut, ready, nets };
+  return { players, totalIn, totalOut, allOut, ready, nets, inferred };
 }

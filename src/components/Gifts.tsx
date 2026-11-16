@@ -4,7 +4,7 @@ import { GiftButton, WishForm } from "@/components/GiftForms";
 import { SaveButton } from "@/components/SaveButton";
 import { getDraws, getSentJobs, joinNames } from "@/lib/data";
 import { daysBefore } from "@/lib/due";
-import { shortDate } from "@/lib/format";
+import { listText, shortDate } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
 /**
@@ -33,6 +33,12 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
 
       {!host && me && (
         <>
+          {/* The details: who's in, when names get drawn, and the host's rules. */}
+          <p className="mt-2 text-[15px] text-soft">
+            {(() => { const ins = coming.filter((h) => h.gift_in); return `${ins.length} in: ${listText(ins.map((h) => (h.id === me.id ? "you" : joinNames(h.names))))}`; })()}
+            {event.gift_draw_on && draws.size === 0 && <> · names drawn {shortDate(event.gift_draw_on)}</>}
+          </p>
+          {event.gift_rules && <p className="mt-2 whitespace-pre-line text-[16px]">{event.gift_rules}</p>}
           {!me.gift_in ? (
             <p className="mt-2 text-soft">You&apos;re not in this one.</p>
           ) : draws.get(me.id) ? (

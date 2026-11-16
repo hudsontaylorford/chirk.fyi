@@ -1,12 +1,16 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 
 type Send = (prev: string | null, f: FormData) => Promise<string>;
 
 /** "+ Add a cost": what it was, the amount, who paid (hosts pick; guests are the payer), and who it's split between. */
 export function CostForm({ action, host, me, going }: { action: Send; host: boolean; me: string | null; going: { id: string; name: string; people: number }[] }) {
   const [result, add, adding] = useActionState(action, null);
+  // Kept in state so they stay as picked after each "Add cost": the form resets itself on submit, back to these defaults.
+  const [paidBy, setPaidBy] = useState(me ?? going[0]?.id ?? "");
+  const [split, setSplit] = useState(() => new Set(going.map((g) => g.id)));
+  const toggle = (id: string) => setSplit((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   return (
     <details className="mt-6 rounded-2xl border border-line px-4 py-3">
       <summary className="cursor-pointer text-[16px] font-semibold">+ Add a cost</summary>
@@ -18,7 +22,7 @@ export function CostForm({ action, host, me, going }: { action: Send; host: bool
         {host && (
           <label className="block">
             <span className="text-[15px] text-soft">Paid by</span>
-            <select name="paid_by" defaultValue={me ?? going[0]?.id} className="field mt-1">
+            <select key={paidBy} name="paid_by" defaultValue={paidBy} onChange={(e) => setPaidBy(e.target.value)} className="field mt-1">
               {going.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
             </select>
           </label>
@@ -28,7 +32,7 @@ export function CostForm({ action, host, me, going }: { action: Send; host: bool
           <div className="mt-1 flex flex-wrap gap-2">
             {going.map((g) => (
               <label key={g.id} className="pill-check">
-                <input type="checkbox" name="split" value={g.id} defaultChecked className="h-4 w-4" />
+                <input type="checkbox" name="split" value={g.id} defaultChecked={split.has(g.id)} onChange={() => toggle(g.id)} className="h-4 w-4" />
                 {g.id === me ? "You" : g.name}
                 {g.people > 1 && <span className="opacity-60">×{g.people}</span>}
               </label>
@@ -60,23 +64,27 @@ export function VenmoForm({ action, venmo }: { action: Send; venmo: string | nul
 /** Poker: a buy-in or a cash-out for a player (hosts pick anyone; players enter their own). */
 export function PokerForm({ action, host, me, usual, players }: { action: Send; host: boolean; me: string | null; usual: string; players: { id: string; name: string }[] }) {
   const [result, add, adding] = useActionState(action, null);
+  // Kept in state so a run of cash-outs stays on Cash-out (and the same player) until changed.
+  // Uncontrolled, defaulting to the state: the form resets itself after each add, back to these defaults (key remounts the select so its default follows).
+  const [kind, setKind] = useState<"buyin" | "cashout">("buyin");
+  const [who, setWho] = useState(me ?? players[0]?.id ?? "");
   return (
     <form action={add} className="mt-3 space-y-2">
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Buy-in or cash-out">
         <label className="pill-check">
-          <input type="radio" name="kind" value="buyin" defaultChecked className="h-4 w-4" /> Buy-in
+          <input type="radio" name="kind" value="buyin" defaultChecked={kind === "buyin"} onChange={() => setKind("buyin")} className="h-4 w-4" /> Buy-in
         </label>
         <label className="pill-check">
-          <input type="radio" name="kind" value="cashout" className="h-4 w-4" /> Cash-out
+          <input type="radio" name="kind" value="cashout" defaultChecked={kind === "cashout"} onChange={() => setKind("cashout")} className="h-4 w-4" /> Cash-out
         </label>
       </div>
       <div className="flex gap-2">
         {host && (
-          <select name="who" defaultValue={me ?? players[0]?.id} className="field" aria-label="Player">
+          <select key={who} name="who" defaultValue={who} onChange={(e) => setWho(e.target.value)} className="field" aria-label="Player">
             {players.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
         )}
-        <input name="amount" className="field w-28 shrink-0" inputMode="decimal" placeholder="$20" defaultValue={usual} aria-label="Poker amount" required />
+        <input name="amount" className="field w-28 shrink-0" inputMode="decimal" placeholder="$20" defaultValue={kind === "buyin" ? usual : ""} aria-label="Poker amount" required />
         <button className="btn shrink-0 px-4" disabled={adding}>{adding ? "…" : "Add"}</button>
       </div>
       {result && <p role="status" className="text-[14px] text-soft">{result}</p>}

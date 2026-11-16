@@ -82,7 +82,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                     <tr key={who} className="border-t border-line">
                       <td className="py-2 pr-2">{capital(name(who))}</td>
                       <td className="text-right">{money(p.in)}</td>
-                      <td className="text-right">{p.out === null ? "—" : money(p.out)}</td>
+                      <td className={`text-right ${game.inferred.has(who) ? "text-soft" : ""}`}>{p.out === null ? "—" : money(p.out)}</td>
                       <td className={`text-right font-semibold ${p.out === null ? "text-soft" : ""}`}>{p.out === null ? "—" : signed(p.out - p.in)}</td>
                     </tr>
                   ))}
@@ -92,6 +92,11 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                 In {money(game.totalIn)} · Out {money(game.totalOut)}
                 {game.ready ? " ✓ Added to settle up." : !game.allOut ? ` · waiting on ${[...game.players.values()].filter((p) => p.out === null).length} to cash out` : ""}
               </p>
+              {[...game.inferred].map(([who, cents]) => (
+                <p key={who} className="mt-1 text-[14px] text-soft">
+                  {capital(name(who))} hasn&apos;t cashed out, so {who === me?.id ? "you're" : "they're"} counted as the {money(cents)} left on the table. Enter a cash-out to change it.
+                </p>
+              ))}
               {game.allOut && !game.ready && (
                 <p role="alert" className="mt-2 rounded-2xl bg-amber-50 p-3 text-[15px] text-amber-900">
                   The chips don&apos;t add up: out is {money(Math.abs(game.totalOut - game.totalIn))} {game.totalOut > game.totalIn ? "more" : "less"} than in. Check the cash-outs below.

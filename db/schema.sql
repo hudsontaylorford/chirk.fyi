@@ -39,6 +39,7 @@ begin
     poker_on boolean not null default false,      -- poker buy-ins and cash-outs
     gift_on boolean not null default false,       -- gift exchange
     gift_budget text,                    -- "$30"
+    gift_rules text,                     -- the host's house rules, shown to everyone in it
     gift_never jsonb not null default '[]',       -- pairs of replies who never draw each other
     gift_draw_on date,                   -- names drawn automatically that morning
     gift_remind_ideas boolean not null default true,  -- nudge to add ideas 3 days before the draw
@@ -200,6 +201,7 @@ begin
   alter table events add column if not exists poker_on boolean not null default false;
   alter table events add column if not exists gift_on boolean not null default false;
   alter table events add column if not exists gift_budget text;
+  alter table events add column if not exists gift_rules text;
   alter table events add column if not exists gift_never jsonb not null default '[]';
   alter table events add column if not exists gift_draw_on date;
   alter table events add column if not exists gift_remind_ideas boolean not null default true;

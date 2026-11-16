@@ -9,7 +9,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
  */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_never, gift_draw_on::text, gift_remind_ideas, gift_remind_givers, remind_replies
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules, gift_never, gift_draw_on::text, gift_remind_ideas, gift_remind_givers, remind_replies
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   if (forGuest && !e.hosted_by) {

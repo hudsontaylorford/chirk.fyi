@@ -48,8 +48,25 @@ test("poker: rebuys, cash-outs, ready only when the chips add up", () => {
     { who: "a", kind: "cashout", amount: 5500 }, { who: "b", kind: "cashout", amount: 2500 },
   ]);
   assert.equal(game.totalIn, 8000);
-  assert.equal(game.allOut, false); // c hasn't cashed out
-  assert.equal(game.ready, false);
+  // c hasn't cashed out, but in ($80) already equals out ($80): c left with $0, so it settles.
+  assert.equal(game.ready, true);
+  assert.deepEqual([...game.inferred], [["c", 0]]);
+  // Exactly one missing and $15 still on the table: that $15 is theirs.
+  const one = poker([
+    { who: "a", kind: "buyin", amount: 2000 }, { who: "b", kind: "buyin", amount: 2000 },
+    { who: "a", kind: "cashout", amount: 2500 },
+  ]);
+  assert.equal(one.ready, true);
+  assert.deepEqual([...one.inferred], [["b", 1500]]);
+  // Two missing and money unaccounted for: can't know who has what, so it waits.
+  const two = poker([
+    { who: "a", kind: "buyin", amount: 2000 }, { who: "b", kind: "buyin", amount: 2000 }, { who: "c", kind: "buyin", amount: 2000 },
+    { who: "a", kind: "cashout", amount: 2500 },
+  ]);
+  assert.equal(two.ready, false);
+  assert.equal(two.allOut, false);
+  // One missing but out is already over in: a typo somewhere, nothing to infer.
+  assert.equal(poker([{ who: "a", kind: "buyin", amount: 100 }, { who: "b", kind: "buyin", amount: 100 }, { who: "a", kind: "cashout", amount: 300 }]).ready, false);
   const short = poker([...[{ who: "a", kind: "buyin", amount: 2000 }, { who: "a", kind: "cashout", amount: 1500 }] as const]);
   assert.equal(short.ready, false); // $5 missing from the count
   const done = poker([
