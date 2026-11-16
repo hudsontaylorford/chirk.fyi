@@ -8,7 +8,8 @@ export function OpenRow({ id, children }: { id: string; children: React.ReactNod
       onClick={() => {
         const row = document.getElementById(id) as HTMLDetailsElement | null;
         if (!row) return;
-        row.open = true;
+        // Open it and anything it's tucked inside (a row under "More options").
+        for (let d: HTMLElement | null = row; d; d = d.parentElement?.closest("details") ?? null) (d as HTMLDetailsElement).open = true;
         row.scrollIntoView({ behavior: "smooth", block: "start" });
       }}
     >

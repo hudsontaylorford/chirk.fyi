@@ -34,6 +34,81 @@ export function EventFields({ event, needed = [], matches = [] }: { event?: Even
     </div>
   );
 
+  const advanced = [
+    {
+      label: "Guest options",
+      on: extras.length > 0 || !!event?.note_prompt || !!event?.note_hint,
+      row: (
+        <Row key="guests" id="guests" label="Guest options" value={extras.length ? extras.join(", ").replace(/^./, (c) => c.toUpperCase()) : "Notes, plus-ones"}>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
+            <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />
+          </div>
+          <Check name="notes_public" checked={event?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
+          <label className="block">
+            <span className="text-[15px] text-soft">Extra guests per reply</span>
+            <select name="max_guests" defaultValue={event?.max_guests ?? ""} className="field mt-1">
+              <option value="">No limit</option>
+              <option value="0">None (just the person replying)</option>
+              <option value="1">Up to 1 (a plus-one)</option>
+              <option value="2">Up to 2</option>
+              <option value="3">Up to 3</option>
+              <option value="4">Up to 4</option>
+            </select>
+          </label>
+          <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
+          <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
+        </Row>
+      ),
+    },
+    {
+      label: "Shared costs",
+      on: !!(event?.costs_on || event?.poker_on),
+      row: (
+        <Row key="costs" id="costs" label="Shared costs" value={[event?.costs_on && "Split costs", event?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
+          <Check name="costs_on" checked={event?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
+          <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
+          <p className="text-[14px] text-soft">Everyone on the guest list (unless they said they can&apos;t make it) can add what they paid, no reply needed. chirk works out who owes whom and links to Venmo; no money goes through chirk.</p>
+        </Row>
+      ),
+    },
+    {
+      label: "Gift exchange",
+      on: !!event?.gift_on,
+      row: (
+        <Row key="gifts" id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
+          <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
+          <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
+          <label className="block">
+            <span className="text-[15px] text-soft">Rules (optional, everyone in it sees them)</span>
+            <textarea name="gift_rules" defaultValue={event?.gift_rules ?? ""} rows={3} className="field mt-1" aria-label="Gift rules"
+              placeholder="e.g. Something homemade or secondhand. Bring it wrapped, with a tag." />
+          </label>
+          <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
+          <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
+          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
+          <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
+          {matches.length > 0 && (
+            // Tucked away for sorting out a problem (a lost match, a mix-up), so hosts in the exchange aren't spoiled by accident.
+            <details className="text-[15px]">
+              <summary className="cursor-pointer text-soft">Trouble with the draw? See every match (spoils the surprise)</summary>
+              <ul className="mt-1 space-y-1">{matches.map((m) => <li key={m}>{m}</li>)}</ul>
+            </details>
+          )}
+        </Row>
+      ),
+    },
+    ...(event ? [] : [{
+      label: "Web address",
+      on: false,
+      row: (
+        <Row key="address" id="address" label="Web address" value="Made from the title">
+          <Field label="chirk.fyi/…" name="slug" placeholder="e.g. saturday-plans" />
+        </Row>
+      ),
+    }]),
+  ];
+
   return (
     <>
       <FormDraft id={event ? `edit:${event.slug}` : "new"} />
@@ -66,54 +141,11 @@ export function EventFields({ event, needed = [], matches = [] }: { event?: Even
           <Field label="Reply deadline" name="rsvp_by" type="date" value={event?.rsvp_by} />
           <Check name="remind_replies" checked={event?.remind_replies ?? false} label="Email a reminder to anyone who hasn't replied, 3 days before" />
         </Row>
-        <Row id="guests" label="Guest options" value={extras.length ? extras.join(", ").replace(/^./, (c) => c.toUpperCase()) : "Notes, plus-ones"}>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
-            <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />
-          </div>
-          <Check name="notes_public" checked={event?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
-          <label className="block">
-            <span className="text-[15px] text-soft">Extra guests per reply</span>
-            <select name="max_guests" defaultValue={event?.max_guests ?? ""} className="field mt-1">
-              <option value="">No limit</option>
-              <option value="0">None (just the person replying)</option>
-              <option value="1">Up to 1 (a plus-one)</option>
-              <option value="2">Up to 2</option>
-              <option value="3">Up to 3</option>
-              <option value="4">Up to 4</option>
-            </select>
-          </label>
-          <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
-          <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
-        </Row>
-        <Row id="costs" label="Shared costs" value={[event?.costs_on && "Split costs", event?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
-          <Check name="costs_on" checked={event?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
-          <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
-          <p className="text-[14px] text-soft">Everyone on the guest list (unless they said they can&apos;t make it) can add what they paid, no reply needed. chirk works out who owes whom and links to Venmo; no money goes through chirk.</p>
-        </Row>
-        <Row id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
-          <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
-          <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
-          <label className="block">
-            <span className="text-[15px] text-soft">Rules (optional, everyone in it sees them)</span>
-            <textarea name="gift_rules" defaultValue={event?.gift_rules ?? ""} rows={3} className="field mt-1" aria-label="Gift rules"
-              placeholder="e.g. Something homemade or secondhand. Bring it wrapped, with a tag." />
-          </label>
-          <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
-          <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
-          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
-          <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
-          {matches.length > 0 && (
-            // Tucked away for sorting out a problem (a lost match, a mix-up), so hosts in the exchange aren't spoiled by accident.
-            <details className="text-[15px]">
-              <summary className="cursor-pointer text-soft">Trouble with the draw? See every match (spoils the surprise)</summary>
-              <ul className="mt-1 space-y-1">{matches.map((m) => <li key={m}>{m}</li>)}</ul>
-            </details>
-          )}
-        </Row>
-        {!event && (
-          <Row id="address" label="Web address" value="Made from the title">
-            <Field label="chirk.fyi/…" name="slug" placeholder="e.g. saturday-plans" />
+        {/* Rows most chirks don't need wait under "More options"; one that's switched on always shows. */}
+        {advanced.filter((r) => r.on).map((r) => r.row)}
+        {advanced.some((r) => !r.on) && (
+          <Row id="more" label="More options" value={advanced.filter((r) => !r.on).map((r) => r.label).join(", ")}>
+            <div className="-mx-4 -mb-4 divide-y divide-line border-t border-line">{advanced.filter((r) => !r.on).map((r) => r.row)}</div>
           </Row>
         )}
       </div>
@@ -124,12 +156,12 @@ export function EventFields({ event, needed = [], matches = [] }: { event?: Even
 /** One optional part of the event: a single line with its current setting; tap to open. */
 function Row({ id, label, value, children }: { id: string; label: string; value: string; children: React.ReactNode }) {
   return (
-    <details id={id} className="group px-4">
+    <details id={id} className="px-4">
       <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 py-2 [&::-webkit-details-marker]:hidden">
         <span className="shrink-0 text-[16px] font-semibold">{label}</span>
         <span className="flex min-w-0 items-center gap-2 text-[15px] text-soft">
           <span className="truncate">{value}</span>
-          <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+          <span aria-hidden className="transition-transform [details[open]>summary_&]:rotate-90">›</span>
         </span>
       </summary>
       <div className="space-y-3 pb-4">{children}</div>

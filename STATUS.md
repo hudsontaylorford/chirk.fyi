@@ -14,8 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `notes-4`, includes `audit`)
-Say **"put it live"** to ship. No database step needed.
+## Waiting to go live (branch `more-options`)
+- **More options (roadmap 35):** the event form shows the everyday rows (Basics, Message, Photo, What to bring, Schedule, Reply by). Guest options, Shared costs, Gift exchange and Web address wait under one "More options" row; any of them that's switched on shows as its own row. No database step.
+
+## Went live Nov 16 (`notes-4`, includes `audit`)
 - **Security:** sign-in code guessing closed (a burst of guesses could skip the 5-try limit); test sign-in code can't work on any Vercel deploy.
 - **Privacy:** archiving can't make a draft public; "Email me my link" ignores drafts; gift matches moved into Edit event → Gift exchange → "Trouble with the draw?".
 - **Money:** Mark paid records once (no double taps); deleting a guest with costs or poker warns first.
@@ -47,7 +49,7 @@ Say **"put it live"** to ship. No database step needed.
 - Email greetings vary slightly ("Hi X," vs "Hi X!").
 
 ## Next moves (suggested)
-1. Put `notes-4` live, then use chirk for Thanksgiving and watch what guests do.
+1. Put `more-options` live, then use chirk for Thanksgiving and watch what guests do.
 2. After Nov 26: a short retro.
-3. Phase 1 picks from ROADMAP.md: templates + advanced options (29, 35), event tiles (37), Cash App button and payment links (33, 34), place autocomplete (14).
+3. Phase 1 picks from ROADMAP.md: templates (29, now that More options exists), event tiles (37), Cash App button and payment links (33, 34), place autocomplete (14).
 4. Phase 2: Your people (12, 24) and the "join chirk" email.

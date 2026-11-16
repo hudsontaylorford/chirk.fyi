@@ -68,7 +68,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **Chips (pills):** toggles; selected inverts to ink fill. On the invite, **Still needed** items are dashed-outline chips; a wash **"+ Add your own"** chip ends the row (a link into the reply) when guests may add things. On the host page, **Covered** items are wash-filled chips.
 - **Schedule:** a quiet two-column timeline under the place: time (soft) left, part of the day right; the part at the event's start time is bold. Times as typed are read in any style and shown in the event's style.
 - **Coming list (invite):** each reply once: names in bold (+ kids), what they're bringing on the next line, and their note as an italic message bubble (wash-gray, rounded with a small tail corner) when the host shows notes.
-- **Form rows (host):** one line per optional part (label left, current setting right in soft, a › that turns when open). Tapping opens just that row; closed rows keep their values.
+- **Form rows (host):** one line per optional part (label left, current setting right in soft, a › that turns when open). Tapping opens just that row; closed rows keep their values. Rows most chirks don't need (Guest options, Shared costs, Gift exchange, Web address) sit inside a **More options** row that lists them; one that's switched on always shows on its own.
 - **List editor:** the host's list as removable chips (who's bringing it shown in soft; removing a covered item asks first) plus an "Add things (commas for several)" box.
 - **Stat tiles (host):** three wash tiles: coming, replies, still needed, with an optional tiny sub-line.
 - **Formatting in the message:** `# Title`, `- bullet`, `**bold**`, auto-links; tools: Auto-format, Clear formatting, Preview.
