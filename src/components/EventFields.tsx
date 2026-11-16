@@ -4,6 +4,7 @@ import { DetailsInput } from "@/components/DetailsInput";
 import { FormDraft } from "@/components/FormDraft";
 import { shortDate, when } from "@/lib/format";
 import { parseSchedule } from "@/lib/schedule";
+import type { Template } from "@/lib/templates";
 import type { Event } from "@/lib/types";
 
 /**
@@ -11,43 +12,44 @@ import type { Event } from "@/lib/types";
  * then one row per optional part, each showing its current setting and opening on a tap.
  * Closed rows keep their fields, so nothing typed in them is lost.
  */
-export function EventFields({ event, needed = [], matches = [] }: { event?: Event; needed?: ListItem[]; matches?: string[] }) {
-  const stages = parseSchedule(event?.schedule ?? null, event?.time ?? null).length;
+export function EventFields({ event, start, needed = [], matches = [] }: { event?: Event; start?: Template; needed?: ListItem[]; matches?: string[] }) {
+  const e: Partial<Event> | undefined = event ?? start?.set; // a new event can start from a template's settings
+  const stages = parseSchedule(e?.schedule ?? null, e?.time ?? null).length;
   const extras = [
-    event?.notes_public && "notes on invite",
-    event?.max_guests != null && (event.max_guests === 0 ? "no extra guests" : `up to ${event.max_guests} extra`),
-    event?.ask_kids && "kids",
-    event?.notify_host && "email me",
+    e?.notes_public && "notes on invite",
+    e?.max_guests != null && (e.max_guests === 0 ? "no extra guests" : `up to ${e.max_guests} extra`),
+    e?.ask_kids && "kids",
+    e?.notify_host && "email me",
   ].filter(Boolean);
 
   const basics = (
     <div className="space-y-3">
-      <Field label="Title" name="title" value={event?.title} required />
-      <Field label="Date" name="date" type="date" value={event?.date} required />
+      <Field label="Title" name="title" value={e?.title} required />
+      <Field label="Date" name="date" type="date" value={e?.date} required />
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Starts" name="time" type="time" value={event?.time?.slice(0, 5)} />
-        <Field label="Ends (optional)" name="end_time" type="time" value={event?.end_time?.slice(0, 5)} />
+        <Field label="Starts" name="time" type="time" value={e?.time?.slice(0, 5)} />
+        <Field label="Ends (optional)" name="end_time" type="time" value={e?.end_time?.slice(0, 5)} />
       </div>
-      <Field label="Place" name="place" value={event?.place} placeholder="e.g. The Fords'" />
-      <Field label="Address" name="address" value={event?.address} />
-      <Field label="Hosted by (optional)" name="hosted_by" value={event?.hosted_by} placeholder="e.g. Hudson & Molly" />
+      <Field label="Place" name="place" value={e?.place} placeholder="e.g. The Fords'" />
+      <Field label="Address" name="address" value={e?.address} />
+      <Field label="Hosted by (optional)" name="hosted_by" value={e?.hosted_by} placeholder="e.g. Hudson & Molly" />
     </div>
   );
 
   const advanced = [
     {
       label: "Guest options",
-      on: extras.length > 0 || !!event?.note_prompt || !!event?.note_hint,
+      on: extras.length > 0 || !!e?.note_prompt || !!e?.note_hint,
       row: (
         <Row key="guests" id="guests" label="Guest options" value={extras.length ? extras.join(", ").replace(/^./, (c) => c.toUpperCase()) : "Notes, plus-ones"}>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Note question" name="note_prompt" value={event?.note_prompt} placeholder="Anything we should know?" />
-            <Field label="Its example" name="note_hint" value={event?.note_hint} placeholder="Allergies, arriving late…" />
+            <Field label="Note question" name="note_prompt" value={e?.note_prompt} placeholder="Anything we should know?" />
+            <Field label="Its example" name="note_hint" value={e?.note_hint} placeholder="Allergies, arriving late…" />
           </div>
-          <Check name="notes_public" checked={event?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
+          <Check name="notes_public" checked={e?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
           <label className="block">
             <span className="text-[15px] text-soft">Extra guests per reply</span>
-            <select name="max_guests" defaultValue={event?.max_guests ?? ""} className="field mt-1">
+            <select name="max_guests" defaultValue={e?.max_guests ?? ""} className="field mt-1">
               <option value="">No limit</option>
               <option value="0">None (just the person replying)</option>
               <option value="1">Up to 1 (a plus-one)</option>
@@ -56,37 +58,37 @@ export function EventFields({ event, needed = [], matches = [] }: { event?: Even
               <option value="4">Up to 4</option>
             </select>
           </label>
-          <Check name="ask_kids" checked={event?.ask_kids ?? false} label="Ask how many kids are coming" />
-          <Check name="notify_host" checked={event?.notify_host ?? false} label="Email me when someone replies" />
+          <Check name="ask_kids" checked={e?.ask_kids ?? false} label="Ask how many kids are coming" />
+          <Check name="notify_host" checked={e?.notify_host ?? false} label="Email me when someone replies" />
         </Row>
       ),
     },
     {
       label: "Shared costs",
-      on: !!(event?.costs_on || event?.poker_on),
+      on: !!(e?.costs_on || e?.poker_on),
       row: (
-        <Row key="costs" id="costs" label="Shared costs" value={[event?.costs_on && "Split costs", event?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
-          <Check name="costs_on" checked={event?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
-          <Check name="poker_on" checked={event?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
+        <Row key="costs" id="costs" label="Shared costs" value={[e?.costs_on && "Split costs", e?.poker_on && "Poker"].filter(Boolean).join(" · ") || "Off"}>
+          <Check name="costs_on" checked={e?.costs_on ?? false} label="Split costs (who paid what, who owes whom)" />
+          <Check name="poker_on" checked={e?.poker_on ?? false} label="Poker night (buy-ins and cash-outs)" />
           <p className="text-[14px] text-soft">Everyone on the guest list (unless they said they can&apos;t make it) can add what they paid, no reply needed. chirk works out who owes whom and links to Venmo; no money goes through chirk.</p>
         </Row>
       ),
     },
     {
       label: "Gift exchange",
-      on: !!event?.gift_on,
+      on: !!e?.gift_on,
       row: (
-        <Row key="gifts" id="gifts" label="Gift exchange" value={event?.gift_on ? (event.gift_budget ? `On · ${event.gift_budget}` : "On") : "Off"}>
-          <Check name="gift_on" checked={event?.gift_on ?? false} label="Draw names for a gift exchange" />
-          <Field label="Budget (optional)" name="gift_budget" value={event?.gift_budget} placeholder="e.g. $30" />
+        <Row key="gifts" id="gifts" label="Gift exchange" value={e?.gift_on ? (e.gift_budget ? `On · ${e.gift_budget}` : "On") : "Off"}>
+          <Check name="gift_on" checked={e?.gift_on ?? false} label="Draw names for a gift exchange" />
+          <Field label="Budget (optional)" name="gift_budget" value={e?.gift_budget} placeholder="e.g. $30" />
           <label className="block">
             <span className="text-[15px] text-soft">Rules (optional, everyone in it sees them)</span>
-            <textarea name="gift_rules" defaultValue={event?.gift_rules ?? ""} rows={3} className="field mt-1" aria-label="Gift rules"
+            <textarea name="gift_rules" defaultValue={e?.gift_rules ?? ""} rows={3} className="field mt-1" aria-label="Gift rules"
               placeholder="e.g. Something homemade or secondhand. Bring it wrapped, with a tag." />
           </label>
-          <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
-          <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
-          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
+          <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={e?.gift_draw_on} />
+          <Check name="gift_remind_ideas" checked={e?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
+          <Check name="gift_remind_givers" checked={e?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
           <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
           {matches.length > 0 && (
             // Tucked away for sorting out a problem (a lost match, a mix-up), so hosts in the exchange aren't spoiled by accident.
@@ -111,35 +113,35 @@ export function EventFields({ event, needed = [], matches = [] }: { event?: Even
 
   return (
     <>
-      <FormDraft id={event ? `edit:${event.slug}` : "new"} />
+      <FormDraft id={event ? `edit:${event.slug}` : start ? `new:${start.id}` : "new"} />
       {/* New events start with the essentials open (they're required); existing ones show them as a row. */}
       {!event && basics}
       <div className="divide-y divide-line rounded-2xl border border-line bg-white">
         {event && (
           <Row id="basics" label="Basics" value={[when(event), event.place].filter(Boolean).join(" · ")}>{basics}</Row>
         )}
-        <Row id="details" label="Message" value={event?.details ? event.details.replace(/[#*\-]/g, "").trim().slice(0, 40) + "…" : "Add one"}>
-          <DetailsInput value={event?.details ?? ""} />
+        <Row id="details" label="Message" value={e?.details ? e.details.replace(/[#*\-]/g, "").trim().slice(0, 40) + "…" : "Add one"}>
+          <DetailsInput value={e?.details ?? ""} />
         </Row>
-        <Row id="photo" label="Photo" value={event?.cover_url ? "Added" : "Add one"}>
+        <Row id="photo" label="Photo" value={e?.cover_url ? "Added" : "Add one"}>
           {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
-          <CoverInput value={event?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
+          <CoverInput value={e?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
         </Row>
-        <Row id="bring" label="What to bring" value={event?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
-          <BringFields prompt={event?.bring_prompt ?? null} allowOwn={event?.allow_own ?? true} allowDoubles={event?.allow_doubles ?? false} items={needed} />
+        <Row id="bring" label="What to bring" value={e?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
+          <BringFields prompt={e?.bring_prompt ?? null} allowOwn={e?.allow_own ?? true} allowDoubles={e?.allow_doubles ?? false} items={needed} />
         </Row>
         <Row id="schedule" label="Schedule" value={stages ? `${stages} part${stages === 1 ? "" : "s"}` : "Add one"}>
           <label className="block">
-            <textarea name="schedule" defaultValue={event?.schedule ?? ""} rows={4} className="field" aria-label="Schedule"
+            <textarea name="schedule" defaultValue={e?.schedule ?? ""} rows={4} className="field" aria-label="Schedule"
               placeholder={"2 pm Arrive\n3 pm The main part\n6 pm Wrap up"} />
             <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
           </label>
-          <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
-          <Check name="long_times" checked={event?.long_times ?? false} label="Write times as 3:00 PM" />
+          <Check name="ask_arrival" checked={e?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
+          <Check name="long_times" checked={e?.long_times ?? false} label="Write times as 3:00 PM" />
         </Row>
-        <Row id="reply-by" label="Reply by" value={event?.rsvp_by ? shortDate(event.rsvp_by) : "No deadline"}>
-          <Field label="Reply deadline" name="rsvp_by" type="date" value={event?.rsvp_by} />
-          <Check name="remind_replies" checked={event?.remind_replies ?? false} label="Email a reminder to anyone who hasn't replied, 3 days before" />
+        <Row id="reply-by" label="Reply by" value={e?.rsvp_by ? shortDate(e.rsvp_by) : "No deadline"}>
+          <Field label="Reply deadline" name="rsvp_by" type="date" value={e?.rsvp_by} />
+          <Check name="remind_replies" checked={e?.remind_replies ?? false} label="Email a reminder to anyone who hasn't replied, 3 days before" />
         </Row>
         {/* Rows most chirks don't need wait under "More options"; one that's switched on always shows. */}
         {advanced.filter((r) => r.on).map((r) => r.row)}

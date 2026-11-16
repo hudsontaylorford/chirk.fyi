@@ -14,6 +14,9 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Waiting to go live (branch `templates`)
+- **Templates (roadmap 29):** a quiet "Start from a template" line on New event opens ten: Dinner or potluck, Holiday meal, Party or birthday, Shower or celebration, Game or watch night, Poker night, Secret Santa, White elephant, Tickets or an outing, Quick hang. Picking one fills in settings and example wording only; "Start blank" undoes it. No database step.
+
 ## Went live Nov 16 (`more-options`)
 - **More options (roadmap 35):** the event form shows the everyday rows (Basics, Message, Photo, What to bring, Schedule, Reply by). Guest options, Shared costs, Gift exchange and Web address wait under one "More options" row; any of them that's switched on shows as its own row. No database step.
 
@@ -51,5 +54,5 @@ Everything up to Nov 16's "fixes-3":
 ## Next moves (suggested)
 1. Use chirk for Thanksgiving and watch what guests do.
 2. After Nov 26: a short retro.
-3. Phase 1 picks from ROADMAP.md: templates (29, now that More options exists), event tiles (37), Cash App button and payment links (33, 34), place autocomplete (14).
+3. Phase 1 picks from ROADMAP.md: event tiles (37), Cash App button and payment links (33, 34), place autocomplete (14).
 4. Phase 2: Your people (12, 24) and the "join chirk" email.

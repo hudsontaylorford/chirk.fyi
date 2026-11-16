@@ -457,6 +457,18 @@ await h.waitForURL(/\/host$/);
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 
 // Gift exchange: names in, a "never draw each other" rule, a draw, and each person seeing only their own match.
+// Templates: one quiet line on New event; picking Poker night switches poker on, and nothing else is required.
+await h.goto(ORIGIN + "/host/new");
+await h.click("summary:text-is('Start from a template')");
+await h.click("a:text-is('Poker night')");
+await h.waitForSelector("text=Started from");
+await h.fill("input[name=title]", "Template test");
+await h.fill("input[name=date]", "2026-12-12");
+await h.click("button:text-is('Create event')");
+await h.waitForURL(/\/template-test(-\d+)?\/host$/);
+assert.match(await h.textContent("main"), /Poker night/); // the poker section is on
+assert.equal(await h.locator("summary:has(span:text-is('Shared costs'))").isVisible(), true);
+
 await h.goto(ORIGIN + "/host/new");
 await h.fill("input[name=title]", "Gift test");
 await h.fill("input[name=date]", "2026-12-20");

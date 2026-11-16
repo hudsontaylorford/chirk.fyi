@@ -41,6 +41,7 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 - **Poker night:** Buy-in / Cash-out, "Buy in all", In · Out · Net, "counted as the $X left on the table" for a worked-out cash-out.
 - **Gift exchange:** Who's in, Never draw each other, Rules, Draw names, "You're giving a gift to", "Your gift ideas".
 - **Sign in:** "Been invited to an event? You're invited to chirk." Anyone on a chirk guest list can sign in.
+- **Templates:** "Start from a template", "Started from …", "Start blank". A template only fills in settings and example wording.
 - **Scheduled sends** show their state: "sent ✓", or "skipped (too late)".
 
 ### An open question
