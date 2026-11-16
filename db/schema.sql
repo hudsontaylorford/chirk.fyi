@@ -161,6 +161,17 @@ begin
     primary key (event_id, job)
   );
 
+  -- A host's own templates ("Save as a template"): an event's settings, wording and bring list, never its guests or dates.
+  create table if not exists templates (
+    id uuid primary key default gen_random_uuid(),
+    user_id uuid not null references users(id) on delete cascade,
+    name text not null,
+    settings jsonb not null default '{}',  -- event fields, see TEMPLATE_FIELDS in src/lib/templates.ts
+    items text[] not null default '{}',    -- the bring list
+    created_at timestamptz not null default now()
+  );
+  create index if not exists templates_user on templates (user_id);
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;

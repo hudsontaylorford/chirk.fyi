@@ -1,13 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { TEMPLATES, template } from "./templates.ts";
+import { TEMPLATE_FIELDS, TEMPLATES, fromEvent, template } from "./templates.ts";
 
 // Every setting a template fills in must be one the event form has a field for, or it would silently do nothing.
-const FORM = new Set([
-  "details", "schedule", "bring_prompt", "allow_own", "allow_doubles", "ask_arrival", "long_times", "rsvp_by", "remind_replies",
-  "note_prompt", "note_hint", "notes_public", "max_guests", "ask_kids", "notify_host", "costs_on", "poker_on",
-  "gift_on", "gift_budget", "gift_rules", "gift_draw_on", "gift_remind_ideas", "gift_remind_givers",
-]);
+const FORM = new Set<string>(TEMPLATE_FIELDS);
 
 test("templates: unique, findable, and only fill in fields the form has", () => {
   assert.equal(new Set(TEMPLATES.map((t) => t.id)).size, TEMPLATES.length);
@@ -18,4 +14,9 @@ test("templates: unique, findable, and only fill in fields the form has", () => 
   }
   assert.equal(template("nope"), undefined);
   assert.equal(template(undefined), undefined);
+});
+
+test("saving an event as a template keeps settings and wording, never its title, dates or guests", () => {
+  const kept = fromEvent({ id: "x", slug: "poker", title: "Poker", date: "2026-12-12", rsvp_by: "2026-12-10", gift_draw_on: "2026-12-01", time: "20:00:00", poker_on: true, max_guests: 0, details: "Bring cash", status: "live" });
+  assert.deepEqual(kept, { time: "20:00:00", poker_on: true, max_guests: 0, details: "Bring cash" });
 });

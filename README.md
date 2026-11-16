@@ -17,7 +17,7 @@ A simple way to make plans with your people: one page per plan, one link to send
 - shared costs (who paid, who owes whom, Pay with Venmo, Mark paid) and poker (buy-ins, cash-outs, payouts)
 - gift exchange (who's in, never-draw pairs, rules, draw names, email matches)
 - scheduled emails each morning at 9 am New York: the gift draw, gift reminders, reply reminders
-- Copy to next year, Archive, Delete
+- Copy to next year, Save as a template, Archive, Delete
 
 ## Links
 
@@ -34,7 +34,7 @@ A simple way to make plans with your people: one page per plan, one link to send
 
 ## How it's built
 - Next.js (App Router) + Tailwind on Vercel. Postgres on Neon through `DATABASE_URL`; only the server talks to the database.
-- Schema in `db/schema.sql` (re-runnable; paste into the Neon SQL editor). Tables: `events`, `households` (one reply each, with a private `token`), `items` + `claims` (the bring list), `users`, `login_codes`, `event_hosts`, `costs`, `cost_shares`, `payments`, `poker_entries`, `gift_draws`, `sent_jobs`.
+- Schema in `db/schema.sql` (re-runnable; paste into the Neon SQL editor). Tables: `events`, `households` (one reply each, with a private `token`), `items` + `claims` (the bring list), `users`, `login_codes`, `event_hosts`, `costs`, `cost_shares`, `payments`, `poker_entries`, `gift_draws`, `sent_jobs`, `templates` (a host's saved templates).
 - Pure logic with unit tests in `src/lib` (`*.test.mts`): money math and poker (`costs.ts`), name draws (`gifts.ts`), what's due each morning (`due.ts`), counts and formatting (`format.ts`), emails.
 - The morning job: `vercel.json` cron → `/api/cron` (needs `CRON_SECRET`) → `src/lib/jobs.ts`. Each job is claimed once in `sent_jobs`; every email has an idempotency key.
 - The look is intentionally plain until it's designed. Tokens live in `src/app/globals.css`.

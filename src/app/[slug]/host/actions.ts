@@ -13,8 +13,30 @@ import { parseGuests } from "@/lib/guests";
 import { inviteEmail, reminderEmail } from "@/lib/invite-email";
 import { messageEmail } from "@/lib/message-email";
 import { ownerEmail } from "@/lib/jobs";
+import { fromEvent } from "@/lib/templates";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
+
+/** "Save as a template": this event's settings, wording and bring list, for the signed-in host's own New event. */
+export async function saveTemplate(slug: string, f: FormData) {
+  const ev = await eventId(slug);
+  const me = await requireUser();
+  const e = await getEvent(slug);
+  if (!e) return;
+  const items = (await sql<{ name: string }[]>`select name from items where event_id = ${ev} and kind = 'needed' order by sort`).map((i) => i.name);
+  const name = val(f, "name").slice(0, 60) || e.title;
+  const [{ n }] = await sql<{ n: number }[]>`select count(*)::int as n from templates where user_id = ${me.id}`;
+  if (n >= 30) return; // shortcut: a quiet cap, plenty for one person; say so in the page if anyone reaches it
+  await sql`insert into templates ${sql({ user_id: me.id, name, settings: sql.json(fromEvent(e)), items })}`;
+  revalidatePath("/host/new");
+}
+
+/** Removes one of your own templates. */
+export async function removeTemplate(id: string) {
+  const me = await requireUser();
+  await sql`delete from templates where id = ${id} and user_id = ${me.id}`;
+  revalidatePath("/host/new");
+}
 
 /** The event's id, once we know the signed-in host hosts it (owner or co-host; `owner` = owner only). */
 async function eventId(slug: string, owner = false) {

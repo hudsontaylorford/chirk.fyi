@@ -469,6 +469,23 @@ await h.waitForURL(/\/template-test(-\d+)?\/host$/);
 assert.match(await h.textContent("main"), /Poker night/); // the poker section is on
 assert.equal(await h.locator("summary:has(span:text-is('Shared costs'))").isVisible(), true);
 
+// Save as a template: this event's setup becomes a starting point under New event; the title and guests don't come along.
+await h.click("summary:text-is('Save as a template')");
+await h.fill("input[name=name]", "Our poker");
+await h.click("button:text-is('Save template')");
+await h.waitForSelector("button:text-is('Saved ✓')");
+await h.goto(ORIGIN + "/host/new");
+await h.click("summary:text-is('Start from a template')");
+await h.click("a:text-is('Our poker')");
+await h.waitForSelector("text=Started from");
+assert.equal(await h.inputValue("input[name=title]"), "");
+assert.equal(await h.locator("summary:has(span:text-is('Shared costs'))").isVisible(), true); // poker came along
+await h.goto(ORIGIN + "/host/new");
+await h.click("summary:text-is('Start from a template')");
+await h.click("li:has-text('Our poker') summary:text-is('Remove')");
+await h.click("li:has-text('Our poker') button:text-is('Sure?')");
+await h.waitForSelector("a:text-is('Our poker')", { state: "detached" });
+
 await h.goto(ORIGIN + "/host/new");
 await h.fill("input[name=title]", "Gift test");
 await h.fill("input[name=date]", "2026-12-20");

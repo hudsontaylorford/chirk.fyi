@@ -46,6 +46,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const answered = guests.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
   const sent = await getSentJobs(event.id);
+  const [{ myTemplates }] = await sql<{ myTemplates: number }[]>`select count(*)::int as "myTemplates" from templates where user_id = ${me.id}`;
   const nameOf = (id: string) => joinNames(households.find((h) => h.id === id)?.names ?? ["someone"]);
   // Guests with money on the event: deleting them changes everyone's settle-up, so the page warns first.
   const hasMoney = new Set((await sql<{ id: string }[]>`
@@ -247,6 +248,22 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <form action={act.copyToNextYear.bind(null, slug)}>
           <SaveButton className="btn btn-quiet w-full">Copy to next year (as a draft)</SaveButton>
         </form>
+        {/* Saves this event's setup (not its title, dates or guests) as a starting point for your next New event. */}
+        <details className="rounded-2xl bg-wash px-4">
+          <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-center text-[17px] font-semibold [&::-webkit-details-marker]:hidden">Save as a template</summary>
+          {myTemplates >= 30 ? (
+            <p className="pb-4 text-[15px] text-soft">You have 30 templates. Remove one under New event → Start from a template first.</p>
+          ) : (
+            <form action={act.saveTemplate.bind(null, slug)} className="space-y-2 pb-4">
+              <label className="block">
+                <span className="text-[15px] text-soft">Template name</span>
+                <input name="name" defaultValue={event.title} maxLength={60} className="field mt-1" />
+              </label>
+              <p className="text-[14px] text-soft">Keeps the settings, message, times, place, photo and what to bring. Not the title, dates or guests. It shows under Start from a template on New event.</p>
+              <SaveButton className="btn w-full">Save template</SaveButton>
+            </form>
+          )}
+        </details>
         {event.status !== "draft" && (
           <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
             <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>

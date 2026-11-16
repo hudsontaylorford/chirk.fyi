@@ -2,7 +2,18 @@
 // wording; everything stays editable, and nothing about the event remembers which one it came from.
 import type { Event } from "./types";
 
-export type Template = { id: string; label: string; set: Partial<Event> };
+export type Template = { id: string; label: string; set: Partial<Event>; items?: string[] };
+
+/** What a saved template keeps from an event: settings, wording, times, place and photo. Never the title, dates or guests. */
+export const TEMPLATE_FIELDS = [
+  "time", "end_time", "place", "address", "hosted_by", "details", "cover_url", "schedule", "ask_arrival", "long_times",
+  "bring_prompt", "allow_own", "allow_doubles", "remind_replies", "note_prompt", "note_hint", "notes_public", "max_guests",
+  "ask_kids", "notify_host", "costs_on", "poker_on", "gift_on", "gift_budget", "gift_rules", "gift_remind_ideas", "gift_remind_givers",
+] as const satisfies readonly (keyof Event)[];
+
+/** An event's template-worthy settings. */
+export const fromEvent = (e: Partial<Event>): Partial<Event> =>
+  Object.fromEntries(TEMPLATE_FIELDS.filter((k) => e[k] !== undefined).map((k) => [k, e[k]]));
 
 export const TEMPLATES: Template[] = [
   { id: "poker", label: "Poker night", set: { poker_on: true, max_guests: 0, bring_prompt: "Bringing a snack or a drink?", allow_own: true } },
