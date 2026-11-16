@@ -27,10 +27,10 @@ export function CostForm({ action, host, me, going }: { action: Send; host: bool
           <legend className="text-[15px] text-soft">Split between (per person: a couple pays for two)</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {going.map((g) => (
-              <label key={g.id} className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+              <label key={g.id} className="pill-check">
                 <input type="checkbox" name="split" value={g.id} defaultChecked className="h-4 w-4" />
                 {g.id === me ? "You" : g.name}
-                {g.people > 1 && <span className="text-soft">×{g.people}</span>}
+                {g.people > 1 && <span className="opacity-60">×{g.people}</span>}
               </label>
             ))}
           </div>
@@ -63,10 +63,10 @@ export function PokerForm({ action, host, me, usual, players }: { action: Send; 
   return (
     <form action={add} className="mt-3 space-y-2">
       <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Buy-in or cash-out">
-        <label className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+        <label className="pill-check">
           <input type="radio" name="kind" value="buyin" defaultChecked className="h-4 w-4" /> Buy-in
         </label>
-        <label className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+        <label className="pill-check">
           <input type="radio" name="kind" value="cashout" className="h-4 w-4" /> Cash-out
         </label>
       </div>

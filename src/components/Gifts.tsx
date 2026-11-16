@@ -59,7 +59,7 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
             <p className="text-[15px] text-soft">Who&apos;s in</p>
             <div className="mt-1 flex flex-wrap gap-2">
               {coming.map((h) => (
-                <label key={h.id} className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
+                <label key={h.id} className="pill-check">
                   <input type="checkbox" name="in" value={h.id} defaultChecked={h.gift_in} className="h-4 w-4" />
                   {joinNames(h.names)}
                 </label>

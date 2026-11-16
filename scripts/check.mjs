@@ -248,7 +248,7 @@ await h.check("input[name=poker_on]");
 await h.click("form:has(input[name=poker_on]) button:text-is('Save')");
 await h.waitForSelector("text=Saved");
 const pokerIn = async (page, who, amount, kind = "buyin") => {
-  await page.check(`input[name=kind][value=${kind}]`);
+  await page.click(`label:has(input[name=kind][value=${kind}])`); // the pill is what people tap
   if (who) await page.selectOption("select[aria-label=Player]", { label: who });
   await page.fill("input[aria-label='Poker amount']", amount);
   await page.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
@@ -293,7 +293,7 @@ await h.click("button:text-is('Buy in all')"); // tapping again doubles nobody
 await h.waitForSelector("text=Everyone's already bought in.");
 await h.goto(pokerHost);
 assert.equal(await h.inputValue("input[aria-label='Poker amount']"), "20"); // the usual buy-in is prefilled
-await h.check("input[name=kind][value=cashout]");
+await h.click("label:has(input[name=kind][value=cashout])");
 await h.selectOption("select[aria-label=Player]", { label: "Sam" });
 await h.fill("input[aria-label='Poker amount']", "10000");
 await h.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
@@ -354,6 +354,12 @@ await ge.click("text=Send RSVP");
 await ge.waitForURL(/\/r\//);
 await h.goto(pokerHost);
 assert.match(await h.textContent("main"), /Gil & Eve/); // saved as two people
+// Your events and the event page count the same (couples typed together are two people).
+const tile = Number((await h.locator("div.rounded-2xl:has-text('coming') >> div.text-\\[28px\\]").first().textContent()).trim());
+await h.goto(ORIGIN + "/host");
+assert.match(await h.textContent("li:has-text('Poker test')"), new RegExp(`${tile} coming`));
+await h.goto(pokerHost);
+
 await h.goto(ORIGIN + "/");
 assert.equal(await h.locator("a:text-is('Your events ›')").count(), 1);
 const nobodyHome = await phone();
@@ -468,7 +474,7 @@ await h.goto(giftHost);
 await h.click("button:text-is('Email everyone their match')");
 await h.waitForSelector("text=Email only sends from the live site.");
 assert.equal(await h.locator("text=giving a gift to").count(), 0); // hosts aren't spoiled
-await h.uncheck("label:has-text('Cal') input[name=in]");
+await h.click("label.pill-check:has-text('Cal')"); // untick Cal
 await h.click('button:has-text("Save who")');
 await h.waitForSelector("text=draw again to include everyone");
 

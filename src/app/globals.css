@@ -55,3 +55,15 @@ input::-webkit-date-and-time-value { text-align: left; }
     background-repeat: no-repeat; background-position: right 1rem center; background-size: 12px 8px;
   }
 }
+
+/* Checkboxes and radios that stay visible (event settings) use the ink color, not the system blue. */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
+
+/* A checkbox or radio shown as a pill: outlined when off, solid ink with white text when on (like .pill[aria-pressed]). */
+@utility pill-check {
+  position: relative; display: inline-flex; align-items: center; gap: .35rem; cursor: pointer; user-select: none;
+  border: 1.5px solid var(--color-line); border-radius: 999px; padding: .5rem 1rem; font-size: 15px; background: white;
+  & input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  &:has(input:checked) { background: var(--color-accent); border-color: var(--color-accent); color: white; }
+  &:has(input:focus-visible) { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+}

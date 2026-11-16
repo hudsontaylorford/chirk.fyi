@@ -4,7 +4,7 @@ import { BulkBar, Pick } from "@/components/BulkBar";
 import { SaveButton } from "@/components/SaveButton";
 import { currentUser, hasLegacyCookie, unclaimedEvents } from "@/lib/auth";
 import { sql } from "@/lib/db";
-import { shortDate } from "@/lib/format";
+import { headcount, shortDate } from "@/lib/format";
 import { acceptTerms, saveName, signOut } from "./sign-in";
 import { bulkEvents } from "../[slug]/host/actions";
 import { TERMS_VERSION } from "@/lib/terms";
@@ -13,7 +13,7 @@ import { Footer } from "@/components/Footer";
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Host", robots: { index: false } };
 
-type Row = { slug: string; title: string; date: string; status: string; hosted_by: string | null; going: number; past: boolean };
+type Row = { id: string; slug: string; title: string; date: string; status: string; hosted_by: string | null; going: number; past: boolean };
 
 /** The host's home: upcoming events (soonest first), then past and archived ones tucked away. */
 export default async function HostHome({ searchParams }: { searchParams: Promise<{ wrong?: string; email?: string }> }) {
@@ -23,12 +23,20 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
     return <HostSignIn claiming={await hasLegacyCookie()} legacy={(await unclaimedEvents()) > 0} wrong={!!q.wrong} email={q.email} />;
   }
 
-  const events = await sql<Row[]>`
-    select e.slug, e.title, e.date::text, e.status, e.hosted_by,
-      e.date < (now() at time zone 'America/New_York')::date as past,
-      (select coalesce(sum((select count(*) from unnest(h.names) n, regexp_split_to_table(n, '\s+(&|and)\s+|\s*&\s*', 'i') p where p <> '') + h.kids), 0)::int from households h where h.event_id = e.id and h.going) as going -- couples typed in one box count as two, like headcount()
+  const rows = await sql<Omit<Row, "going">[]>`
+    select e.id, e.slug, e.title, e.date::text, e.status, e.hosted_by,
+      e.date < (now() at time zone 'America/New_York')::date as past
     from events e join event_hosts eh on eh.event_id = e.id and eh.user_id = ${me.id}
     order by e.date`;
+  // Who's coming, counted exactly as on each event's page ("Graham and Ellen" in one box is two people).
+  const coming = rows.length
+    ? await sql<{ event_id: string; names: string[]; kids: number }[]>`
+        select event_id, names, kids from households where going and event_id in ${sql(rows.map((r) => r.id))}`
+    : [];
+  const events: Row[] = rows.map((r) => ({
+    ...r,
+    going: coming.filter((h) => h.event_id === r.id).reduce((n, h) => n + headcount(h.names) + h.kids, 0),
+  }));
   const archived = events.filter((e) => e.status === "archived").reverse();
   const past = events.filter((e) => e.status !== "archived" && e.past).reverse();
   const upcoming = events.filter((e) => e.status !== "archived" && !e.past);
