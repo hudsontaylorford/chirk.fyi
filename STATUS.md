@@ -14,6 +14,11 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Waiting to go live (branch `trim`)
+- **Schedule** moved under More options (it shows on its own once it has lines or asks which parts guests are coming to).
+- **Templates cut to three** that switch a feature on: Poker night, Secret Santa, White elephant. Saving your own is next on the roadmap.
+- **Roadmap:** import (43), forward an email (44), crewmaxxing → chirk (45), address lookup reusing crew-scheduler's Google approach (14b).
+
 ## Went live Nov 16 (`templates`)
 - **Templates (roadmap 29):** a quiet "Start from a template" line on New event opens ten: Dinner or potluck, Holiday meal, Party or birthday, Shower or celebration, Game or watch night, Poker night, Secret Santa, White elephant, Tickets or an outing, Quick hang. Picking one fills in settings and example wording only; "Start blank" undoes it. No database step.
 

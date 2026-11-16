@@ -38,6 +38,21 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
 
   const advanced = [
     {
+      label: "Schedule",
+      on: !!e?.schedule || !!e?.ask_arrival,
+      row: (
+                <Row key="schedule" id="schedule" label="Schedule" value={stages ? `${stages} part${stages === 1 ? "" : "s"}` : "Add one"}>
+                  <label className="block">
+                    <textarea name="schedule" defaultValue={e?.schedule ?? ""} rows={4} className="field" aria-label="Schedule"
+                      placeholder={"2 pm Arrive\n3 pm The main part\n6 pm Wrap up"} />
+                    <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
+                  </label>
+                  <Check name="ask_arrival" checked={e?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
+                  <Check name="long_times" checked={e?.long_times ?? false} label="Write times as 3:00 PM" />
+                </Row>
+      ),
+    },
+    {
       label: "Guest options",
       on: extras.length > 0 || !!e?.note_prompt || !!e?.note_hint,
       row: (
@@ -129,15 +144,6 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
         </Row>
         <Row id="bring" label="What to bring" value={e?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
           <BringFields prompt={e?.bring_prompt ?? null} allowOwn={e?.allow_own ?? true} allowDoubles={e?.allow_doubles ?? false} items={needed} />
-        </Row>
-        <Row id="schedule" label="Schedule" value={stages ? `${stages} part${stages === 1 ? "" : "s"}` : "Add one"}>
-          <label className="block">
-            <textarea name="schedule" defaultValue={e?.schedule ?? ""} rows={4} className="field" aria-label="Schedule"
-              placeholder={"2 pm Arrive\n3 pm The main part\n6 pm Wrap up"} />
-            <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
-          </label>
-          <Check name="ask_arrival" checked={e?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
-          <Check name="long_times" checked={e?.long_times ?? false} label="Write times as 3:00 PM" />
         </Row>
         <Row id="reply-by" label="Reply by" value={e?.rsvp_by ? shortDate(e.rsvp_by) : "No deadline"}>
           <Field label="Reply deadline" name="rsvp_by" type="date" value={e?.rsvp_by} />
