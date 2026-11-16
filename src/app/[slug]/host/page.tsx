@@ -59,7 +59,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <div className="flex justify-between text-[16px] text-soft">
         <Link href="/host">‹ Your events</Link>
-        <a href={`/${slug}`} className="font-semibold text-ink">View invite</a>
+        <a href={`/${slug}`} className="font-semibold text-ink">View event</a>
       </div>
       <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
       {/* Who hosts this: everyone here can edit and send; only the owner removes hosts or deletes the event. */}

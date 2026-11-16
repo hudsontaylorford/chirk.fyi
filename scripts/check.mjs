@@ -285,7 +285,20 @@ await h.click("summary:has-text('Shared costs')");
 await h.check("input[name=poker_on]");
 await h.click("form:has(input[name=poker_on]) button:text-is('Save')");
 await h.waitForSelector("text=Saved");
-for (const [who, amount, kind] of [["Hudson", "20"], ["Sam", "20"], ["Lee", "20"], ["Lee", "20"], ["Hudson", "55", "cashout"], ["Sam", "25", "cashout"], ["Lee", "0", "cashout"]]) {
+await h.goto(pokerHost);
+await h.fill("input[aria-label='Buy-in for everyone']", "20");
+await h.click("button:text-is('Buy in all')");
+await h.waitForSelector("text=Bought in 3 at $20 ✓");
+await h.click("button:text-is('Buy in all')"); // tapping again doubles nobody
+await h.waitForSelector("text=Everyone's already bought in.");
+await h.goto(pokerHost);
+assert.equal(await h.inputValue("input[aria-label='Poker amount']"), "20"); // the usual buy-in is prefilled
+await h.check("input[name=kind][value=cashout]");
+await h.selectOption("select[aria-label=Player]", { label: "Sam" });
+await h.fill("input[aria-label='Poker amount']", "10000");
+await h.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
+await h.waitForSelector("text=That's more than the whole table put in ($60). Check the amount.");
+for (const [who, amount, kind] of [["Lee", "20"], ["Hudson", "55", "cashout"], ["Sam", "25", "cashout"], ["Lee", "0", "cashout"]]) {
   await h.goto(pokerHost);
   await pokerIn(h, who, amount, kind);
 }

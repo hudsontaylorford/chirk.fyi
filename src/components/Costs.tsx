@@ -1,6 +1,6 @@
-import { addCost, addPoker, markPaid, removeCost, removePoker, saveVenmo } from "@/app/costs";
+import { addCost, addPoker, buyInAll, markPaid, removeCost, removePoker, saveVenmo } from "@/app/costs";
 import { Confirm } from "@/components/Confirm";
-import { CostForm, PokerForm, VenmoForm } from "@/components/CostForms";
+import { BuyInAll, CostForm, PokerForm, VenmoForm } from "@/components/CostForms";
 import { balances, money, poker, settle, venmoUrl } from "@/lib/costs";
 import { getCosts, joinNames } from "@/lib/data";
 import type { EventData } from "@/lib/types";
@@ -18,6 +18,13 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
   const costs = event.costs_on ? all.costs : [];
   // A poker game joins the settle-up once everyone has cashed out and the chips add up.
   const game = poker(entries);
+  // The usual buy-in (the most common one so far), to prefill the boxes.
+  const usual = (() => {
+    const counts = new Map<number, number>();
+    for (const e of entries) if (e.kind === "buyin") counts.set(e.amount, (counts.get(e.amount) ?? 0) + 1);
+    const top = [...counts].sort((a, b) => b[1] - a[1])[0];
+    return top ? (top[0] / 100).toFixed(top[0] % 100 ? 2 : 0) : "";
+  })();
   // Everyone on the list counts unless they've said they can't make it; nobody has to reply first.
   const me = households.find((h) => h.token === token && h.going !== false) ?? null;
   const going = households.filter((h) => h.going !== false);
@@ -62,6 +69,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
       {event.poker_on && (
         <div className={event.costs_on ? "mt-6" : "mt-2"}>
           {event.costs_on && <h3 className="text-[17px] font-semibold">Poker</h3>}
+          {host && <BuyInAll action={buyInAll.bind(null, event.slug)} usual={usual} />}
           {game.players.size === 0 ? (
             <p className="mt-1 text-soft">No buy-ins yet.</p>
           ) : (
@@ -81,8 +89,14 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
               </table>
               <p className="mt-2 text-[15px] text-soft">
                 In {money(game.totalIn)} · Out {money(game.totalOut)}
-                {game.ready ? " ✓ Added to settle up." : !game.allOut ? ` · waiting on ${[...game.players.values()].filter((p) => p.out === null).length} to cash out` : game.totalOut > game.totalIn ? ` · out is ${money(game.totalOut - game.totalIn)} over` : ` · out is ${money(game.totalIn - game.totalOut)} short`}
+                {game.ready ? " ✓ Added to settle up." : !game.allOut ? ` · waiting on ${[...game.players.values()].filter((p) => p.out === null).length} to cash out` : ""}
               </p>
+              {game.allOut && !game.ready && (
+                <p role="alert" className="mt-2 rounded-2xl bg-amber-50 p-3 text-[15px] text-amber-900">
+                  The chips don&apos;t add up: out is {money(Math.abs(game.totalOut - game.totalIn))} {game.totalOut > game.totalIn ? "more" : "less"} than in. Check the cash-outs below.
+                </p>
+              )}
+              {!game.ready && <p className="mt-1 text-[14px] text-soft">Settle up shows who pays whom once everyone&apos;s cashed out and the chips add up.</p>}
               <details className="mt-1 text-[14px] text-soft">
                 <summary className="cursor-pointer">Every buy-in and cash-out</summary>
                 <ul className="mt-1 space-y-1">
@@ -96,7 +110,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
               </details>
             </>
           )}
-          {canAdd && <PokerForm action={addPoker.bind(null, event.slug, token)} host={host} me={me?.id ?? null} players={going.map((h) => ({ id: h.id, name: joinNames(h.names) }))} />}
+          {canAdd && <PokerForm action={addPoker.bind(null, event.slug, token)} host={host} me={me?.id ?? null} usual={usual} players={going.map((h) => ({ id: h.id, name: joinNames(h.names) }))} />}
         </div>
       )}
 

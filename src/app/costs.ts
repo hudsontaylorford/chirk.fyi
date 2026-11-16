@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { hostRole } from "@/lib/auth";
-import { parseMoney } from "@/lib/costs";
+import { money, parseMoney } from "@/lib/costs";
 import { headcount } from "@/lib/format";
 import { sql } from "@/lib/db";
 
@@ -94,6 +94,11 @@ export async function addPoker(slug: string, token: string | null, _prev: string
     select id from households where event_id = ${a.eventId} and going is not false and id = ${a.host ? String(f.get("who") ?? a.household ?? "") : a.household ?? ""}`
     .catch(() => []);
   if (!player) return "Pick a player.";
+  if (kind === "cashout") {
+    // Nobody can walk away with more than the whole table put in: that's a typo.
+    const [{ pot }] = await sql<{ pot: number }[]>`select coalesce(sum(amount), 0)::int as pot from poker_entries where event_id = ${a.eventId} and kind = 'buyin'`;
+    if (amount > pot) return `That's more than the whole table put in (${money(pot)}). Check the amount.`;
+  }
   await sql.begin(async (tx) => {
     if (kind === "cashout") await tx`delete from poker_entries where event_id = ${a.eventId} and household_id = ${player.id} and kind = 'cashout'`;
     await tx`insert into poker_entries ${tx({ event_id: a.eventId, household_id: player.id, kind, amount })}`;
@@ -108,4 +113,20 @@ export async function removePoker(slug: string, token: string | null, id: string
   if (!a) return;
   await sql`delete from poker_entries where id = ${id} and event_id = ${a.eventId} and (${a.host} or household_id = ${a.household})`;
   done(slug);
+}
+
+/** "Buy in all": one buy-in of the amount for everyone at the table who hasn't bought in yet (so tapping twice is safe). Hosts only. */
+export async function buyInAll(slug: string, _prev: string | null, f: FormData): Promise<string> {
+  const a = await actor(slug, null);
+  if (!a?.poker || !a.host) return "Only hosts can buy everyone in.";
+  const amount = parseMoney(String(f.get("amount") ?? ""));
+  if (!amount) return "Add the buy-in, like 20.";
+  const added = await sql`
+    insert into poker_entries (event_id, household_id, kind, amount)
+    select ${a.eventId}, h.id, 'buyin', ${amount} from households h
+    where h.event_id = ${a.eventId} and h.going is not false
+      and not exists (select 1 from poker_entries p where p.household_id = h.id and p.kind = 'buyin')
+    returning 1`;
+  done(slug);
+  return added.length ? `Bought in ${added.length} at ${money(amount)} ✓` : "Everyone's already bought in.";
 }
