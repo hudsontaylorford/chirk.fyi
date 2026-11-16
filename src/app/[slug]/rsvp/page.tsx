@@ -5,7 +5,7 @@ import { bringChoices, getEventData, arrivals } from "@/lib/data";
 import { Footer } from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "RSVP" };
+export const metadata = { title: "RSVP", robots: { index: false, follow: false } };
 
 export default async function RsvpPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

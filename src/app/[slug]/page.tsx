@@ -14,13 +14,15 @@ export const dynamic = "force-dynamic";
 // What iMessage / WhatsApp show when the link is pasted into a group text.
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const e = await getEvent((await params).slug, true);
-  if (!e) return {};
+  if (!e) return { robots: { index: false } };
   const preview = `You're invited: ${e.title}`;
   const description = `${when(e)}${e.place ? ` · ${e.place}` : ""}`;
   // No cover photo: a generated card with the title, date and place, so text previews never come up blank.
   const images = [e.cover_url || `/${e.slug}/og`];
   return {
     title: e.title, description,
+    robots: { index: false, follow: false }, // invites are private: never in search results
+
     openGraph: { title: preview, description, images },
     twitter: { card: "summary_large_image", title: preview, description, images },
   };

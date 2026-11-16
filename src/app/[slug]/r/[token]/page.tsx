@@ -8,7 +8,7 @@ import { Costs } from "@/components/Costs";
 import { Gifts } from "@/components/Gifts";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Your RSVP", robots: { index: false } };
+export const metadata = { title: "Your RSVP", robots: { index: false, follow: false } };
 
 export default async function YourRsvp({
   params, searchParams,

@@ -31,8 +31,9 @@ export async function sendEmail(e: Email): Promise<boolean> {
   }
 }
 
-/** This site's address, for links inside emails ("https://chirk.fyi"). */
+/** This site's address, for links inside emails ("https://chirk.fyi"); on the live site always the real domain. */
 export async function siteUrl() {
+  if (process.env.VERCEL_ENV === "production" && process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "chirk.fyi";
   return `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;

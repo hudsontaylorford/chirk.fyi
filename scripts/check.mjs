@@ -379,6 +379,12 @@ for (const path of ["", "/rsvp"]) {
 }
 await stranger.goto(B.replace("/thanksgiving-2026", "/privacy"));
 assert.equal(await stranger.locator("footer").count(), 1);
+// Private chirks are kept out of search; the public pages are listed.
+await stranger.goto(B);
+assert.match(await stranger.getAttribute('meta[name="robots"]', "content"), /noindex/);
+const robots = await (await fetch(ORIGIN + "/robots.txt")).text();
+assert.match(robots, /Disallow: \/host/);
+assert.match(await (await fetch(ORIGIN + "/sitemap.xml")).text(), /\/privacy<\/loc>/);
 await stranger.goto(B.replace("/thanksgiving-2026", "/terms"));
 assert.match(await stranger.textContent("main"), /Use it kindly/);
 assert.match(await stranger.textContent("footer"), /Privacy · Terms/);
