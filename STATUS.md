@@ -14,9 +14,9 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `own-templates`)
+## Went live Nov 16 (`own-templates`)
 - **Save as a template:** on any event's host page (under Copy to next year). Keeps the settings, message, times, place, photo and what to bring; never the title, dates or guests. Your templates list first under New event → Start from a template, each with Remove. Up to 30 per person.
-- **Database step:** one new table, `templates` (SQL given in chat; also in `db/schema.sql`).
+- **Database step:** the `templates` table (run Nov 16; also in `db/schema.sql`).
 
 ## Went live Nov 16 (`trim`)
 - **Schedule** moved under More options (it shows on its own once it has lines or asks which parts guests are coming to).
