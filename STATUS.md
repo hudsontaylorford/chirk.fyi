@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `trim`)
+## Went live Nov 16 (`trim`)
 - **Schedule** moved under More options (it shows on its own once it has lines or asks which parts guests are coming to).
 - **Templates cut to three** that switch a feature on: Poker night, Secret Santa, White elephant. Saving your own is next on the roadmap.
 - **Roadmap:** import (43), forward an email (44), crewmaxxing → chirk (45), address lookup reusing crew-scheduler's Google approach (14b).
