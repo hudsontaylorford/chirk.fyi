@@ -78,6 +78,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **Money:** a plain table for poker (Player · In · Out · Net), worked-out amounts in soft gray with a line saying why; settle-up as wash cards ("Lee owes Hudson $35", Pay with Venmo, Mark paid); an amber alert when the chips don't add up.
 - **Gift match card:** wash card, "You're giving a gift to" then the name large, their ideas, "Keep it a secret!". Above it, a soft line of who's in and the host's rules as plain text.
 - **Host label:** a small wash pill next to a host's name in the guest list.
+- **Place suggestions:** typing 3+ letters in Place shows up to 5 places under the box (name bold, address soft) with "Powered by Google"; a tap fills the Address and says "Address filled in ✓".
 - **Restored draft notice:** amber "Restored what you were typing. Discard" when a half-typed event form comes back after a reload.
 
 ## Screens

@@ -463,6 +463,16 @@ await h.click("summary:text-is('Start from a template')");
 await h.click("a:text-is('Poker night')");
 await h.waitForSelector("text=Started from");
 await h.fill("input[name=title]", "Template test");
+// Address lookup (a stand-in for Google locally): typing a place suggests real ones; a pick fills the address
+// and the Place box keeps the host's own words.
+if (process.env.PLACES_FAKE === "true") {
+  await h.locator("input[name=place]").pressSequentially("sample", { delay: 30 });
+  await h.click("button:has-text('Sample Hall')");
+  await h.waitForSelector("text=Address filled in ✓");
+  assert.equal(await h.inputValue("input[name=address]"), "335 Example Ave, New York, NY 10003");
+  assert.equal(await h.inputValue("input[name=place]"), "sample");
+  assert.equal(await h.locator("img[alt='Powered by Google']").count(), 0); // the list closed
+}
 await h.fill("input[name=date]", "2026-12-12");
 await h.click("button:text-is('Create event')");
 await h.waitForURL(/\/template-test(-\d+)?\/host$/);

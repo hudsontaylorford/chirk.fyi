@@ -63,9 +63,28 @@ All of these live in **Vercel → your project → Settings → Environment Vari
 | `RESEND_API_KEY` | Sends email (codes, invites, reminders) | No email goes out, including sign-in codes |
 | `CRON_SECRET` | The password Vercel's 9 am morning job uses (gift draws, reminders). Any long random text | Every morning job is refused: nothing scheduled ever sends |
 | `BLOB_READ_WRITE_TOKEN` | Photo uploads (Vercel adds it when you connect Blob storage) | The upload button is hidden; pasting a photo link still works |
+| `GOOGLE_PLACES_API_KEY` | Optional: place suggestions while typing a Place, which fill in the Address (see "Google address search" below) | The Place box works as plain typing |
 | `EMAIL_REPLY_TO` | Optional: where replies to chirk emails go when there's no host to reply to | Replies go to the sender address |
 
-Never add `LOGIN_TEST_CODE`, `EMAIL_FAKE` or `PHOTOS_FAKE` in Vercel. They're for testing on a laptop only.
+Never add `LOGIN_TEST_CODE`, `EMAIL_FAKE`, `PHOTOS_FAKE` or `PLACES_FAKE` in Vercel. They're for testing on a laptop only.
+
+---
+
+## 6. Google address search (optional)
+
+Same setup as crewmaxxing's, with its own key so each app has its own limits. All in **Google Cloud Console** (console.cloud.google.com), signed in with the Google account that has billing.
+
+1. Top bar → project picker → **New project**, name it `chirk`, **Create**, then make sure it's selected.
+2. **Billing**: link your billing account to the `chirk` project.
+3. **APIs & Services → Library**: search **Places API (New)** → **Enable**. Then search **Geocoding API** → **Enable**.
+4. **APIs & Services → Credentials → + Create credentials → API key**. Copy it.
+5. Click the new key → **API restrictions → Restrict key** → tick only **Places API (New)** and **Geocoding API** → **Save**. Leave application restrictions at **None** (chirk calls Google from its server).
+6. **APIs & Services → Places API (New) → Quotas**: set a daily cap of about **500** autocomplete requests. Do the same for **Geocoding API** at about **200**.
+7. **Billing → Budgets & alerts → Create budget**: $10 a month, email alerts at 50%, 90% and 100%.
+8. **Vercel → chirk.fyi → Settings → Environment Variables**: Key `GOOGLE_PLACES_API_KEY`, Value: the key, Environment: **Production** only, tick **Sensitive**, **Save**. Then redeploy.
+9. Check: New event → type a place in **Place** → Google's suggestions appear with "Powered by Google". Tap one and the Address fills in.
+
+What's kept: only the address (allowed by Google's terms). The Place box keeps your own words, since Google doesn't allow storing its business names. Nothing you type is stored or logged by the search.
 
 ---
 

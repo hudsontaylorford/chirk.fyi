@@ -2,6 +2,8 @@ import { BringFields, type ListItem } from "@/components/BringFields";
 import { CoverInput } from "@/components/CoverInput";
 import { DetailsInput } from "@/components/DetailsInput";
 import { FormDraft } from "@/components/FormDraft";
+import { PlaceFields } from "@/components/PlaceFields";
+import { placesOn } from "@/lib/places-provider";
 import { shortDate, when } from "@/lib/format";
 import { parseSchedule } from "@/lib/schedule";
 import type { Template } from "@/lib/templates";
@@ -30,8 +32,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
         <Field label="Starts" name="time" type="time" value={e?.time?.slice(0, 5)} />
         <Field label="Ends (optional)" name="end_time" type="time" value={e?.end_time?.slice(0, 5)} />
       </div>
-      <Field label="Place" name="place" value={e?.place} placeholder="e.g. The Fords'" />
-      <Field label="Address" name="address" value={e?.address} />
+      <PlaceFields place={e?.place ?? null} address={e?.address ?? null} search={placesOn()} />
       <Field label="Hosted by (optional)" name="hosted_by" value={e?.hosted_by} placeholder="e.g. Hudson & Molly" />
     </div>
   );
