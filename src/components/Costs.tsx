@@ -2,6 +2,7 @@ import { addCost, addPoker, buyInAll, markPaid, removeCost, removePoker, saveVen
 import { Confirm } from "@/components/Confirm";
 import { BuyInAll, CostForm, PokerForm, VenmoForm } from "@/components/CostForms";
 import { balances, money, poker, settle, venmoUrl } from "@/lib/costs";
+import { headcount } from "@/lib/format";
 import { getCosts, joinNames } from "@/lib/data";
 import type { EventData } from "@/lib/types";
 
@@ -154,7 +155,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
           action={addCost.bind(null, event.slug, token)}
           host={host}
           me={me?.id ?? null}
-          going={going.map((h) => ({ id: h.id, name: joinNames(h.names) }))}
+          going={going.map((h) => ({ id: h.id, name: joinNames(h.names), people: headcount(h.names) + h.kids }))}
         />
       )}
       {me && <VenmoForm action={saveVenmo.bind(null, event.slug, token!)} venmo={me.venmo} />}

@@ -5,7 +5,7 @@ import { useActionState } from "react";
 type Send = (prev: string | null, f: FormData) => Promise<string>;
 
 /** "+ Add a cost": what it was, the amount, who paid (hosts pick; guests are the payer), and who it's split between. */
-export function CostForm({ action, host, me, going }: { action: Send; host: boolean; me: string | null; going: { id: string; name: string }[] }) {
+export function CostForm({ action, host, me, going }: { action: Send; host: boolean; me: string | null; going: { id: string; name: string; people: number }[] }) {
   const [result, add, adding] = useActionState(action, null);
   return (
     <details className="mt-6 rounded-2xl border border-line px-4 py-3">
@@ -24,12 +24,13 @@ export function CostForm({ action, host, me, going }: { action: Send; host: bool
           </label>
         )}
         <fieldset>
-          <legend className="text-[15px] text-soft">Split between (each person counts once)</legend>
+          <legend className="text-[15px] text-soft">Split between (per person: a couple pays for two)</legend>
           <div className="mt-1 flex flex-wrap gap-2">
             {going.map((g) => (
               <label key={g.id} className="pill flex cursor-pointer items-center gap-2 px-3 py-1.5 text-[15px] has-[:checked]:border-ink">
                 <input type="checkbox" name="split" value={g.id} defaultChecked className="h-4 w-4" />
                 {g.id === me ? "You" : g.name}
+                {g.people > 1 && <span className="text-soft">×{g.people}</span>}
               </label>
             ))}
           </div>
