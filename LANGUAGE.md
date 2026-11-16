@@ -1,4 +1,4 @@
-# chirk: language and brand (as of Nov 15, 2026)
+# chirk: language and brand (as of Nov 16, 2026)
 
 How we talk about chirk: what it is, what to call things, and how it sounds. Nothing here is final; it's the working language for the site, emails, and a future product page. How things *look* lives in DESIGN.md.
 
@@ -36,6 +36,12 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 - **Message** is the host's words on the invite; **Message your guests** is a separate email, apart from the invite.
 - **Hosted by** signs the message ("— Hudson & Molly").
 - **By invitation only** in the footer: chirk is reached through links people send.
+- **Host** label on the guest list: hosts are on their own list as going, but never counted as a reply.
+- **Costs:** "Split between", "Settle up" (hosts) / "Your share" (guests), "owes", "Pay with Venmo", "Mark paid", "Everyone's even ✓" / "You're even ✓".
+- **Poker night:** Buy-in / Cash-out, "Buy in all", In · Out · Net, "counted as the $X left on the table" for a worked-out cash-out.
+- **Gift exchange:** Who's in, Never draw each other, Rules, Draw names, "You're giving a gift to", "Your gift ideas".
+- **Sign in:** "Been invited to an event? You're invited to chirk." Anyone on a chirk guest list can sign in.
+- **Scheduled sends** show their state: "sent ✓", or "skipped (too late)".
 
 ### An open question
 The app says **event** today ("New event", "Your events"). Once light chirks exist (a coffee-shop "posted up"), "event" will feel too formal. The likely move: **"New chirk"** and **"Your chirks"**, everywhere at once, when the first light chirk ships. Not before.

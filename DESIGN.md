@@ -1,4 +1,4 @@
-# chirk: design notes (as of Nov 15, 2026)
+# chirk: design notes (as of Nov 16, 2026)
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 
@@ -6,7 +6,7 @@ chirk is a tiny, phone-first invite and RSVP site, a DIY Partiful. A host makes 
 
 ## Who it's for
 - **Guests:** open a link from a group text on their phone, read the invite, tap RSVP, say what they're bringing. Never sign up.
-- **Hosts** (today Hudson and Molly, sharing one password): create events, see replies, send the invite by text or email from a password-protected host page.
+- **Hosts** (today Hudson and Molly) sign in with their email and a 6-digit code; anyone on a chirk guest list can. Each event has an owner and any number of co-hosts.
 - **Scale:** one-day events, about 30 guests (Thanksgiving, a tailgate, a toast night, a birthday).
 - **Direction:** accounts with co-hosting, a feed of plans from friends' "circles", later community events. See ROADMAP.md.
 
@@ -72,7 +72,12 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **List editor:** the host's list as removable chips (who's bringing it shown in soft; removing a covered item asks first) plus an "Add things (commas for several)" box.
 - **Stat tiles (host):** three wash tiles: coming, replies, still needed, with an optional tiny sub-line.
 - **Formatting in the message:** `# Title`, `- bullet`, `**bold**`, auto-links; tools: Auto-format, Clear formatting, Preview.
-- **Two-step delete:** a quiet gray "Delete" link, then a red "Sure?" (no pop-ups).
+- **Two-step delete:** a quiet gray "Delete" link, then a red "Sure?" (no pop-ups). When more goes with it (a guest with costs or poker), an amber box says what, before "Sure?".
+- **Toggle pills (`pill-check`):** a checkbox or radio inside a pill; ticked inverts to ink. Used for Split between, Buy-in / Cash-out, Who's in. Choices stay as picked after each Add.
+- **Selects (`field`):** same shape as fields, with a chevron.
+- **Money:** a plain table for poker (Player · In · Out · Net), worked-out amounts in soft gray with a line saying why; settle-up as wash cards ("Lee owes Hudson $35", Pay with Venmo, Mark paid); an amber alert when the chips don't add up.
+- **Gift match card:** wash card, "You're giving a gift to" then the name large, their ideas, "Keep it a secret!". Above it, a soft line of who's in and the host's rules as plain text.
+- **Host label:** a small wash pill next to a host's name in the guest list.
 - **Restored draft notice:** amber "Restored what you were typing. Discard" when a half-typed event form comes back after a reload.
 
 ## Screens
@@ -81,11 +86,13 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **RSVP (`/event/rsvp`):** Going / Can't make it, names (+ Add someone, limited by the host), kids if asked, "When are you coming?" if the event asks, what you're bringing (multi-pick chips + add your own), a note (with a hint saying whether it shows on the invite).
 - **Your reply (`/event/r/<token>`):** "You're in!", what you're bringing, when you're coming, keep-your-link card, Change my reply.
 - **Home (`chirk.fyi`):** "chirk / By invitation only", plus "Your plans" for events this phone replied to.
+- **Costs / Poker night / Gift exchange:** sections under the invite when the host turns them on; each person sees their own share or match.
 
 **Host side**
-- **Your events (`/host`):** a black "+ New event" button, then Upcoming (soonest first, Live/Draft labels, "Hosted by …"), with Past and Archived folded away underneath.
-- **New event (`/host/new`):** the essentials open (Title, Date, Starts/Ends, Place, Address, Hosted by), then rows: Message, Photo, What to bring, Schedule, Reply by, Guest options, Web address.
-- **Event host page:** stat tiles, "There by" counts when guests say when they're arriving, Send the invite (Share by text, Copy invite for email), Replies (each with what they bring, their note as a bubble, and quiet Copy their link / Edit / Delete), What to bring (Still needed + Covered chips, "Edit list"), Event (the same rows as New event, with Basics as the first row), Copy to next year, Archive, Delete this event.
+- **Sign in (`/host`):** "Been invited to an event? You're invited to chirk.", two lines on what chirk is, email, then the 6-digit code.
+- **Your events (`/host`):** a black "+ New event" button, Select for bulk archive/delete,, then Upcoming (soonest first, Live/Draft labels, "Hosted by …"), with Past and Archived folded away underneath.
+- **New event (`/host/new`):** the essentials open (Title, Date, Starts/Ends, Place, Address, Hosted by), then rows: Message, Photo, What to bring, Schedule, Reply by, Guest options, Shared costs (with Poker), Gift exchange (budget, rules, draw date, reminders; every match tucked under "Trouble with the draw?"), Web address.
+- **Event host page:** Hosts line (+ Add a co-host), stat tiles, "There by" counts when guests say when they're arriving, Send the invite (Share by text, Copy invite for email), Replies (each with what they bring, their note as a bubble, and quiet Copy their link / Edit / Delete), What to bring (Still needed + Covered chips, "Edit list"), Event (the same rows as New event, with Basics as the first row), Costs/Poker and Gift exchange tools, Message your guests, Copy to next year, Archive (not on drafts), Delete this event.
 
 **Outside the site**
 - **iMessage link preview:** bold line "You're invited: <title>", then date, time and place; the cover photo, or a generated 1200×630 white card.
@@ -109,5 +116,5 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **Desktop:** today it's the phone column centered; a wider layout (e.g. photo beside the details) is open.
 - **Three directions from the original Post Up brief, all still open:** Bulletin board (paper notes, pegboard, vintage Apple warmth); Cash App / BRAT (big confident type, one bold color, huge actions); "Craigslist is beautiful" (HTML-1.0 plainness, blue links, dense lists stacked for phones).
 - **Wrappers (an idea):** optional per-event dressing for the invite only (background color, font pairing, texture) from a short curated set; the RSVP form and host tools stay plain.
-- **Coming soon, needing design:** named invitations ("invited vs replied", an invite list on the host page); picking several parts of the day; accounts with co-hosts (owner + co-hosts); a short privacy page with a one-line footer; later a feed of friends' plans.
+- **Coming soon, needing design:** event tiles that fit each event (roadmap 37); advanced options and templates (29, 35); later a feed of friends' plans.
 - **Constraints to keep:** works at 390px wide; tap targets ≥44px; inputs ≥16px (iPhone zoom); emails use inline styles and JPEG images; link previews 1200×630.

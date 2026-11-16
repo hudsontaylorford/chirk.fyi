@@ -1,23 +1,25 @@
 # chirk + Postup: roadmap
 
 *Written Nov 13, 2026. Thinking, not commitments. Revisit after Thanksgiving.*
-*Language and positioning: LANGUAGE.md. The numbered items further down are the detailed notes; this section is the order.*
+*Language and positioning: LANGUAGE.md. Where things stand today: STATUS.md. The numbered items further down are the detailed notes; this section is the order.*
 
 ## Phases (Nov 15)
 
 **Built so far (Nov 13–15):** the invite and RSVP, bring list (Still needed / Covered, doubling up), photo upload, end times, all-day schedule with "which parts are you coming to", named invitations with personal links, email invites, reminders and "Message your guests", fuller reply and RSVP emails, guest notes, copy to next year (with the guest list), privacy and terms, and host accounts with co-hosts (items 4, 8, 10, 11, 13, 18, 19, 20 and the photo upload).
+
+**Built Nov 15–16:** shared costs and poker (28, with Pay with Venmo from 33), gift exchange with rules and scheduled draws (30), the 9 am morning job for gift and reply reminders, bulk actions on guests and events, hosts on their own guest lists, `noindex` on private pages (part of 36), and a full audit (security, counts, wording). Details: STATUS.md.
 
 **Phase 1: make invitations exceptionally good (now → ~2 months)**
 - Place autocomplete (14) and better location lookup.
 - Bulk edits and bulk guest actions; easier text invitations; fewer email-only steps.
 - Several photos (7); a calendar subscription for all your chirks; replies to guests' notes.
 - Signed-in devices (23); a line for guests under Send RSVP (27); share to an Instagram story (21).
-- Shared costs: split a bill, a pool, a poker game (28).
+- Shared costs: split a bill, a pool, a poker game (28). *Split and poker built; the pool is still open.*
 - Goal: hosting something detailed is already much easier in chirk than coordinating it by hand.
 
 **Phase 2: remember your people (~2–4 months)**
 - Your people (12, 24), reusable guest lists, faster repeat invitations, contacts (25).
-- Templates, including your own (9, 29), and gift exchanges (30).
+- Templates, including your own (9, 29), and gift exchanges (30, *built Nov 16*).
 - Recurring and standing chirks (17); data housekeeping (26); early circles.
 - Goal: the second thing you host is much easier than the first.
 
@@ -53,6 +55,10 @@
 35. **Settings → Advanced options (per host).** The event form shows only what most chirks need (Basics, Message, Photo, What to bring, Schedule, Reply by). The deeper rows (Shared costs, Poker, Guest options, Web address, and future ones like gift exchange) live behind one "More" row, or appear by default for hosts who turn on "Show advanced options" in their account settings. A row that's already switched on always shows, so nothing hides a setting that's in use. Pairs with templates (29): a "Poker night" template turns its own options on.
 36. **SEO and AEO for the public pages.** Search (SEO) and AI answer engines (AEO) for the home page, a product/about page (from LANGUAGE.md), Privacy and Terms: titles and descriptions, structured data, a sitemap, fast pages. Private chirks (invites, RSVPs, replies, host pages) always stay out of search: they're marked "noindex" (done Nov 16).
 37. **Event tiles that fit the event.** The host page's number tiles follow what each event uses, beyond coming and replies: shared costs ("$420 still owed"), poker ("In $160"), gift exchange ("Drawn ✓ · 2 without ideas"), what to bring ("Covered 9 of 10", later by category), named guests ("4 haven't replied", with a nudge), follow-ups.
+38. **"Join chirk" email (held).** Once more guest emails are in, one email to past guests (e.g. Thanksgiving's): "Been invited to an event? You're invited to chirk", with a sign-in link. The sign-in page already uses this language. Hold until Hudson says go.
+39. **Opt-in gift exchanges.** Today everyone on the list is in unless the host unticks them. A per-exchange switch, "People join themselves", for bigger or looser groups (a "Count me in" on the invite). Belongs with advanced options (35).
+40. **Who can get an account.** Today: any email on any chirk guest list, and anyone who finds an event address can put themselves on it. Before chirk goes beyond friends: only emails a host added (or existing accounts), plus a limit on how many emails a new host can send.
+41. **One email voice.** Greetings vary ("Hi X," vs "Hi X!"); pick one and use it in every email.
 32. **"Maybe" (later, perhaps).** Fine to leave out for now; revisit if hosts ask for it, possibly as a per-chirk switch.
 
 ## The one idea
