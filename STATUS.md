@@ -14,8 +14,8 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `places`)
-- **Address lookup (roadmap 14b):** typing in Place suggests real places from Google; tapping one fills in the Address. The Place box keeps your own words (Google's terms). Copied from crewmaxxing's approach. Off until `GOOGLE_PLACES_API_KEY` is added (SETUP.md §6); until then the Place box works as before. No database step.
+## Went live Nov 16 (`places`)
+- **Address lookup (roadmap 14b):** typing in Place suggests real places from Google; tapping one fills in the Address. The Place box keeps your own words (Google's terms). Copied from crewmaxxing's approach. Google key added by Hudson Nov 16 (SETUP.md §6); first real check is step 9 there. No database step.
 
 ## Went live Nov 16 (`own-templates`)
 - **Save as a template:** on any event's host page (under Copy to next year). Keeps the settings, message, times, place, photo and what to bring; never the title, dates or guests. Your templates list first under New event → Start from a template, each with Remove. Up to 30 per person.
