@@ -280,10 +280,8 @@ export async function bulkGuests(slug: string, _prev: string | null, f: FormData
     select id, token, names, email from households where event_id = ${ev} and id in ${sql(ids)}`;
   const what = String(f.get("do"));
   if (what === "remove") {
-    let removed = 0;
-    for (const h of rows) if (await dropHousehold(slug, h.id)) removed++;
-    const kept = rows.length - removed;
-    return `Removed ${removed} ✓${kept ? ` Kept ${kept} with costs or poker on the event.` : ""}`;
+    for (const h of rows) await removeHousehold(slug, h.id);
+    return `Removed ${rows.length} ✓`;
   }
   const kind = what === "reminder" ? "reminder" : "invite";
   const withEmail = rows.filter((h): h is typeof h & { email: string } => !!h.email);
@@ -314,21 +312,14 @@ export async function bulkEvents(_prev: string | null, f: FormData): Promise<str
   return `${verb} ${done} ✓${skipped ? ` (${skipped} skipped: only the owner can delete)` : ""}`;
 }
 
-/** Removes a guest. Not one with costs, payments or poker entries: deleting them would erase money others are owed. */
+/** Removes a guest, with their costs, payments and poker (the page warns first when they have any). */
 export async function removeHousehold(slug: string, id: string) {
-  await dropHousehold(slug, id);
-}
-async function dropHousehold(slug: string, id: string) {
   const ev = await eventId(slug);
-  const [money] = await sql`select 1 from costs where paid_by = ${id} union all select 1 from cost_shares where household_id = ${id}
-    union all select 1 from payments where ${id} in (from_household, to_household) union all select 1 from poker_entries where household_id = ${id} limit 1`;
-  if (money) return false;
   // Things they added go too, unless someone else is also bringing them; their list picks reopen.
   await sql`delete from items i where i.household_id = ${id} and i.event_id = ${ev} and i.kind <> 'needed'
     and not exists (select 1 from claims c where c.item_id = i.id and c.household_id <> ${id})`;
   await sql`delete from households where id = ${id} and event_id = ${ev}`;
   revalidatePath(`/${slug}`, "layout");
-  return true;
 }
 
 export async function saveEvent(slug: string, f: FormData) {

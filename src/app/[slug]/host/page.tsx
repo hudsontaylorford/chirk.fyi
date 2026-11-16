@@ -15,7 +15,7 @@ import { MessageGuests } from "@/components/MessageGuests";
 import { currentUser, hostRole } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { AddCohost } from "@/components/AddCohost";
-import { arrivals, bringList, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
+import { arrivals, bringList, getDraws, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
 import { daysBefore } from "@/lib/due";
 import { headcount, listText, shortDate } from "@/lib/format";
 import * as act from "./actions";
@@ -46,7 +46,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const answered = guests.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
   const sent = await getSentJobs(event.id);
-  // Guests with money on the event can't be deleted (it would erase what others are owed).
+  const nameOf = (id: string) => joinNames(households.find((h) => h.id === id)?.names ?? ["someone"]);
+  // Guests with money on the event: deleting them changes everyone's settle-up, so the page warns first.
   const hasMoney = new Set((await sql<{ id: string }[]>`
     select paid_by id from costs where event_id = ${event.id} union select s.household_id from cost_shares s join costs c on c.id = s.cost_id where c.event_id = ${event.id}
     union select from_household from payments where event_id = ${event.id} union select to_household from payments where event_id = ${event.id}
@@ -144,7 +145,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           actions={[
             { value: "invite", label: "Email invite" },
             { value: "reminder", label: "Email reminder" },
-            { value: "remove", label: "Remove", confirm: "Remove the ticked guests and their replies?" },
+            { value: "remove", label: "Remove", confirm: `Remove the ticked guests and their replies?${hasMoney.size ? " Anyone with costs or poker also loses what they paid and owe, so everyone's settle-up changes." : ""}` },
           ]}
         />
       )}
@@ -182,7 +183,10 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
               <div className="mt-2 flex gap-5 text-[14px] text-soft">
                 {h.going !== null && <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />}
                 <a href={`/${slug}/r/${h.token}`} className="underline underline-offset-2">Edit</a>
-                {hasMoney.has(h.id) ? <span>Has costs, so it stays</span> : <Confirm label="Delete" action={act.removeHousehold.bind(null, slug, h.id)} />}
+                <Confirm
+                  label="Delete" action={act.removeHousehold.bind(null, slug, h.id)}
+                  warn={hasMoney.has(h.id) ? "They have costs or poker on this event. Deleting them also deletes what they paid and what they owe, so everyone's settle-up changes." : undefined}
+                />
               </div>
             </li>
           );
@@ -232,7 +236,10 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
 
       <h2 className="mt-8 text-[20px] font-bold">Event</h2>
       <form action={act.saveEvent.bind(null, slug)} className="mt-3 space-y-3">
-        <EventFields event={event} needed={needed.map((i) => ({ name: i.name, by: whoHas.get(i.id) ?? null }))} />
+        <EventFields
+          event={event} needed={needed.map((i) => ({ name: i.name, by: whoHas.get(i.id) ?? null }))}
+          matches={event.gift_on ? [...(await getDraws(event.id))].map(([g, r]) => `${nameOf(g)} → ${nameOf(r)}`) : []}
+        />
         <SaveButton className="btn w-full">Save</SaveButton>
       </form>
 

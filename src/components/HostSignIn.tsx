@@ -15,10 +15,16 @@ export function HostSignIn({ claiming, legacy, wrong, email: preset }: { claimin
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-5">
-      <h1 className="text-[24px] font-bold">{claiming ? "Set up your account" : "Host sign-in"}</h1>
-      <p className="mt-1 text-[15px] text-soft">
-        {claiming ? "Your email becomes your sign-in, and every event so far becomes yours." : "We'll email you a 6-digit code. No password."}
-      </p>
+      <h1 className="text-[24px] font-bold">{claiming ? "Set up your account" : "Been invited to an event? You're invited to chirk."}</h1>
+      {claiming ? (
+        <p className="mt-1 text-[15px] text-soft">Your email becomes your sign-in, and every event so far becomes yours.</p>
+      ) : (
+        // Who can join: anyone on a chirk guest list (the code only goes to those emails).
+        <div className="mt-2 space-y-2 text-[15px] text-soft">
+          <p>chirk is a simple way to make plans with your people: one page per plan, with replies, who&apos;s bringing what, and shared costs.</p>
+          <p>Sign in with the email you were invited with to make plans of your own. We&apos;ll email you a 6-digit code, no password.</p>
+        </div>
+      )}
 
       {!onCode ? (
         <form action={send} className="mt-5 space-y-3">

@@ -123,14 +123,6 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
               />
               {draws.size > 0 && <GiftButton action={emailMatches.bind(null, slug)} label="Email everyone their match" quiet />}
             </div>
-            {draws.size > 0 && (
-              <details className="text-[15px]">
-                <summary className="cursor-pointer text-soft">Show all matches (spoils the surprise)</summary>
-                <ul className="mt-1 space-y-1">
-                  {[...draws].map(([g, r]) => <li key={g}>{name(g)} → {name(r)}</li>)}
-                </ul>
-              </details>
-            )}
           </div>
         </>
       )}

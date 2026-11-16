@@ -312,6 +312,10 @@ const lee = await phone();
 await lee.goto(new URL(leeLink + "/remember?to=invite", h.url()).href);
 assert.match(await lee.textContent("body"), /You owe Hudson \$35[\s\S]*You owe Sam \$5/); // no reply needed to see their share
 assert.equal(await lee.locator("text=Mark paid").count(), 0);
+// Deleting a guest with poker on the event warns what goes with them first.
+await h.goto(pokerHost);
+await h.click("li:has-text('Lee') summary:text-is('Delete')");
+await h.waitForSelector("li:has-text('Lee') [role=alert]:has-text('Deleting them also deletes what they paid and what they owe')");
 
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
@@ -464,6 +468,10 @@ await h.click("form:has(select[aria-label='First person']) button:text-is('Add')
 await h.waitForSelector("text=Ann ↔ Ben");
 await h.click("button:text-is('Draw names')");
 await h.waitForSelector("text=Names drawn for 5 ✓"); // Ann, Ben, Cal, Dee & Eve, and the host
+assert.equal(await h.locator("li:has-text('→')").first().isVisible(), false); // matches aren't shown on the host page…
+await h.click("summary:has-text('Gift exchange')");
+await h.click("summary:has-text('Trouble with the draw?')");
+assert.equal(await h.locator("#gifts li:has-text('→')").count(), 5); // …only tucked into the gift exchange settings
 const annLink = await h.getAttribute("li:has-text('Ann') a:text-is('Edit')", "href");
 const ann = await phone();
 await ann.goto(new URL(annLink + "/remember?to=invite", h.url()).href);

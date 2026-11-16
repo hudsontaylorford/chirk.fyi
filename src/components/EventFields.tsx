@@ -11,7 +11,7 @@ import type { Event } from "@/lib/types";
  * then one row per optional part, each showing its current setting and opening on a tap.
  * Closed rows keep their fields, so nothing typed in them is lost.
  */
-export function EventFields({ event, needed = [] }: { event?: Event; needed?: ListItem[] }) {
+export function EventFields({ event, needed = [], matches = [] }: { event?: Event; needed?: ListItem[]; matches?: string[] }) {
   const stages = parseSchedule(event?.schedule ?? null, event?.time ?? null).length;
   const extras = [
     event?.notes_public && "notes on invite",
@@ -103,6 +103,13 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
           <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
           <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
           <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
+          {matches.length > 0 && (
+            // Tucked away for sorting out a problem (a lost match, a mix-up), so hosts in the exchange aren't spoiled by accident.
+            <details className="text-[15px]">
+              <summary className="cursor-pointer text-soft">Trouble with the draw? See every match (spoils the surprise)</summary>
+              <ul className="mt-1 space-y-1">{matches.map((m) => <li key={m}>{m}</li>)}</ul>
+            </details>
+          )}
         </Row>
         {!event && (
           <Row id="address" label="Web address" value="Made from the title">
