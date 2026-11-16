@@ -1,5 +1,5 @@
 // Turning the host's "Add guests" box into replies-to-be, and the words of a reminder. Pure.
-import { longDate, shortDate } from "./format.ts";
+import { longDate } from "./format.ts";
 
 /**
  * "Sam, Graham & Ellen graham@x.com" → [{ names: ["Sam"] }, { names: ["Graham", "Ellen"], email: "graham@x.com" }].
@@ -17,6 +17,6 @@ export function parseGuests(text: string) {
 
 /** A short nudge for someone who hasn't answered, for a text or an email. */
 export function reminderText(e: { title: string; date: string; rsvp_by: string | null }, names: string, url?: string) {
-  const by = e.rsvp_by ? ` by ${shortDate(e.rsvp_by)}` : "";
+  const by = e.rsvp_by ? ` by ${longDate(e.rsvp_by)}` : "";
   return `Hi ${names}! Can you make ${e.title} on ${longDate(e.date)}? ${url ? `Let us know here${by}: ${url}` : `Let us know${by}.`}`;
 }

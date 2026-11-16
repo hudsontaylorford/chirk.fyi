@@ -42,7 +42,7 @@ export default async function Home() {
                     <span className="text-[15px] text-soft">{shortDate(p.date)}</span>
                   </span>
                   <span className={`shrink-0 text-[15px] ${p.going ? "text-green-700" : "text-soft"}`}>
-                    {p.going === null ? "Not answered" : p.going ? "Going" : "Can't go"} ›
+                    {p.going === null ? "No reply yet" : p.going ? "Going" : "Can't make it"} ›
                   </span>
                 </a>
               </li>

@@ -9,7 +9,7 @@ export function replyEmail(i: {
   coming: number; waiting: number; hostUrl: string;
 }) {
   const several = i.adults > 1 || many(i.names);
-  const verb = i.going ? (i.changed ? "updated: going" : several ? "are going" : "is going") : "can't make it";
+  const verb = i.going ? (several ? (i.changed ? "are now going" : "are going") : i.changed ? "is now going" : "is going") : "can't make it";
   const subject = `${i.names} ${verb}: ${i.title}`;
   // What they said, then where the event stands, so even a bare "going" says something useful.
   const lines = [
@@ -18,7 +18,7 @@ export function replyEmail(i: {
     i.going && i.bringOn ? (i.bringing.length ? `Bringing: ${listText(i.bringing)}` : "Not bringing anything yet") : null,
     i.note ? `Note: "${i.note}"` : null,
   ].filter((l): l is string => !!l);
-  const tally = `That's ${i.coming} coming so far${i.waiting ? `, and ${i.waiting} ${i.waiting === 1 ? "invite hasn't" : "invites haven't"} replied yet` : ""}.`;
+  const tally = `That's ${i.coming} coming so far${i.waiting ? `, and ${i.waiting} ${i.waiting === 1 ? "hasn't" : "haven't"} replied yet` : ""}.`;
   const sub = `${i.title} · ${shortDate(i.date)}`;
   const text = [subject, sub, "", ...lines, ...(lines.length ? [""] : []), tally, "", `All replies: ${i.hostUrl}`].join("\n");
   const html = `<div style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">

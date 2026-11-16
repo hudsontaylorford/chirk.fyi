@@ -52,6 +52,23 @@ If anything shows red, send Claude a screenshot of the Vercel Domains page and t
 
 ---
 
+## 5. Every setting in Vercel, in one place
+
+All of these live in **Vercel → your project → Settings → Environment Variables**. After adding or changing one, redeploy (**Deployments → ⋯ on the newest → Redeploy**).
+
+| Name | What it does | If it's missing |
+|---|---|---|
+| `ADMIN_PASSWORD` | Signs everyone's sign-in cookie | Nobody can sign in. Never delete it. |
+| `DATABASE_URL` | The database (Vercel adds it when you connect Neon) | Nothing works |
+| `RESEND_API_KEY` | Sends email (codes, invites, reminders) | No email goes out, including sign-in codes |
+| `CRON_SECRET` | The password Vercel's 9 am morning job uses (gift draws, reminders). Any long random text | Every morning job is refused: nothing scheduled ever sends |
+| `BLOB_READ_WRITE_TOKEN` | Photo uploads (Vercel adds it when you connect Blob storage) | The upload button is hidden; pasting a photo link still works |
+| `EMAIL_REPLY_TO` | Optional: where replies to chirk emails go when there's no host to reply to | Replies go to the sender address |
+
+Never add `LOGIN_TEST_CODE`, `EMAIL_FAKE` or `PHOTOS_FAKE` in Vercel. They're for testing on a laptop only.
+
+---
+
 ## Before you send invites
 
 - RSVP yourself first, as a test and to claim anything you're making.

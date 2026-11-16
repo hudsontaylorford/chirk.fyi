@@ -80,7 +80,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
           Coming {people > 0 && <span className="font-normal text-soft">· {people}</span>}
         </h2>
         {going.length === 0 ? (
-          <p className="mt-2 text-soft">No replies yet. Be the first!</p>
+          <p className="mt-2 text-soft">Nobody&apos;s said they&apos;re going yet. Be the first!</p>
         ) : (
           <ul className="mt-3 divide-y divide-line border-y border-line">
             {going.map((h) => {

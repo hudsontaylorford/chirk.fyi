@@ -233,12 +233,12 @@ await s1.goto(invite);
 assert.match(await s1.textContent("body"), /Costs\s*·\s*\$40 so far[\s\S]*Pizza\s*\$40[\s\S]*Zed paid/);
 assert.match(await s1.textContent("body"), /You owe Zed \$\d+(\.\d\d)?/);
 assert.match(await s1.getAttribute("a:text-is('Pay with Venmo')", "href"), /^https:\/\/venmo\.com\/zed-v\?txn=pay&amount=\d+\.\d\d&note=/);
-assert.equal(await s1.locator("text=Mark paid ✓").count(), 0); // only the person paid (or a host) confirms
+assert.equal(await s1.locator("text=Mark paid").count(), 0); // only the person paid (or a host) confirms
 await z.reload();
-await z.click("li:has-text('Early Bird owes you') button:text-is('Mark paid ✓')");
+await z.click("li:has-text('Early Bird owes you') button:text-is('Mark paid')");
 await z.waitForSelector("li:has-text('Early Bird owes you')", { state: "detached" });
 await s1.reload();
-assert.match(await s1.textContent("body"), /You're all square ✓/);
+assert.match(await s1.textContent("body"), /You're even ✓/);
 await h.reload();
 assert.match(await h.textContent("main"), /Settle up[\s\S]*owes Zed/);
 
@@ -311,7 +311,7 @@ const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit')", "hr
 const lee = await phone();
 await lee.goto(new URL(leeLink + "/remember?to=invite", h.url()).href);
 assert.match(await lee.textContent("body"), /You owe Hudson \$35[\s\S]*You owe Sam \$5/); // no reply needed to see their share
-assert.equal(await lee.locator("text=Mark paid ✓").count(), 0);
+assert.equal(await lee.locator("text=Mark paid").count(), 0);
 
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
@@ -427,7 +427,7 @@ await h.click("text=Copy to next year");
 await h.waitForURL(/\/thanksgiving-2027(-\d+)?\/host$/);
 assert.match(await h.textContent("main"), /Draft\./);
 assert.match(await h.textContent("main"), /Check A\s*No reply yet/); // last year's guests come along, unanswered
-assert.match(await h.textContent("main"), /1\s*of \d+ replied/); // only the host, who is going
+assert.match(await h.textContent("main"), /0\s*of \d+ replied/); // the host is going, but hosts aren't counted as replies
 const draftUrl = h.url().replace(/\/host$/, "");
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 await h.click("button:has-text('Publish')");
@@ -510,7 +510,7 @@ assert.ok(ran.done.includes(`${autoSlug}: reply_reminder (2)`), JSON.stringify(r
 ran = await (await cron(true)).json();
 assert.ok(!ran.done.some((d) => d.startsWith(`${autoSlug}:`)), "nothing twice");
 await h.goto(autoHost);
-assert.match(await h.textContent("main"), /Names drawn and emailed: [^·]+· done ✓/);
+assert.match(await h.textContent("main"), /Names drawn and emailed: [^·]+· sent ✓/);
 assert.match(await h.textContent("main"), /Names drawn for 4 ✓/); // Ana, Bo, Cy and the host
 assert.match(await h.textContent("main"), /Automatic reminder to anyone who hasn't replied: [^·]+· sent ✓/);
 

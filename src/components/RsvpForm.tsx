@@ -182,7 +182,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
       )}
 
       {going !== null && (
-        <Q label={notePrompt || "Anything we should know?"} hint={notesPublic ? "Optional. Shows on the invite." : "Optional. Only the host sees this."}>
+        <Q label={notePrompt || "Anything we should know?"} hint={notesPublic ? "Optional. Shows on the invite." : "Optional. Only the hosts see this."}>
           <textarea
             className="field" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder={going ? noteHint || "Allergies, arriving late…" : "A note for the hosts"}
@@ -203,7 +203,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
       )}
 
       <button className="btn w-full" disabled={busy || going === null}>
-        {busy ? "Sending…" : initial?.going != null ? "Save" : "Send RSVP"}
+        {busy ? (initial?.going != null ? "Saving…" : "Sending…") : initial?.going != null ? "Save" : "Send RSVP"}
       </button>
     </form>
   );

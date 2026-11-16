@@ -19,5 +19,5 @@ test("can't make it, and a named guest who hasn't answered", () => {
   assert.equal(no.subject, "Your RSVP: Jets <vs> Bills");
   assert.doesNotMatch(no.text, /Bringing|calendar/);
   const later = linkEmail({ ...base, going: null });
-  assert.match(later.text, /haven't replied yet\.\n\nReply now: https/);
+  assert.match(later.text, /haven't replied yet\.\n\nRSVP: https/);
 });

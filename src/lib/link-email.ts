@@ -17,7 +17,7 @@ export function linkEmail(i: {
     i.going && i.parts.length ? `Coming to: ${listText(i.parts)}` : null,
     i.going && i.bringing.length ? `Bringing: ${listText(i.bringing)}` : null,
   ].filter((l): l is string => !!l);
-  const button = i.going === null ? "Reply now" : "See or change your reply";
+  const button = i.going === null ? "RSVP" : "See or change your reply";
 
   const text = [
     e.title, whenText(e), where, "", `${i.names}: ${status}`, ...lines, "",

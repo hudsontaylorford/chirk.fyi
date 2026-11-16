@@ -53,10 +53,10 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
         <Row id="bring" label="What to bring" value={event?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
           <BringFields prompt={event?.bring_prompt ?? null} allowOwn={event?.allow_own ?? true} allowDoubles={event?.allow_doubles ?? false} items={needed} />
         </Row>
-        <Row id="schedule" label="Schedule" value={stages ? `${stages} parts` : "For all-day events"}>
+        <Row id="schedule" label="Schedule" value={stages ? `${stages} part${stages === 1 ? "" : "s"}` : "Add one"}>
           <label className="block">
             <textarea name="schedule" defaultValue={event?.schedule ?? ""} rows={4} className="field" aria-label="Schedule"
-              placeholder={"10am Bagels & coffee\n1pm Snacks & wine\n4:30pm Dinner"} />
+              placeholder={"2 pm Arrive\n3 pm The main part\n6 pm Wrap up"} />
             <span className="text-[14px] text-soft">One per line, time first. The one at your start time is the main one.</span>
           </label>
           <Check name="ask_arrival" checked={event?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
@@ -101,12 +101,12 @@ export function EventFields({ event, needed = [] }: { event?: Event; needed?: Li
           </label>
           <Field label="Draw names automatically on (optional, 9 am)" name="gift_draw_on" type="date" value={event?.gift_draw_on} />
           <Check name="gift_remind_ideas" checked={event?.gift_remind_ideas ?? true} label="Remind people to add gift ideas, 3 days before the draw" />
-          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before" />
+          <Check name="gift_remind_givers" checked={event?.gift_remind_givers ?? true} label="Remind everyone who they're giving to, a week before the event" />
           <p className="text-[14px] text-soft">Choose who&apos;s in and draw names on this page once it&apos;s on. Each person only ever sees their own match.</p>
         </Row>
         {!event && (
           <Row id="address" label="Web address" value="Made from the title">
-            <Field label="chirk.fyi/…" name="slug" placeholder="e.g. molly-birthday" />
+            <Field label="chirk.fyi/…" name="slug" placeholder="e.g. saturday-plans" />
           </Row>
         )}
       </div>

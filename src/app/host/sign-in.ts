@@ -48,20 +48,20 @@ export async function sendCode(_prev: SignInState, f: FormData): Promise<SignInS
 export async function verifyCode(_prev: SignInState, f: FormData): Promise<SignInState> {
   const email = clean(f.get("email"));
   const code = String(f.get("code") ?? "").replace(/\D/g, "");
-  const wrong = { email, step: "code" as const, message: "That code didn't work. Check it, or send a new one." };
+  const wrong = { email, step: "code" as const, message: "That code didn't work. Check it, or tap Use a different email to get a new one." };
   // Local testing only: a fixed code, never on the live site.
-  const testCode = process.env.VERCEL_ENV !== "production" && process.env.LOGIN_TEST_CODE;
+  const testCode = !process.env.VERCEL && process.env.LOGIN_TEST_CODE; // never on any Vercel deploy, previews included
   if (testCode && code === testCode) {
     if (!(await invited(email))) return wrong;
   } else {
-    const [row] = await sql<{ code_hash: string; ok: boolean; attempts: number }[]>`
-      select code_hash, expires_at > now() as ok, attempts from login_codes where email = ${email}`;
-    if (!row || !row.ok || row.attempts >= 5) return { ...wrong, message: "That code has expired. Send a new one." };
-    if (row.code_hash !== hashCode(email, code)) {
-      await sql`update login_codes set attempts = attempts + 1 where email = ${email}`;
-      return wrong;
-    }
-    await sql`delete from login_codes where email = ${email}`;
+    // Counts the try and checks the limit in one step, so a burst of guesses can't all slip under it.
+    const [row] = await sql<{ code_hash: string }[]>`
+      update login_codes set attempts = attempts + 1 where email = ${email} and attempts < 5 and expires_at > now() returning code_hash`;
+    if (!row) return { ...wrong, message: "That code has expired. Send a new one." };
+    if (row.code_hash !== hashCode(email, code)) return wrong;
+    // Used once: only the request that deletes it signs in.
+    const [used] = await sql`delete from login_codes where email = ${email} and code_hash = ${row.code_hash} returning 1`;
+    if (!used) return wrong;
   }
 
   const [user] = await sql<{ id: string }[]>`

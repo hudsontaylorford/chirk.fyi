@@ -103,16 +103,20 @@ export async function runDue(today: string, base: string) {
   for (const e of events) {
     const sent = new Set((await sql<{ job: Job }[]>`select job from sent_jobs where event_id = ${e.id}`).map((r) => r.job));
     for (const job of dueJobs(e, today, sent)) {
+      // Claim the job first, so two runs at once can't both draw or both send.
+      const [claimed] = await sql`insert into sent_jobs (event_id, job) values (${e.id}, ${job}) on conflict do nothing returning 1`;
+      if (!claimed) continue;
       if (job === "gift_draw") {
         const [drawn] = await sql`select 1 from gift_draws where event_id = ${e.id} limit 1`;
         if (!drawn) {
           const r = await drawFor(e);
-          if ("error" in r) { log.push(`${e.slug}: draw failed (${r.error})`); continue; }
+          if ("error" in r) {
+            await sql`delete from sent_jobs where event_id = ${e.id} and job = ${job}`; // try again tomorrow
+            log.push(`${e.slug}: draw failed (${r.error})`);
+            continue;
+          }
         }
       }
-      // Claim the job first, so two runs at once can't both send.
-      const [claimed] = await sql`insert into sent_jobs (event_id, job) values (${e.id}, ${job}) on conflict do nothing returning 1`;
-      if (!claimed) continue;
       const n = job === "gift_draw" ? (await emailMatchesFor(e, base)).sent
         : job === "gift_ideas" ? await remindIdeas(e, base)
         : job === "gift_givers" ? await remindGivers(e, base)

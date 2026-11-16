@@ -7,6 +7,7 @@ import { hostRole, requireUser } from "@/lib/auth";
 import { cohostEmail } from "@/lib/code-email";
 import { getEvent, joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
+import { splitNames } from "@/lib/format";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { parseGuests } from "@/lib/guests";
 import { inviteEmail, reminderEmail } from "@/lib/invite-email";
@@ -103,7 +104,8 @@ export async function copyToNextYear(slug: string) {
 
 export async function setStatus(slug: string, status: "draft" | "live" | "archived") {
   await eventId(slug);
-  await sql`update events set status = ${status} where slug = ${slug}`;
+  // Archiving never touches a draft: an archived event is public, a draft isn't.
+  await sql`update events set status = ${status} where slug = ${slug} and (${status} <> 'archived' or status <> 'draft')`;
   revalidatePath("/host");
   revalidatePath(`/${slug}`, "layout");
 }
@@ -226,10 +228,12 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
  */
 async function addHostAsGuest(eventId: string, user: { email: string; name: string | null }) {
   const name = user.name || user.email.split("@")[0];
-  const [have] = await sql`
-    select 1 from households where event_id = ${eventId}
-      and (lower(email) = ${user.email} or exists (select 1 from unnest(names) n where lower(n) = lower(${name})))`;
-  if (!have) await sql`insert into households ${sql({ event_id: eventId, names: [name], going: true, email: user.email })}`;
+  const first = name.split(/\s+/)[0].toLowerCase(); // "Hudson Ford" is the Hudson in "Hudson & Molly"
+  const rows = await sql<{ id: string; names: string[]; email: string | null }[]>`select id, names, email from households where event_id = ${eventId}`;
+  const byEmail = rows.find((h) => h.email?.toLowerCase() === user.email);
+  if (byEmail) await sql`update households set going = true where id = ${byEmail.id} and going is null`;
+  else if (!rows.some((h) => splitNames(h.names).some((n) => n.toLowerCase() === first || n.toLowerCase() === name.toLowerCase())))
+    await sql`insert into households ${sql({ event_id: eventId, names: [name], going: true, email: user.email })}`;
 }
 
 /** Adds a co-host by email (making their account if they don't have one) and emails them. Any host can add. */
@@ -276,8 +280,10 @@ export async function bulkGuests(slug: string, _prev: string | null, f: FormData
     select id, token, names, email from households where event_id = ${ev} and id in ${sql(ids)}`;
   const what = String(f.get("do"));
   if (what === "remove") {
-    for (const h of rows) await removeHousehold(slug, h.id);
-    return `Removed ${rows.length} ✓`;
+    let removed = 0;
+    for (const h of rows) if (await dropHousehold(slug, h.id)) removed++;
+    const kept = rows.length - removed;
+    return `Removed ${removed} ✓${kept ? ` Kept ${kept} with costs or poker on the event.` : ""}`;
   }
   const kind = what === "reminder" ? "reminder" : "invite";
   const withEmail = rows.filter((h): h is typeof h & { email: string } => !!h.email);
@@ -299,7 +305,8 @@ export async function bulkEvents(_prev: string | null, f: FormData): Promise<str
     const role = await hostRole(slug);
     if (!role || (what === "delete" && role !== "owner")) { skipped++; continue; }
     if (what === "delete") await sql`delete from events where slug = ${slug}`;
-    else await sql`update events set status = ${what === "unarchive" ? "live" : "archived"} where slug = ${slug}`;
+    else if (what === "unarchive") await sql`update events set status = 'live' where slug = ${slug} and status = 'archived'`;
+    else await sql`update events set status = 'archived' where slug = ${slug} and status <> 'draft'`; // a draft stays private
     done++;
   }
   revalidatePath("/host");
@@ -307,13 +314,21 @@ export async function bulkEvents(_prev: string | null, f: FormData): Promise<str
   return `${verb} ${done} ✓${skipped ? ` (${skipped} skipped: only the owner can delete)` : ""}`;
 }
 
+/** Removes a guest. Not one with costs, payments or poker entries: deleting them would erase money others are owed. */
 export async function removeHousehold(slug: string, id: string) {
+  await dropHousehold(slug, id);
+}
+async function dropHousehold(slug: string, id: string) {
   const ev = await eventId(slug);
+  const [money] = await sql`select 1 from costs where paid_by = ${id} union all select 1 from cost_shares where household_id = ${id}
+    union all select 1 from payments where ${id} in (from_household, to_household) union all select 1 from poker_entries where household_id = ${id} limit 1`;
+  if (money) return false;
   // Things they added go too, unless someone else is also bringing them; their list picks reopen.
-  await sql`delete from items i where i.household_id = ${id} and i.kind <> 'needed'
+  await sql`delete from items i where i.household_id = ${id} and i.event_id = ${ev} and i.kind <> 'needed'
     and not exists (select 1 from claims c where c.item_id = i.id and c.household_id <> ${id})`;
   await sql`delete from households where id = ${id} and event_id = ${ev}`;
   revalidatePath(`/${slug}`, "layout");
+  return true;
 }
 
 export async function saveEvent(slug: string, f: FormData) {

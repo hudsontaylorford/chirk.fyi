@@ -36,6 +36,6 @@ test("personal invites greet the guest; reminders ask plainly", () => {
   assert.match(mine.text, /^Hi Sam & Lee, you're invited!\n\nJets <vs> Bills/);
   const r = reminderEmail({ ...event, rsvp_by: "2026-11-10" }, "https://chirk.fyi/t/r/abc/remember?to=invite", "Sam");
   assert.equal(r.subject, "Can you make Jets <vs> Bills?");
-  assert.match(r.text, /^Hi Sam! Can you make Jets <vs> Bills on Sunday, November 15\? Let us know by Tue, Nov 10\.\n\nRSVP: https/);
+  assert.match(r.text, /^Hi Sam! Can you make Jets <vs> Bills on Sunday, November 15\? Let us know by Tuesday, November 10\.\n\nRSVP: https/);
   assert.match(r.html, /href="https:\/\/chirk\.fyi\/t\/r\/abc\/remember\?to=invite"/);
 });

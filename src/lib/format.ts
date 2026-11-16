@@ -48,9 +48,9 @@ export const several = (who: string) => /,|&|\band\b/i.test(who);
 export const listText = (xs: string[]) =>
   xs.some((x) => /\band\b|&/i.test(x)) ? xs.join(" · ") : xs.length < 2 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs.at(-1)}`;
 
-/** "Graham and Ellen" or "Sam & Priya" typed in one box is two people; "Andrea" stays one. */
+/** "Graham and Ellen", "Sam & Priya" or "Sam, Priya" typed in one box is two people; "Andrea" stays one. */
 export const splitNames = (names: string[]) =>
-  names.flatMap((n) => n.split(/\s+(?:&|and)\s+|\s*&\s*/i)).map((n) => n.trim()).filter(Boolean);
+  names.flatMap((n) => n.split(/\s*,\s*|\s+(?:&|and)\s+|\s*&\s*/i)).map((n) => n.trim()).filter(Boolean);
 
 /** How many people a reply is (before kids). */
 export const headcount = (names: string[]) => splitNames(names).length;

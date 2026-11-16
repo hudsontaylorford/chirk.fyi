@@ -3,7 +3,7 @@ import { Confirm } from "@/components/Confirm";
 import { GiftButton, WishForm } from "@/components/GiftForms";
 import { SaveButton } from "@/components/SaveButton";
 import { getDraws, getSentJobs, joinNames } from "@/lib/data";
-import { daysBefore } from "@/lib/due";
+import { daysBefore, giversFrom } from "@/lib/due";
 import { listText, shortDate } from "@/lib/format";
 import type { EventData } from "@/lib/types";
 
@@ -101,9 +101,9 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
               {event.gift_remind_ideas && (
                 <li>Ideas reminder: {shortDate(daysBefore(event.gift_draw_on, 3))}{status("gift_ideas", daysBefore(event.gift_draw_on, 1))}</li>
               )}
-              <li>Names drawn and emailed: {shortDate(event.gift_draw_on)}, 9 am{sent.has("gift_draw") && " · done ✓"}</li>
+              <li>Names drawn and emailed: {shortDate(event.gift_draw_on)}, 9 am{sent.has("gift_draw") && " · sent ✓"}</li>
               {event.gift_remind_givers && (
-                <li>&ldquo;You&apos;re giving to…&rdquo; reminder: {shortDate(daysBefore(event.date, 7))}{status("gift_givers", daysBefore(event.date, 1))}</li>
+                <li>&ldquo;You&apos;re giving to…&rdquo; reminder: {shortDate(giversFrom(event.date, event.gift_draw_on))}{status("gift_givers", daysBefore(event.date, 1))}</li>
               )}
               {event.status !== "live" && <li className="text-soft">Nothing sends until the event is published.</li>}
             </ul>

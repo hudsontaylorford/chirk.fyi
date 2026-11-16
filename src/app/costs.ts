@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { hostRole } from "@/lib/auth";
-import { money, parseMoney } from "@/lib/costs";
+import { balances, money, parseMoney, poker, settle } from "@/lib/costs";
+import { getCosts } from "@/lib/data";
 import { headcount } from "@/lib/format";
 import { sql } from "@/lib/db";
 
@@ -64,7 +65,16 @@ export async function markPaid(slug: string, token: string | null, from: string,
   if (!a || !(a.host || a.household === to) || !(amount > 0)) return;
   const [ok] = await sql`select count(*)::int as n from households where event_id = ${a.eventId} and id in (${from}, ${to})`;
   if (ok.n !== 2) return;
-  await sql`insert into payments ${sql({ event_id: a.eventId, from_household: from, to_household: to, amount: Math.round(amount) })}`;
+  // Only a payment the settle-up still shows, one at a time per event: a double tap (or host and guest both tapping) records it once.
+  await sql.begin(async (tx) => {
+    await tx`select pg_advisory_xact_lock(hashtext(${a.eventId}))`;
+    const [e] = await tx<{ costs_on: boolean }[]>`select costs_on from events where id = ${a.eventId}`;
+    const all = await getCosts(a.eventId);
+    const game = poker(all.poker);
+    const owed = settle(balances(e.costs_on ? all.costs.map((c) => ({ amount: c.amount, paidBy: c.paid_by, split: c.split })) : [], all.payments, game.ready ? game.nets : undefined));
+    if (!owed.some((p) => p.from === from && p.to === to && p.amount === Math.round(amount))) return;
+    await tx`insert into payments ${sql({ event_id: a.eventId, from_household: from, to_household: to, amount: Math.round(amount) })}`;
+  });
   done(slug);
 }
 

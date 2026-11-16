@@ -161,7 +161,7 @@ async function saveBringing(tx: Tx, event: { id: string; allow_doubles: boolean 
  * The button goes to /<event>/r/<token>/remember, which also makes that device remember them.
  */
 async function emailLinks(slug: string, by: { token: string } | { email: string }) {
-  const data = await getEventData(slug);
+  const data = await getEventData(slug, true); // as guests see it: nothing for a draft (unless a host is testing it)
   if (!data) return;
   const rows = data.households.filter((h) => h.email && ("token" in by ? h.token === by.token : h.email === by.email));
   const claimed = bringList(data).claimed;

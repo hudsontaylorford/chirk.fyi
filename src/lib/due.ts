@@ -20,6 +20,12 @@ export const daysBefore = (date: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 
+/** The "you're giving to…" reminder: a week before the event, but never before the day after names are drawn. */
+export const giversFrom = (date: string, drawOn: string) => {
+  const week = daysBefore(date, 7), after = daysBefore(drawOn, -1);
+  return week > after ? week : after;
+};
+
 /**
  * Each job runs once (`sent` holds the ones already done), from its day onward until its window closes,
  * so a missed morning catches up the next day instead of skipping. Only live events send anything.
@@ -31,7 +37,7 @@ export function dueJobs(e: Schedule, today: string, sent: Set<Job>): Job[] {
   if (e.gift_on && e.gift_draw_on) {
     if (e.gift_remind_ideas) open("gift_ideas", daysBefore(e.gift_draw_on, 3), daysBefore(e.gift_draw_on, 1));
     open("gift_draw", e.gift_draw_on, e.date);
-    if (e.gift_remind_givers) open("gift_givers", daysBefore(e.date, 7), daysBefore(e.date, 1));
+    if (e.gift_remind_givers && sent.has("gift_draw")) open("gift_givers", giversFrom(e.date, e.gift_draw_on), daysBefore(e.date, 1));
   }
   if (e.remind_replies && e.rsvp_by) open("reply_reminder", daysBefore(e.rsvp_by, 3), e.rsvp_by);
   return due;

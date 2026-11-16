@@ -26,6 +26,7 @@ test("people typed together count separately", () => {
   assert.deepEqual(splitNames(["Graham and Ellen"]), ["Graham", "Ellen"]);
   assert.deepEqual(splitNames(["Sam & Priya", "Dev"]), ["Sam", "Priya", "Dev"]);
   assert.deepEqual(splitNames(["Sam&Priya"]), ["Sam", "Priya"]);
+  assert.deepEqual(splitNames(["Sam, Priya and Dev"]), ["Sam", "Priya", "Dev"]);
   assert.equal(headcount(["Andrea"]), 1);
   assert.equal(headcount(["Hudson", "Molly"]), 2);
   assert.equal(headcount(["Graham and Ellen"]), 2);

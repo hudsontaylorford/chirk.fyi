@@ -1,8 +1,9 @@
 import { addCost, addPoker, buyInAll, markPaid, removeCost, removePoker, saveVenmo } from "@/app/costs";
 import { Confirm } from "@/components/Confirm";
+import { SaveButton } from "@/components/SaveButton";
 import { BuyInAll, CostForm, PokerForm, VenmoForm } from "@/components/CostForms";
 import { balances, money, poker, settle, venmoUrl } from "@/lib/costs";
-import { headcount } from "@/lib/format";
+import { headcount, several } from "@/lib/format";
 import { getCosts, joinNames } from "@/lib/data";
 import type { EventData } from "@/lib/types";
 
@@ -57,7 +58,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                 <span className="tabular-nums">{money(c.amount)}</span>
               </div>
               <p className="text-[15px] text-soft">
-                {capital(name(c.paid_by))} paid · {c.split.length === going.length ? "split between everyone" : `split between ${people(c.split)} ${people(c.split) === 1 ? "person" : "people"}`}
+                {capital(name(c.paid_by))} paid · {c.split.length === going.length && going.every((h) => c.split.some((x) => x.who === h.id)) ? "split between everyone" : `split between ${people(c.split)} ${people(c.split) === 1 ? "person" : "people"}`}
                 {(host || c.paid_by === me?.id) && (
                   <> · <Confirm label="Remove" action={removeCost.bind(null, event.slug, token, c.id)} /></>
                 )}
@@ -94,7 +95,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
               </p>
               {[...game.inferred].map(([who, cents]) => (
                 <p key={who} className="mt-1 text-[14px] text-soft">
-                  {capital(name(who))} hasn&apos;t cashed out, so {who === me?.id ? "you're" : "they're"} counted as the {money(cents)} left on the table. Enter a cash-out to change it.
+                  {capital(name(who))} {who === me?.id || several(name(who)) ? "haven't" : "hasn't"} cashed out, so {who === me?.id ? "you're" : "they're"} counted as the {money(cents)} left on the table. Enter a cash-out to change it.
                 </p>
               ))}
               {game.allOut && !game.ready && (
@@ -124,7 +125,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
         <div className="mt-6">
           <h3 className="text-[17px] font-semibold">{host ? "Settle up" : "Your share"}</h3>
           {mine.length === 0 ? (
-            <p className="mt-1 text-soft">{host ? "Everyone's even ✓" : "You're all square ✓"}</p>
+            <p className="mt-1 text-soft">{host ? "Everyone's even ✓" : "You're even ✓"}</p>
           ) : (
             <ul className="mt-2 space-y-3">
               {mine.map((p) => {
@@ -133,7 +134,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                 return (
                   <li key={`${p.from}-${p.to}`} className="rounded-2xl bg-wash p-3 text-[16px]">
                     <p>
-                      {iOwe ? <>You owe <strong>{name(p.to)}</strong></> : <><strong>{capital(name(p.from))}</strong> {p.from === me?.id ? "owe" : "owes"} <strong>{name(p.to)}</strong></>}{" "}
+                      {iOwe ? <>You owe <strong>{name(p.to)}</strong></> : <><strong>{capital(name(p.from))}</strong> {several(name(p.from)) ? "owe" : "owes"} <strong>{name(p.to)}</strong></>}{" "}
                       <strong className="tabular-nums">{money(p.amount)}</strong>
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-3 text-[15px]">
@@ -143,7 +144,7 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
                       {iOwe && !handle && <span className="text-soft">Ask them for their Venmo, or add yours below so they can pay you.</span>}
                       {(host || p.to === me?.id) && (
                         <form action={markPaid.bind(null, event.slug, token, p.from, p.to, p.amount)}>
-                          <button className="font-semibold underline underline-offset-2">Mark paid ✓</button>
+                          <SaveButton className="font-semibold underline underline-offset-2">Mark paid</SaveButton>
                         </form>
                       )}
                     </div>

@@ -40,11 +40,17 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const list = bringList(data);
   const whoHas = new Map(list.claimed.map((r) => [r.item.id, r.who]));
   const going = households.filter((h) => h.going);
-  const answered = households.filter((h) => h.going !== null);
+  // Hosts are on the list (as going) but don't count as replies, and don't get their own notes.
+  const isHost = (email: string | null) => !!email && hosts.some((x) => x.email === email.toLowerCase());
+  const guests = households.filter((h) => !isHost(h.email));
+  const answered = guests.filter((h) => h.going !== null);
   const waiting = households.filter((h) => h.going === null);
   const sent = await getSentJobs(event.id);
-  // Who a guest message would reach: hosts are on the list (as going) but don't get their own notes.
-  const isHost = (email: string | null) => !!email && hosts.some((x) => x.email === email.toLowerCase());
+  // Guests with money on the event can't be deleted (it would erase what others are owed).
+  const hasMoney = new Set((await sql<{ id: string }[]>`
+    select paid_by id from costs where event_id = ${event.id} union select s.household_id from cost_shares s join costs c on c.id = s.cost_id where c.event_id = ${event.id}
+    union select from_household from payments where event_id = ${event.id} union select to_household from payments where event_id = ${event.id}
+    union select household_id from poker_entries where event_id = ${event.id}`).map((r) => r.id));
   const count = (hs: typeof households) => ({ email: hs.filter((h) => h.email && !isHost(h.email)).length, total: hs.filter((h) => !isHost(h.email)).length });
   const adults = going.reduce((n, h) => n + headcount(h.names), 0);
   const kids = going.reduce((n, h) => n + h.kids, 0);
@@ -79,7 +85,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       </div>
       {event.status === "draft" && (
         <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 text-[16px]">
-          <span><strong>Draft.</strong> Only you can see it. Check the details, then publish.</span>
+          <span><strong>Draft.</strong> Only hosts can see it. Check the details, then publish.</span>
           <form action={act.setStatus.bind(null, slug, "live")}><SaveButton>Publish</SaveButton></form>
         </div>
       )}
@@ -91,8 +97,8 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <Stat n={adults + kids} label="coming" sub={kids ? `${adults} adult${adults === 1 ? "" : "s"}, ${kids} kid${kids === 1 ? "" : "s"}` : undefined} />
         <Stat
           n={answered.length}
-          label={waiting.length ? `of ${households.length} replied` : answered.length === 1 ? "reply" : "replies"}
-          sub={answered.length - going.length ? `${answered.length - going.length} can't make it` : undefined}
+          label={waiting.length ? `of ${guests.length} replied` : answered.length === 1 ? "reply" : "replies"}
+          sub={answered.filter((h) => h.going === false).length ? `${answered.filter((h) => h.going === false).length} can't make it` : undefined}
         />
         {event.bring_prompt && <Stat n={open} label="still needed" />}
       </div>
@@ -118,7 +124,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           <input name="guests" className="field" placeholder="Sam, Graham & Ellen" aria-label="Add guests" />
           <SaveButton>Add</SaveButton>
         </div>
-        <p className="mt-1 text-[14px] text-soft">Commas between invites. Add an email after a name to send it from here.</p>
+        <p className="mt-1 text-[14px] text-soft">Commas between guests. Add an email after a name to send it from here.</p>
       </form>
       {event.remind_replies && event.rsvp_by && (
         <p className="mt-2 text-[14px] text-soft">
@@ -157,7 +163,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                     <span className="ml-2 rounded-full bg-wash px-2 py-0.5 text-[13px] font-semibold text-soft">Host</span>
                   )}
                 </span>
-                <span className={`shrink-0 ${h.going ? "text-green-700" : "text-soft"}`}>{h.going === null ? "No reply yet" : h.going ? "Going" : "Can't"}</span>
+                <span className={`shrink-0 ${h.going ? "text-green-700" : "text-soft"}`}>{h.going === null ? "No reply yet" : h.going ? "Going" : "Can't make it"}</span>
               </div>
               {h.going && partsOf(event, h).length > 0 && <p className="text-soft">Coming to {listText(partsOf(event, h))}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
@@ -176,7 +182,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
               <div className="mt-2 flex gap-5 text-[14px] text-soft">
                 {h.going !== null && <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />}
                 <a href={`/${slug}/r/${h.token}`} className="underline underline-offset-2">Edit</a>
-                <Confirm label="Delete" action={act.removeHousehold.bind(null, slug, h.id)} />
+                {hasMoney.has(h.id) ? <span>Has costs, so it stays</span> : <Confirm label="Delete" action={act.removeHousehold.bind(null, slug, h.id)} />}
               </div>
             </li>
           );
@@ -234,9 +240,11 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <form action={act.copyToNextYear.bind(null, slug)}>
           <SaveButton className="btn btn-quiet w-full">Copy to next year (as a draft)</SaveButton>
         </form>
-        <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
-          <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
-        </form>
+        {event.status !== "draft" && (
+          <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
+            <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
+          </form>
+        )}
         {role === "owner" && (
           <p className="pt-2 text-center text-[15px] text-soft">
             <Confirm label="Delete this event" action={act.deleteEvent.bind(null, slug)} />

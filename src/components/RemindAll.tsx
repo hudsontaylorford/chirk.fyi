@@ -17,7 +17,7 @@ export function RemindAll({ count, action }: { count: number; action: (prev: str
         </form>
       ) : (
         <button type="button" className="font-semibold underline underline-offset-2" onClick={() => setSure(true)}>
-          Remind the {count} who {count === 1 ? "hasn't" : "haven't"} replied (by email)
+          Email a reminder to the {count} who {count === 1 ? "hasn't" : "haven't"} replied
         </button>
       )}
     </div>

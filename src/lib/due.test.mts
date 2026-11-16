@@ -23,6 +23,14 @@ test("each job on its day, and catching up a missed day", () => {
   assert.deepEqual(dueJobs(ev, "2026-12-20", new Set<Job>(["gift_draw"])), []); // the day itself: too late to nudge
 });
 
+test("the giving-to reminder waits for the draw", () => {
+  const late = { ...ev, gift_draw_on: "2026-12-16", remind_replies: false, gift_remind_ideas: false }; // drawn inside the last week
+  assert.deepEqual(dueJobs(late, "2026-12-13", none), []); // a week before, but no names yet
+  assert.deepEqual(dueJobs(late, "2026-12-16", none), ["gift_draw"]); // draw day: the draw email says who, no second nudge
+  assert.deepEqual(dueJobs(late, "2026-12-17", new Set<Job>(["gift_draw"])), ["gift_givers"]); // the day after
+  assert.deepEqual(dueJobs(late, "2026-12-17", none), ["gift_draw"]); // a missed draw catches up first; no reminder before it
+});
+
 test("never twice, nothing for drafts, and only what's switched on", () => {
   assert.deepEqual(dueJobs(ev, "2026-11-28", new Set<Job>(["gift_ideas"])), []);
   assert.deepEqual(dueJobs({ ...ev, status: "draft" }, "2026-12-01", none), []);

@@ -14,7 +14,7 @@ export function codeEmail(code: string) {
 }
 
 export function cohostEmail(i: { by: string; title: string; url: string }) {
-  const subject = `${i.by} added you as a host: ${i.title}`;
+  const subject = `${i.by} added you as a co-host: ${i.title}`;
   const text = `${i.by} added you as a co-host of ${i.title} on chirk. Sign in with this email to see replies, edit the event and send invites.\n\nOpen chirk: ${i.url}`;
   const html = wrap(`<p style="margin:0;"><strong>${esc(i.by)}</strong> added you as a co-host of <strong>${esc(i.title)}</strong> on chirk.</p>
 <p style="margin:8px 0 0;">Sign in with this email to see replies, edit the event and send invites.</p>
