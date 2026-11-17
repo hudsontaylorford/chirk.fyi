@@ -33,7 +33,7 @@ export async function importPlan(_prev: string | null, f: FormData): Promise<str
 
   let plan;
   try {
-    plan = await readPlan(text, attachment, new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }));
+    plan = await readPlan(text, attachment, new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }), me.name || me.email.split("@")[0]);
   } catch (e) {
     if (e instanceof ImportProblem) return e.message;
     throw e;

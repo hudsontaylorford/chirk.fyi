@@ -6,7 +6,7 @@ import type { Event } from "./types";
 export const SCHEMA = {
   type: "object",
   additionalProperties: false,
-  required: ["title", "date", "start_time", "end_time", "place", "address", "message", "schedule", "bring"],
+  required: ["title", "date", "start_time", "end_time", "place", "address", "hosted_by", "message", "schedule", "bring"],
   properties: {
     title: { type: "string", description: "A short name for the plan, as written or obvious from the text" },
     date: { type: "string", description: "YYYY-MM-DD, or \"\" if no date is given" },
@@ -14,7 +14,8 @@ export const SCHEMA = {
     end_time: { type: "string", description: "24-hour HH:MM, or \"\"" },
     place: { type: "string", description: "The venue or place name as written (a home, a restaurant, a park), or \"\"" },
     address: { type: "string", description: "The street address as written, or \"\"" },
-    message: { type: "string", description: "The useful details for guests, in the source's own words, short; \"\" if none" },
+    hosted_by: { type: "string", description: "Who's hosting, as names (\"Hudson & Ahmad\"), only when the text says; \"\" otherwise" },
+    message: { type: "string", description: "The host's own words for guests, nearly verbatim, emojis kept; \"\" if none" },
     schedule: { type: "array", items: { type: "string" }, description: "Times in the day, one per line, time first (\"7 pm Dinner\"); [] if none" },
     bring: { type: "array", items: { type: "string" }, description: "Things guests are asked to bring, one each; [] if none" },
   },
@@ -29,7 +30,8 @@ Rules:
 - Dates: resolve weekday names and words like "tomorrow" or "next Friday" relative to today's date, given below. If the year isn't written, use the next upcoming occurrence.
 - Times: 24-hour HH:MM. If AM/PM isn't written, choose the reading that makes sense for a social plan. "Doors at 6, dinner at 7": start_time is the first time guests should arrive.
 - place is the venue's or home's name; address is the street address. Keep both as written.
-- message: the details guests need (parking, dress, what to expect), kept short and in the source's words. Leave out the date, time, place and bring list, which have their own fields.
+- message: the host's own words, nearly verbatim: keep their voice, greetings, jokes, slang and emojis. Don't reword, summarize or tidy. Only leave out sentences that just repeat the date, time or address, which have their own fields; keep a sentence that says more (what's planned, what to bring and why).
+- hosted_by: only when the text names who's hosting ("me & ahmad's party", "hosted by Sam and Lee"). "me", "I" or "my" means the person pasting, whose name is given below; write names, capitalized, joined with " & ". Otherwise "".
 - schedule: only when the day has several parts at different times.
 - bring: only things guests are asked to bring.
 - title: short ("Friendsgiving", "Jets vs Bills tailgate").`;
@@ -58,6 +60,7 @@ export function toImported(raw: unknown): Imported {
     time: time ?? undefined,
     end_time: time && end ? end : undefined,
     place: text(r.place, 120) || undefined,
+    hosted_by: text(r.hosted_by, 80) || undefined,
     address: text(r.address, 200) || undefined,
     details: text(r.message, 1200) || undefined,
     schedule: schedule.length > 1 ? schedule.join("\n") : undefined,
@@ -70,7 +73,7 @@ export function toImported(raw: unknown): Imported {
 export function toAnswer({ set, items }: Imported) {
   return {
     title: set.title ?? "", date: set.date ?? "", start_time: set.time?.slice(0, 5) ?? "", end_time: set.end_time?.slice(0, 5) ?? "",
-    place: set.place ?? "", address: set.address ?? "", message: set.details ?? "", schedule: set.schedule?.split("\n") ?? [], bring: items,
+    place: set.place ?? "", address: set.address ?? "", hosted_by: set.hosted_by ?? "", message: set.details ?? "", schedule: set.schedule?.split("\n") ?? [], bring: items,
   };
 }
 

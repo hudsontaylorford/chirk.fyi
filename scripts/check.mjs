@@ -473,6 +473,7 @@ if (process.env.AI_FAKE === "true") {
   assert.equal(await h.inputValue("input[name=date]"), "2026-12-05");
   assert.equal(await h.inputValue("input[name=time]"), "19:00");
   assert.equal(await h.inputValue("input[name=place]"), "Sample Hall");
+  assert.equal(await h.inputValue("input[name=hosted_by]"), "Hostie & Sam"); // "me" is the signed-in host
   assert.match(await h.textContent("summary:has(span:text-is('What to bring'))"), /2 on the list/);
   await h.click("button:text-is('Create event')");
   await h.waitForURL(/\/sample-dinner(-\d+)?\/host$/);

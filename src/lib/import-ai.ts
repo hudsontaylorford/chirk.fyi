@@ -12,11 +12,11 @@ export const importOn = () => fakeOn() || !!process.env.ANTHROPIC_API_KEY?.trim(
 /** A message the host can act on; anything else is a bug. */
 export class ImportProblem extends Error {}
 
-export async function readPlan(text: string, file: { type: FileType; base64: string } | null, today: string): Promise<Imported> {
+export async function readPlan(text: string, file: { type: FileType; base64: string } | null, today: string, me: string): Promise<Imported> {
   if (fakeOn()) {
     // A fixed, fictional answer for local work and tests.
     return toImported({
-      title: "Sample dinner", date: "2026-12-05", start_time: "19:00", end_time: "", place: "Sample Hall", address: "335 Example Ave",
+      title: "Sample dinner", date: "2026-12-05", start_time: "19:00", end_time: "", place: "Sample Hall", address: "335 Example Ave", hosted_by: `${me} & Sam`,
       message: "Bring a sweater, the patio gets cold.", schedule: [], bring: ["Salad", "Dessert"],
     });
   }
@@ -36,7 +36,7 @@ export async function readPlan(text: string, file: { type: FileType; base64: str
             ? { type: "document" as const, source: { type: "base64" as const, media_type: "application/pdf" as const, data: file.base64 } }
             : { type: "image" as const, source: { type: "base64" as const, media_type: file.type, data: file.base64 } }]
           : []),
-        { type: "text" as const, text: `Today is ${today} (New York).\n\n<pasted>\n${text || "(nothing typed; read the attachment)"}\n</pasted>` },
+        { type: "text" as const, text: `Today is ${today} (New York). The person pasting is ${me}.\n\n<pasted>\n${text || "(nothing typed; read the attachment)"}\n</pasted>` },
       ],
     }],
   };

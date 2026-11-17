@@ -4,18 +4,18 @@ import { sniffType, toAnswer, toImported } from "./import.ts";
 
 test("import: keeps well-formed values, drops odd ones, never invents", () => {
   const good = toImported({
-    title: " Friendsgiving ", date: "2026-11-21", start_time: "18:30", end_time: "23:00", place: "Our place", address: "56 Bogart St",
+    title: " Friendsgiving ", date: "2026-11-21", start_time: "18:30", end_time: "23:00", place: "Our place", address: "56 Bogart St", hosted_by: "Hudson & Ahmad",
     message: "Street parking only.", schedule: ["6:30 pm Drinks", "7:30 pm Dinner"], bring: ["Pie", "", "Wine"],
   });
   assert.deepEqual(good.set, {
-    title: "Friendsgiving", date: "2026-11-21", time: "18:30:00", end_time: "23:00:00", place: "Our place", address: "56 Bogart St",
+    title: "Friendsgiving", date: "2026-11-21", time: "18:30:00", end_time: "23:00:00", place: "Our place", address: "56 Bogart St", hosted_by: "Hudson & Ahmad",
     details: "Street parking only.", schedule: "6:30 pm Drinks\n7:30 pm Dinner", bring_prompt: "What are you bringing?",
   });
   assert.deepEqual(good.items, ["Pie", "Wine"]);
   assert.deepEqual(toImported(toAnswer(good)), good); // carried to New event and read again, nothing lost
 
   // Bad dates and times are left for the host, an end time needs a start, one schedule line isn't a schedule.
-  const odd = toImported({ title: "", date: "2026-02-30", start_time: "7pm", end_time: "23:00", place: "", address: "", message: "", schedule: ["7 pm Dinner"], bring: [] });
+  const odd = toImported({ title: "", date: "2026-02-30", start_time: "7pm", end_time: "23:00", place: "", address: "", hosted_by: "", message: "", schedule: ["7 pm Dinner"], bring: [] });
   assert.deepEqual(odd, { set: {}, items: [] });
   assert.deepEqual(toImported(null), { set: {}, items: [] });
   assert.deepEqual(toImported({ title: 42, bring: "Pie" }), { set: {}, items: [] });
