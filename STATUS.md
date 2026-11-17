@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `tiles`)
+## Went live Nov 17 (`tiles`)
 - **Event tiles (roadmap 37):** the host page's number tiles follow what each event uses: **still owed** (costs or poker, with how many payments), **in the pot** (poker: cashed out ✓ or how many still to cash out), **giving gifts** (drawn ✓ · N without ideas, or not drawn yet), beside coming, replies and still needed. The money math now lives in one helper (`settleUp`) shared by the Costs section, Mark paid and the tiles. No database step.
 
 ## Went live Nov 17 (`local-first`)
