@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `import-voice`)
+## Went live Nov 17 (`import-voice`)
 - **Paste a text or screenshot, tuned from the first real try** (a Halloween stoop party text): the Message now keeps the host's own words nearly verbatim (voice, slang, emojis), and **Hosted by** fills in when the text names hosts ("me & ahmad" → "Hudson & Ahmad", using the signed-in host's name). No database step.
 
 ## Went live Nov 17 (`import`)
