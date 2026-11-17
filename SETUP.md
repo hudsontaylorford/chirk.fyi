@@ -63,7 +63,7 @@ All of these live in **Vercel → your project → Settings → Environment Vari
 | `RESEND_API_KEY` | Sends email (codes, invites, reminders) | No email goes out, including sign-in codes |
 | `CRON_SECRET` | The password Vercel's 9 am morning job uses (gift draws, reminders). Any long random text | Every morning job is refused: nothing scheduled ever sends |
 | `BLOB_READ_WRITE_TOKEN` | Photo uploads (Vercel adds it when you connect Blob storage) | The upload button is hidden; pasting a photo link still works |
-| `ANTHROPIC_API_KEY` | Optional: "Make it from a text or screenshot" on New event (see section 7) | That line doesn't show; New event works as before |
+| `ANTHROPIC_API_KEY` | Optional: "Paste a text or screenshot" on New event (see section 7) | That line doesn't show; New event works as before |
 | `GOOGLE_PLACES_API_KEY` | Optional: place suggestions while typing a Place, which fill in the Address (see "Google address search" below) | The Place box works as plain typing |
 | `EMAIL_REPLY_TO` | Optional: where replies to chirk emails go when there's no host to reply to | Replies go to the sender address |
 
@@ -91,7 +91,7 @@ What's kept: only the address (allowed by Google's terms). The Place box keeps y
 
 ---
 
-## 7. Make it from a text or screenshot (optional)
+## 7. Paste a text or screenshot (optional)
 
 chirk reads a pasted text, screenshot or PDF with Claude and fills in New event. All at **console.anthropic.com**.
 
@@ -100,7 +100,7 @@ chirk reads a pasted text, screenshot or PDF with Claude and fills in New event.
 3. **Limits**: set a monthly spend limit, e.g. $10, so a surprise can't cost more.
 4. **API keys → Create key**, name it `chirk`, copy it (it's shown once).
 5. **Vercel → chirk.fyi → Settings → Environment Variables**: Key `ANTHROPIC_API_KEY`, Value: the key, Environment: **Production** only, tick **Sensitive**, **Save**. Then redeploy.
-6. Check: New event → **Make it from a text or screenshot** → paste a group text → **Fill in the form**. The form should come back filled in, saying "Filled in from what you pasted".
+6. Check: New event → **Paste a text or screenshot** → paste a group text → **Fill in**. The form should come back filled in, saying "Filled in from what you pasted".
 
 What's sent: only what you paste or attach, to Claude, to read it once. Nothing is stored; the file is never saved.
 

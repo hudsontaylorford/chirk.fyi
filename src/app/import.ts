@@ -10,7 +10,7 @@ import { allowRequest } from "@/lib/places";
 const recent = new Map<string, number[]>();
 
 /**
- * "Make it from a text or screenshot": reads what the host pasted or attached and opens New event filled in,
+ * "Paste a text or screenshot": reads what the host pasted or attached and opens New event filled in,
  * the same way a template does. Nothing is saved until they press Create event. The file is read, never stored.
  */
 export async function importPlan(_prev: string | null, f: FormData): Promise<string> {

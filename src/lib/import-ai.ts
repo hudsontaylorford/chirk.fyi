@@ -6,7 +6,7 @@ import { SCHEMA, SYSTEM, toImported, type FileType, type Imported } from "./impo
 const MODEL = "claude-opus-5-5";
 const fakeOn = () => process.env.AI_FAKE === "true" && process.env.VERCEL_ENV !== "production";
 
-/** Whether "Make it from a text or screenshot" shows: with the key, or the local stand-in. */
+/** Whether "Paste a text or screenshot" shows: with the key, or the local stand-in. */
 export const importOn = () => fakeOn() || !!process.env.ANTHROPIC_API_KEY?.trim();
 
 /** A message the host can act on; anything else is a bug. */

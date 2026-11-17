@@ -462,11 +462,11 @@ assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 // Make it from a text or screenshot (a stand-in for the AI locally): New event opens filled in, nothing saved until Create.
 if (process.env.AI_FAKE === "true") {
   await h.goto(ORIGIN + "/host/new");
-  await h.click("summary:text-is('Make it from a text or screenshot')");
-  await h.click("button:text-is('Fill in the form')");
+  await h.click("summary:text-is('Paste a text or screenshot')");
+  await h.click("button:text-is('Fill in')");
   await h.waitForSelector("text=Paste something, or add a screenshot or PDF.");
   await h.fill("textarea[aria-label='Pasted text']", "Dinner at Sample Hall, Sat Dec 5 at 7. Bring a salad or dessert!");
-  await h.click("button:text-is('Fill in the form')");
+  await h.click("button:text-is('Fill in')");
   await h.waitForURL(/\/host\/new\?t=import$/);
   await h.waitForSelector("text=Filled in from what you pasted.");
   assert.equal(await h.inputValue("input[name=title]"), "Sample dinner");

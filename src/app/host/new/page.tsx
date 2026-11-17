@@ -25,7 +25,7 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
     select id, name, settings, items from templates where user_id = ${me.id} order by created_at desc`)
     .map((t) => ({ id: `u-${t.id}`, label: t.name, set: t.settings, items: t.items }));
   const t = (await searchParams).t;
-  // A plan read by "Make it from a text or screenshot" opens like a template (re-checked, since it comes back from a cookie).
+  // A plan read by "Paste a text or screenshot" opens like a template (re-checked, since it comes back from a cookie).
   const read = t === "import" ? (await cookies()).get(IMPORT_COOKIE)?.value : undefined;
   const imported: Template | undefined = read ? (() => { try { return { id: "import", label: "what you pasted", ...toImported(JSON.parse(read)) }; } catch { return undefined; } })() : undefined;
   const start = imported ?? mine.find((m) => m.id === t) ?? template(t);
