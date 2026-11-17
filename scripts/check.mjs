@@ -472,6 +472,12 @@ if (process.env.PLACES_FAKE === "true") {
   assert.equal(await h.inputValue("input[name=address]"), "335 Example Ave, New York, NY 10003");
   assert.equal(await h.inputValue("input[name=place]"), "sample");
   assert.equal(await h.locator("img[alt='Powered by Google']").count(), 0); // the list closed
+  // The Address box searches too: a street typed there becomes the full address.
+  await h.fill("input[name=address]", "");
+  await h.locator("input[name=address]").pressSequentially("12 example", { delay: 30 });
+  await h.click("button:has-text('Example Park')");
+  await h.waitForFunction(() => document.querySelector("input[name=address]").value === "12 Example Street, Brooklyn, NY 11206");
+  assert.equal(await h.inputValue("input[name=place]"), "sample"); // Place untouched
 }
 await h.fill("input[name=date]", "2026-12-12");
 await h.click("button:text-is('Create event')");

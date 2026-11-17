@@ -82,7 +82,7 @@ Same setup as crewmaxxing's, with its own key so each app has its own limits. Al
 6. **APIs & Services → Places API (New) → Quotas**: set a daily cap of about **500** autocomplete requests. Do the same for **Geocoding API** at about **200**.
 7. **Billing → Budgets & alerts → Create budget**: $10 a month, email alerts at 50%, 90% and 100%.
 8. **Vercel → chirk.fyi → Settings → Environment Variables**: Key `GOOGLE_PLACES_API_KEY`, Value: the key, Environment: **Production** only, tick **Sensitive**, **Save**. Then redeploy.
-9. Check: New event → type a place in **Place** → Google's suggestions appear with "Powered by Google". Tap one and the Address fills in.
+9. Check: New event → type a place in **Place** (or a street in **Address**) → Google's suggestions appear with "Powered by Google". Tap one and the Address fills in.
 
 What's kept: only the address (allowed by Google's terms). The Place box keeps your own words, since Google doesn't allow storing its business names. Nothing you type is stored or logged by the search.
 
