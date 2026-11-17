@@ -16,8 +16,9 @@ export const maxDuration = 60;
  */
 export async function POST(req: Request) {
   const raw = await req.text();
-  const h = req.headers;
-  if (!verifyWebhook(process.env.RESEND_WEBHOOK_SECRET ?? "", h.get("webhook-id"), h.get("webhook-timestamp"), raw, h.get("webhook-signature"), Math.floor(Date.now() / 1000))) {
+  // Resend sends the signature as svix-* headers (its webhooks run on Svix); webhook-* is the same scheme's newer name.
+  const h = (name: string) => req.headers.get(`svix-${name}`) ?? req.headers.get(`webhook-${name}`);
+  if (!verifyWebhook(process.env.RESEND_WEBHOOK_SECRET?.trim() ?? "", h("id"), h("timestamp"), raw, h("signature"), Math.floor(Date.now() / 1000))) {
     return NextResponse.json({ error: "bad signature" }, { status: 401 });
   }
   const event = JSON.parse(raw) as { type?: string; data?: { email_id?: string; from?: string; subject?: string } };
