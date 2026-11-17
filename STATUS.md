@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `local-first`)
+## Went live Nov 17 (`local-first`)
 - **Nearby places first:** Place and Address suggestions favor places within about 30 miles of the host, from Vercel's rough city guess for their connection (no location prompt, never stored). Faraway matches still show.
 
 ## Went live Nov 17 (`address-search`)
