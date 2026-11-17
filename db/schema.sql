@@ -172,6 +172,14 @@ begin
   );
   create index if not exists templates_user on templates (user_id);
 
+  -- Forwarded emails ("forward an email to chirk"): each one makes at most one draft, even if Resend sends it twice.
+  create table if not exists inbound_emails (
+    email_id text primary key,             -- Resend's id for the received email
+    user_id uuid not null references users(id) on delete cascade,
+    event_id uuid references events(id) on delete set null,
+    created_at timestamptz not null default now()
+  );
+
   create index if not exists items_event on items(event_id);
   create index if not exists households_event on households(event_id);
   alter table events enable row level security;

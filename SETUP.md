@@ -64,6 +64,8 @@ All of these live in **Vercel → your project → Settings → Environment Vari
 | `CRON_SECRET` | The password Vercel's 9 am morning job uses (gift draws, reminders). Any long random text | Every morning job is refused: nothing scheduled ever sends |
 | `BLOB_READ_WRITE_TOKEN` | Photo uploads (Vercel adds it when you connect Blob storage) | The upload button is hidden; pasting a photo link still works |
 | `ANTHROPIC_API_KEY` | Optional: "Paste a text or screenshot" on New event (see section 7) | That line doesn't show; New event works as before |
+| `RESEND_WEBHOOK_SECRET` | Optional: forwarded emails become drafts (section 8). The signing secret of Resend's `email.received` webhook | Forwarded emails are refused |
+| `INBOUND_ADDRESS` | Optional: the forwarding address shown on New event, e.g. `new@in.chirk.fyi` | The address isn't shown |
 | `GOOGLE_PLACES_API_KEY` | Optional: place suggestions while typing a Place, which fill in the Address (see "Google address search" below) | The Place box works as plain typing |
 | `EMAIL_REPLY_TO` | Optional: where replies to chirk emails go when there's no host to reply to | Replies go to the sender address |
 
@@ -103,6 +105,25 @@ chirk reads a pasted text, screenshot or PDF with Claude and fills in New event.
 6. Check: New event → **Paste a text or screenshot** → paste a group text → **Fill in**. The form should come back filled in, saying "Filled in from what you pasted".
 
 What's sent: only what you paste or attach, to Claude, to read it once. Nothing is stored; the file is never saved.
+
+---
+
+## 8. Forward an email to chirk (optional, needs section 7 first)
+
+Forward an invite, reservation or ticket email to chirk's address from **your chirk sign-in email**, and it becomes a **draft** in Your events (guests see nothing until you publish), with an email back to you linking to it. Resend receives the mail.
+
+1. **Resend → Domains → Add domain**: `in.chirk.fyi`, with **receiving** turned on. Resend shows a receiving **MX** record for it.
+   (If Resend instead offers a ready-made receiving address ending in `.resend.app`, you can use that and skip steps 1–2.)
+2. **Cloudflare → chirk.fyi → DNS → Records → Add record**: copy the MX record exactly as Resend shows it (Type **MX**, Name **in**, the mail server and priority). Proxy status: **DNS only**. Back in Resend, wait for the domain to show as verified.
+3. **Resend → Webhooks → Add endpoint**: URL `https://chirk.fyi/api/inbound`, event **email.received**. Copy its **signing secret** (starts with `whsec_`).
+4. **Resend → API keys**: chirk's `RESEND_API_KEY` must be allowed to **read received emails** (a "Full access" key). If yours is "Sending access" only, create a Full access key and replace `RESEND_API_KEY` in Vercel with it.
+5. **Vercel → chirk.fyi → Settings → Environment Variables** (Production, Sensitive for the secret):
+   - `RESEND_WEBHOOK_SECRET` = the signing secret
+   - `INBOUND_ADDRESS` = `new@in.chirk.fyi` (any name before the @ works)
+   Then redeploy.
+6. Check: from the email you sign in to chirk with, forward any invite email to `new@in.chirk.fyi`. Within a minute you get "Draft ready: …"; the draft is in Your events.
+
+Only a chirk account's own address is accepted; anything else is quietly ignored. Each email makes at most one draft, and at most 20 a day per person.
 
 ---
 

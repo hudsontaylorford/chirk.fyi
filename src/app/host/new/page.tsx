@@ -44,7 +44,7 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
         </p>
       ) : (
         <>
-        {importOn() && <ImportBox />}
+        {importOn() && <ImportBox address={process.env.INBOUND_ADDRESS?.trim() || null} />}
         <details className="mt-1 text-[15px]">
           <summary className="cursor-pointer list-none text-soft underline underline-offset-2 [&::-webkit-details-marker]:hidden">Start from a template</summary>
           {mine.length > 0 && (

@@ -480,6 +480,30 @@ if (process.env.AI_FAKE === "true") {
   assert.match(await h.textContent("main"), /Salad[\s\S]*Dessert/);
 }
 
+// Forward an email to chirk: a signed Resend notice from a host's own address becomes a draft in their events, once.
+if (process.env.AI_FAKE === "true" && process.env.RESEND_WEBHOOK_SECRET) {
+  const { createHmac } = await import("node:crypto");
+  const post = async (from, emailId, secret = process.env.RESEND_WEBHOOK_SECRET) => {
+    const body = JSON.stringify({ type: "email.received", created_at: new Date().toISOString(), data: { email_id: emailId, from, to: ["new@in.example.com"], subject: "Fwd: Dinner at Sample Hall Dec 5", attachments: [] } });
+    const ts = Math.floor(Date.now() / 1000);
+    const sig = createHmac("sha256", Buffer.from(secret.slice(6), "base64")).update(`msg_${emailId}.${ts}.${body}`).digest("base64");
+    return fetch(ORIGIN + "/api/inbound", { method: "POST", body, headers: { "content-type": "application/json", "webhook-id": `msg_${emailId}`, "webhook-timestamp": String(ts), "webhook-signature": `v1,${sig}` } });
+  };
+  const made = await post("Hostie <HOST@example.com>", `em_${Date.now()}`);
+  assert.equal(made.status, 200);
+  const { slug } = await made.json();
+  assert.ok(slug, "a draft was made");
+  assert.equal((await (await phone()).goto(`${ORIGIN}/${slug}`)).status(), 404); // a draft: guests can't see it
+  await h.goto(`${ORIGIN}/${slug}/host`);
+  assert.match(await h.textContent("main"), /Draft\. Only hosts can see it/);
+  assert.equal(await h.inputValue("input[name=hosted_by]"), "Hostie & Sam");
+  const dupId = `em_dup_${Date.now()}`;
+  await post("host@example.com", dupId);
+  assert.deepEqual(await (await post("host@example.com", dupId)).json(), { ok: true, duplicate: true }); // the same email twice: one draft
+  assert.equal((await (await post("stranger@example.com", `em_s_${Date.now()}`)).json()).ignored, "not a chirk account");
+  assert.equal((await post("host@example.com", `em_b_${Date.now()}`, "whsec_" + Buffer.from("wrong").toString("base64"))).status, 401);
+}
+
 // Templates: one quiet line on New event; picking Poker night switches poker on, and nothing else is required.
 await h.goto(ORIGIN + "/host/new");
 await h.click("summary:text-is('Start from a template')");

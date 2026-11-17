@@ -42,6 +42,7 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 - **Gift exchange:** Who's in, Never draw each other, Rules, Draw names, "You're giving a gift to", "Your gift ideas".
 - **Sign in:** "Been invited to an event? You're invited to chirk." Anyone on a chirk guest list can sign in.
 - **Paste a text or screenshot:** "Fill in" (busy: "Reading…"), then "Filled in from what you pasted. Check everything, then create the event." Never says "AI" in the interface except in setup errors.
+- **Forward an email:** "Or forward an email to new@in.chirk.fyi from your chirk email; it becomes a draft in Your events." Reply email: "Draft ready: …", "Open the draft".
 - **Templates:** "Start from a template", "Started from …", "Start blank". A template only fills in settings and example wording.
 - **Scheduled sends** show their state: "sent ✓", or "skipped (too late)".
 

@@ -7,7 +7,7 @@ import { hostRole, requireUser } from "@/lib/auth";
 import { cohostEmail } from "@/lib/code-email";
 import { getEvent, joinNames } from "@/lib/data";
 import { sql } from "@/lib/db";
-import { splitNames } from "@/lib/format";
+import { addHostAsGuest, freeSlug, saveList } from "@/lib/event-setup";
 import { sendEmail, siteUrl } from "@/lib/email";
 import { parseGuests } from "@/lib/guests";
 import { inviteEmail, reminderEmail } from "@/lib/invite-email";
@@ -81,16 +81,8 @@ const eventFields = (f: FormData) => ({
   remind_replies: f.get("remind_replies") === "on",
 });
 
-// Static routes that an event's web address must not shadow.
-const RESERVED = new Set(["host", "privacy", "terms", "robots.txt", "sitemap.xml", "api"]);
 
 /** "Thanksgiving 2026" → "thanksgiving-2026"; if taken, "thanksgiving-2026-2", and so on. */
-async function freeSlug(text: string) {
-  const base = text.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "event";
-  let slug = RESERVED.has(base) ? `${base}-event` : base;
-  for (let n = 2; (await sql`select 1 from events where slug = ${slug}`).length; n++) slug = `${base}-${n}`;
-  return slug;
-}
 
 /**
  * Copy an event to next year as a draft: same details and needed list, and the same guests
@@ -140,29 +132,10 @@ export async function createEvent(f: FormData) {
   const [e] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, slug })} returning id`;
   await sql`insert into event_hosts (event_id, user_id, role) values (${e.id}, ${me.id}, 'owner')`;
   await addHostAsGuest(e.id, me);
-  await saveList(e.id, f);
+  await saveList(e.id, val(f, "needed").split("\n"));
   redirect(`/${slug}/host`);
 }
 
-/**
- * The host's list from the form (one thing per line): new things are added, things taken off are removed
- * (with anyone's claim on them), and the rest keep their claims and take the new order.
- */
-async function saveList(eventId: string, f: FormData) {
-  const lines = val(f, "needed").split("\n").map((s) => s.trim().slice(0, 120)).filter(Boolean).slice(0, 50);
-  const names = [...new Map(lines.map((n) => [n.toLowerCase(), n])).values()];
-  await sql.begin(async (tx) => {
-    const have = await tx<{ id: string; name: string }[]>`select id, name from items where event_id = ${eventId} and kind = 'needed'`;
-    const byName = new Map(have.map((i) => [i.name.toLowerCase(), i.id]));
-    const gone = have.filter((i) => !names.some((n) => n.toLowerCase() === i.name.toLowerCase())).map((i) => i.id);
-    if (gone.length) await tx`delete from items where id in ${tx(gone)}`;
-    for (const [i, name] of names.entries()) {
-      const id = byName.get(name.toLowerCase());
-      if (id) await tx`update items set name = ${name}, sort = ${i + 1} where id = ${id}`;
-      else await tx`insert into items ${tx({ event_id: eventId, kind: "needed", name, sort: i + 1 })}`;
-    }
-  });
-}
 
 /** Deletes an event with everything on it (replies, list, claims). The host page asks "Sure?" first. */
 export async function deleteEvent(slug: string) {
@@ -244,19 +217,6 @@ export async function messageGuests(slug: string, _prev: string | null, f: FormD
 }
 
 
-/**
- * Hosts are going to their own events, like any guest (Partiful does the same): added once to the guest list as Going.
- * Skipped if they're already on it (same email, or a reply with their name), so nobody appears twice.
- */
-async function addHostAsGuest(eventId: string, user: { email: string; name: string | null }) {
-  const name = user.name || user.email.split("@")[0];
-  const first = name.split(/\s+/)[0].toLowerCase(); // "Hudson Ford" is the Hudson in "Hudson & Molly"
-  const rows = await sql<{ id: string; names: string[]; email: string | null }[]>`select id, names, email from households where event_id = ${eventId}`;
-  const byEmail = rows.find((h) => h.email?.toLowerCase() === user.email);
-  if (byEmail) await sql`update households set going = true where id = ${byEmail.id} and going is null`;
-  else if (!rows.some((h) => splitNames(h.names).some((n) => n.toLowerCase() === first || n.toLowerCase() === name.toLowerCase())))
-    await sql`insert into households ${sql({ event_id: eventId, names: [name], going: true, email: user.email })}`;
-}
 
 /** Adds a co-host by email (making their account if they don't have one) and emails them. Any host can add. */
 export async function addCohost(slug: string, _prev: string | null, f: FormData): Promise<string> {
@@ -349,7 +309,7 @@ export async function saveEvent(slug: string, f: FormData) {
   const fields = eventFields(f);
   if (!fields.title || !fields.date) return;
   const [e] = await sql<{ id: string }[]>`update events set ${sql(fields)} where slug = ${slug} returning id`;
-  await saveList(e.id, f);
+  await saveList(e.id, val(f, "needed").split("\n"));
   revalidatePath(`/${slug}`, "layout");
 }
 

@@ -7,7 +7,7 @@ import { importPlan } from "@/app/import";
  * One quiet line on New event; tapped, a small composer (two lines, a paperclip, Fill in) so it never crowds the form.
  * The form below then fills itself in.
  */
-export function ImportBox() {
+export function ImportBox({ address }: { address: string | null }) {
   const [problem, read, reading] = useActionState(importPlan, null);
   const [file, setFile] = useState<string | null>(null);
   return (
@@ -33,6 +33,7 @@ export function ImportBox() {
         {problem
           ? <p role="alert" className="mt-1 text-[14px] text-red-700">{problem}</p>
           : <p className="mt-1 text-[14px] text-soft">Fills in the form below. Nothing is saved until you create the event.</p>}
+        {address && <p className="mt-1 text-[14px] text-soft">Or forward an email to <strong className="font-semibold text-ink">{address}</strong> from your chirk email; it becomes a draft in Your events.</p>}
       </form>
     </details>
   );

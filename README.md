@@ -34,8 +34,9 @@ A simple way to make plans with your people: one page per plan, one link to send
 
 ## How it's built
 - Next.js (App Router) + Tailwind on Vercel. Postgres on Neon through `DATABASE_URL`; only the server talks to the database.
-- Schema in `db/schema.sql` (re-runnable; paste into the Neon SQL editor). Tables: `events`, `households` (one reply each, with a private `token`), `items` + `claims` (the bring list), `users`, `login_codes`, `event_hosts`, `costs`, `cost_shares`, `payments`, `poker_entries`, `gift_draws`, `sent_jobs`, `templates` (a host's saved templates).
+- Schema in `db/schema.sql` (re-runnable; paste into the Neon SQL editor). Tables: `events`, `households` (one reply each, with a private `token`), `items` + `claims` (the bring list), `users`, `login_codes`, `event_hosts`, `costs`, `cost_shares`, `payments`, `poker_entries`, `gift_draws`, `sent_jobs`, `templates` (a host's saved templates), `inbound_emails` (forwarded emails, one draft each).
 - Pure logic with unit tests in `src/lib` (`*.test.mts`): money math and poker (`costs.ts`), name draws (`gifts.ts`), what's due each morning (`due.ts`), counts and formatting (`format.ts`), emails.
+- Forwarded emails: Resend `email.received` webhook → `/api/inbound` (needs `RESEND_WEBHOOK_SECRET`) → the same reader as Paste a text → a draft; `inbound_emails` keeps it to one draft per email.
 - The morning job: `vercel.json` cron → `/api/cron` (needs `CRON_SECRET`) → `src/lib/jobs.ts`. Each job is claimed once in `sent_jobs`; every email has an idempotency key.
 - The look is intentionally plain until it's designed. Tokens live in `src/app/globals.css`.
 
