@@ -14,9 +14,9 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `forward-email`)
+## Went live Nov 17 (`forward-email`)
 - **Forward an email to chirk (roadmap 44):** forward an invite, reservation or ticket email from your chirk sign-in address to the forwarding address; it becomes a **draft** in Your events (same reader as Paste a text), and you get "Draft ready: …" with a link. Signature-checked, only chirk accounts' own addresses, one draft per email, 20 a day. The address shows inside "Paste a text or screenshot". Setup in Resend, Cloudflare and Vercel: SETUP.md §8.
-- **Database step:** one new table, `inbound_emails`.
+- **Database step:** the `inbound_emails` table (run Nov 17). Resend, Cloudflare and Vercel setup (SETUP.md §8) still to do.
 - Under the hood: the event set-up helpers (free web address, host on the guest list, bring list) moved to `src/lib/event-setup.ts` so the email handler shares them; nothing a browser can call.
 
 ## Went live Nov 17 (`import-voice`)
