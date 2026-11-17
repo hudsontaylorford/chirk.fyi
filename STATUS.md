@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `import`)
+## Went live Nov 17 (`import`)
 - **Paste a text or screenshot (roadmap 43):** on New event, paste a group text or email, or add a screenshot, photo or PDF; Claude (Opus 5.5) reads it and New event opens filled in like a template (title, date, times, place, address, message, schedule, what to bring). Unknowns stay blank; nothing is saved until Create event; the file is never stored. Adapted from crewmaxxing's import (prompt rules, file checks, refusal fallback, plain errors). Off until `ANTHROPIC_API_KEY` is in Vercel (SETUP.md §7). New dependency: `@anthropic-ai/sdk`. No database step.
 
 ## Went live Nov 17 (`tiles`)
