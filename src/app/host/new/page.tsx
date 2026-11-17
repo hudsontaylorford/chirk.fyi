@@ -8,6 +8,10 @@ import { Confirm } from "@/components/Confirm";
 import { sql } from "@/lib/db";
 import { Footer } from "@/components/Footer";
 import { TEMPLATES, template, type Template } from "@/lib/templates";
+import { cookies } from "next/headers";
+import { ImportBox } from "@/components/ImportBox";
+import { IMPORT_COOKIE, toImported } from "@/lib/import";
+import { importOn } from "@/lib/import-ai";
 import type { Event } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +25,10 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
     select id, name, settings, items from templates where user_id = ${me.id} order by created_at desc`)
     .map((t) => ({ id: `u-${t.id}`, label: t.name, set: t.settings, items: t.items }));
   const t = (await searchParams).t;
-  const start = mine.find((m) => m.id === t) ?? template(t);
+  // A plan read by "Make it from a text or screenshot" opens like a template (re-checked, since it comes back from a cookie).
+  const read = t === "import" ? (await cookies()).get(IMPORT_COOKIE)?.value : undefined;
+  const imported: Template | undefined = read ? (() => { try { return { id: "import", label: "what you pasted", ...toImported(JSON.parse(read)) }; } catch { return undefined; } })() : undefined;
+  const start = imported ?? mine.find((m) => m.id === t) ?? template(t);
   return (
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
@@ -30,9 +37,14 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
       {/* Templates stay out of the way: one quiet line, and picking one only fills in settings you can change. */}
       {start ? (
         <p className="mt-1 text-[15px] text-soft">
-          Started from <strong className="font-semibold text-ink">{start.label}</strong> · <Link href="/host/new" className="underline underline-offset-2">Start blank</Link>
+          {start.id === "import"
+            ? <>Filled in from what you pasted. <strong className="font-semibold text-ink">Check everything</strong>, then create the event.</>
+            : <>Started from <strong className="font-semibold text-ink">{start.label}</strong></>}{" "}
+          · <Link href="/host/new" className="underline underline-offset-2">Start blank</Link>
         </p>
       ) : (
+        <>
+        {importOn() && <ImportBox />}
         <details className="mt-1 text-[15px]">
           <summary className="cursor-pointer list-none text-soft underline underline-offset-2 [&::-webkit-details-marker]:hidden">Start from a template</summary>
           {mine.length > 0 && (
@@ -50,6 +62,7 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
           </div>
           <p className="mt-2 text-[14px] text-soft">It only fills things in; change anything after. To make your own, open any event and tap Save as a template.</p>
         </details>
+        </>
       )}
       <form action={createEvent} className="mt-4 space-y-3">
         <EventFields key={start?.id ?? "blank"} start={start} needed={(start?.items ?? []).map((name) => ({ name, by: null }))} />

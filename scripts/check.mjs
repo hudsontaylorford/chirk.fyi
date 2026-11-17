@@ -459,6 +459,26 @@ await h.waitForURL(/\/host$/);
 assert.equal((await (await phone()).goto(draftUrl)).status(), 404);
 
 // Gift exchange: names in, a "never draw each other" rule, a draw, and each person seeing only their own match.
+// Make it from a text or screenshot (a stand-in for the AI locally): New event opens filled in, nothing saved until Create.
+if (process.env.AI_FAKE === "true") {
+  await h.goto(ORIGIN + "/host/new");
+  await h.click("summary:text-is('Make it from a text or screenshot')");
+  await h.click("button:text-is('Fill in the form')");
+  await h.waitForSelector("text=Paste something, or add a screenshot or PDF.");
+  await h.fill("textarea[aria-label='Pasted text']", "Dinner at Sample Hall, Sat Dec 5 at 7. Bring a salad or dessert!");
+  await h.click("button:text-is('Fill in the form')");
+  await h.waitForURL(/\/host\/new\?t=import$/);
+  await h.waitForSelector("text=Filled in from what you pasted.");
+  assert.equal(await h.inputValue("input[name=title]"), "Sample dinner");
+  assert.equal(await h.inputValue("input[name=date]"), "2026-12-05");
+  assert.equal(await h.inputValue("input[name=time]"), "19:00");
+  assert.equal(await h.inputValue("input[name=place]"), "Sample Hall");
+  assert.match(await h.textContent("summary:has(span:text-is('What to bring'))"), /2 on the list/);
+  await h.click("button:text-is('Create event')");
+  await h.waitForURL(/\/sample-dinner(-\d+)?\/host$/);
+  assert.match(await h.textContent("main"), /Salad[\s\S]*Dessert/);
+}
+
 // Templates: one quiet line on New event; picking Poker night switches poker on, and nothing else is required.
 await h.goto(ORIGIN + "/host/new");
 await h.click("summary:text-is('Start from a template')");

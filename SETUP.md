@@ -63,10 +63,11 @@ All of these live in **Vercel → your project → Settings → Environment Vari
 | `RESEND_API_KEY` | Sends email (codes, invites, reminders) | No email goes out, including sign-in codes |
 | `CRON_SECRET` | The password Vercel's 9 am morning job uses (gift draws, reminders). Any long random text | Every morning job is refused: nothing scheduled ever sends |
 | `BLOB_READ_WRITE_TOKEN` | Photo uploads (Vercel adds it when you connect Blob storage) | The upload button is hidden; pasting a photo link still works |
+| `ANTHROPIC_API_KEY` | Optional: "Make it from a text or screenshot" on New event (see section 7) | That line doesn't show; New event works as before |
 | `GOOGLE_PLACES_API_KEY` | Optional: place suggestions while typing a Place, which fill in the Address (see "Google address search" below) | The Place box works as plain typing |
 | `EMAIL_REPLY_TO` | Optional: where replies to chirk emails go when there's no host to reply to | Replies go to the sender address |
 
-Never add `LOGIN_TEST_CODE`, `EMAIL_FAKE`, `PHOTOS_FAKE` or `PLACES_FAKE` in Vercel. They're for testing on a laptop only.
+Never add `LOGIN_TEST_CODE`, `EMAIL_FAKE`, `PHOTOS_FAKE`, `PLACES_FAKE` or `AI_FAKE` in Vercel. They're for testing on a laptop only.
 
 ---
 
@@ -87,6 +88,21 @@ Same setup as crewmaxxing's, with its own key so each app has its own limits. Al
 Suggestions favor places within about 30 miles of where you are (Vercel's rough city guess from your connection; never stored), and anywhere else still shows when it matches better.
 
 What's kept: only the address (allowed by Google's terms). The Place box keeps your own words, since Google doesn't allow storing its business names. Nothing you type is stored or logged by the search.
+
+---
+
+## 7. Make it from a text or screenshot (optional)
+
+chirk reads a pasted text, screenshot or PDF with Claude and fills in New event. All at **console.anthropic.com**.
+
+1. Sign in (or sign up) with the account that will pay.
+2. **Billing**: add a card and buy a small credit, e.g. $10. One read costs about a cent or two.
+3. **Limits**: set a monthly spend limit, e.g. $10, so a surprise can't cost more.
+4. **API keys → Create key**, name it `chirk`, copy it (it's shown once).
+5. **Vercel → chirk.fyi → Settings → Environment Variables**: Key `ANTHROPIC_API_KEY`, Value: the key, Environment: **Production** only, tick **Sensitive**, **Save**. Then redeploy.
+6. Check: New event → **Make it from a text or screenshot** → paste a group text → **Fill in the form**. The form should come back filled in, saying "Filled in from what you pasted".
+
+What's sent: only what you paste or attach, to Claude, to read it once. Nothing is stored; the file is never saved.
 
 ---
 
