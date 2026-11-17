@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { PlacesError, allowRequest, autocompleteBody, autocompleteProblem, parseGeocode, parseSuggestions } from "./places.ts";
+import { PlacesError, US_BIAS, allowRequest, autocompleteBody, autocompleteProblem, nearFrom, parseGeocode, parseSuggestions } from "./places.ts";
 
 test("suggestions: only real place predictions, at most 5", () => {
   const p = (id: string, main: string, secondary?: string) => ({ placePrediction: { placeId: id, structuredFormat: { mainText: { text: main }, ...(secondary ? { secondaryText: { text: secondary } } : {}) } } });
@@ -38,4 +38,12 @@ test("the Google key is read in one server-only file", () => {
   const users = files("src").filter((f) => /\.(ts|tsx)$/.test(f) && readFileSync(f, "utf8").includes("GOOGLE_PLACES_API_KEY"));
   assert.deepEqual(users, [join("src", "lib", "places-provider.ts")]);
   assert.ok(!readFileSync(join("src", "lib", "places-provider.ts"), "utf8").includes("use client"));
+});
+
+test("nearby first: Vercel's city guess becomes a 50 km bias, else the US", () => {
+  const near = nearFrom("40.6782", "-73.9442");
+  assert.deepEqual(near, { latitude: 40.6782, longitude: -73.9442 });
+  assert.deepEqual(autocompleteBody("metlife", near).locationBias, { circle: { center: near, radius: 50_000 } });
+  assert.deepEqual(autocompleteBody("metlife", null).locationBias, US_BIAS);
+  for (const [lat, lng] of [[null, null], ["", "1"], ["abc", "1"], ["95", "1"], ["1", "200"]] as const) assert.equal(nearFrom(lat, lng), null);
 });

@@ -84,6 +84,8 @@ Same setup as crewmaxxing's, with its own key so each app has its own limits. Al
 8. **Vercel → chirk.fyi → Settings → Environment Variables**: Key `GOOGLE_PLACES_API_KEY`, Value: the key, Environment: **Production** only, tick **Sensitive**, **Save**. Then redeploy.
 9. Check: New event → type a place in **Place** (or a street in **Address**) → Google's suggestions appear with "Powered by Google". Tap one and the Address fills in.
 
+Suggestions favor places within about 30 miles of where you are (Vercel's rough city guess from your connection; never stored), and anywhere else still shows when it matches better.
+
 What's kept: only the address (allowed by Google's terms). The Place box keeps your own words, since Google doesn't allow storing its business names. Nothing you type is stored or logged by the search.
 
 ---

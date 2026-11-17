@@ -14,6 +14,9 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Waiting to go live (branch `local-first`)
+- **Nearby places first:** Place and Address suggestions favor places within about 30 miles of the host, from Vercel's rough city guess for their connection (no location prompt, never stored). Faraway matches still show.
+
 ## Went live Nov 17 (`address-search`)
 - **The Address box searches too:** typing a street there suggests full addresses; a tap fills it in ("56 bogar" → "56 Bogart St, Brooklyn, NY 11206"). Both boxes now ask the phone's contact AutoFill to stay out of the way. Google key confirmed working Nov 17 (Place found "MetLife").
 

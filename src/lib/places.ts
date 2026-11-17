@@ -25,8 +25,21 @@ export const MAX_SEARCH = 120;
 /** Google place ids are opaque; a sanity check before sending one back. */
 export const PLACE_ID = /^[A-Za-z0-9_-]{10,400}$/;
 
-export function autocompleteBody(input: string) {
-  return { input: input.trim().slice(0, MAX_SEARCH), languageCode: "en", regionCode: "us", locationBias: US_BIAS };
+export type Near = { latitude: number; longitude: number };
+
+/** Roughly where the host is, from Vercel's IP location headers (city level; never stored). Null if missing or odd. */
+export function nearFrom(lat: string | null, lng: string | null): Near | null {
+  const latitude = Number(lat), longitude = Number(lng);
+  if (!lat || !lng || !Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) return null;
+  return { latitude, longitude };
+}
+
+/** The Autocomplete (New) request: places near the host first (about 30 miles), else the US first; anywhere still allowed. */
+export function autocompleteBody(input: string, near: Near | null = null) {
+  return {
+    input: input.trim().slice(0, MAX_SEARCH), languageCode: "en", regionCode: "us",
+    locationBias: near ? { circle: { center: near, radius: 50_000 } } : US_BIAS,
+  };
 }
 
 type Text = { text?: unknown } | undefined;

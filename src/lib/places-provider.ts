@@ -1,8 +1,8 @@
 // Google address search, the network side. The only file that reads GOOGLE_PLACES_API_KEY (a unit test checks):
 // it runs on the server, and the key is never sent to the browser or logged.
-import { AUTOCOMPLETE_FIELD_MASK, PlacesError, autocompleteBody, autocompleteProblem, parseGeocode, parseSuggestions, type PlaceSuggestion } from "./places";
+import { AUTOCOMPLETE_FIELD_MASK, PlacesError, autocompleteBody, autocompleteProblem, parseGeocode, parseSuggestions, type Near, type PlaceSuggestion } from "./places";
 
-type Provider = { suggest(input: string): Promise<PlaceSuggestion[]>; address(placeId: string): Promise<string> };
+type Provider = { suggest(input: string, near: Near | null): Promise<PlaceSuggestion[]>; address(placeId: string): Promise<string> };
 
 const fakeOn = () => process.env.PLACES_FAKE === "true" && process.env.VERCEL_ENV !== "production";
 
@@ -24,11 +24,11 @@ function google(key: string): Provider {
     }
   };
   return {
-    async suggest(input) {
+    async suggest(input, near) {
       const res = await call("https://places.googleapis.com/v1/places:autocomplete", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-Goog-Api-Key": key, "X-Goog-FieldMask": AUTOCOMPLETE_FIELD_MASK },
-        body: JSON.stringify(autocompleteBody(input)),
+        body: JSON.stringify(autocompleteBody(input, near)),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok) throw autocompleteProblem(res.status, json);

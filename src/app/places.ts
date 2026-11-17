@@ -1,7 +1,8 @@
 "use server";
 
+import { headers } from "next/headers";
 import { currentUser } from "@/lib/auth";
-import { MAX_SEARCH, MIN_SEARCH, PLACE_ID, PlacesError, allowRequest, type PlaceSuggestion, type PlacesProblem } from "@/lib/places";
+import { MAX_SEARCH, MIN_SEARCH, PLACE_ID, PlacesError, allowRequest, nearFrom, type PlaceSuggestion, type PlacesProblem } from "@/lib/places";
 import { placesProvider } from "@/lib/places-provider";
 
 // Google address search for signed-in hosts. Search text is never stored or logged; any failure just hides
@@ -25,7 +26,8 @@ async function lookup<T>(kind: "suggest" | "address", run: (p: NonNullable<Retur
 export async function placeSuggestions(input: string): Promise<Result<PlaceSuggestion[]>> {
   const q = typeof input === "string" ? input.trim().slice(0, MAX_SEARCH) : "";
   if (q.length < MIN_SEARCH) return { ok: true, value: [] };
-  return lookup("suggest", (p) => p.suggest(q));
+  const h = await headers(); // Vercel's guess at the host's city, so nearby places come first
+  return lookup("suggest", (p) => p.suggest(q, nearFrom(h.get("x-vercel-ip-latitude"), h.get("x-vercel-ip-longitude"))));
 }
 
 /** The address for a picked suggestion (Geocoding, which may be kept on the event). */
