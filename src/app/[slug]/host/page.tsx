@@ -15,7 +15,8 @@ import { MessageGuests } from "@/components/MessageGuests";
 import { currentUser, hostRole } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { AddCohost } from "@/components/AddCohost";
-import { arrivals, bringList, getDraws, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
+import { arrivals, bringList, getCosts, getDraws, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
+import { money, settleUp } from "@/lib/costs";
 import { daysBefore } from "@/lib/due";
 import { headcount, listText, shortDate } from "@/lib/format";
 import * as act from "./actions";
@@ -47,6 +48,13 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   const waiting = households.filter((h) => h.going === null);
   const sent = await getSentJobs(event.id);
   const [{ myTemplates }] = await sql<{ myTemplates: number }[]>`select count(*)::int as "myTemplates" from templates where user_id = ${me.id}`;
+  // Tiles follow what the event uses: money (costs or poker) and the gift exchange, beside coming and replies.
+  const cash = event.costs_on || event.poker_on ? settleUp(await getCosts(event.id), event.costs_on) : null;
+  const gift = event.gift_on ? await (async () => {
+    const ins = households.filter((h) => h.going !== false && h.gift_in);
+    return { in: ins.length, drawn: (await getDraws(event.id)).size > 0, noIdeas: ins.filter((h) => !h.gift_wish).length };
+  })() : null;
+  const tiles = 2 + [event.bring_prompt, cash, cash && event.poker_on, gift].filter(Boolean).length;
   const nameOf = (id: string) => joinNames(households.find((h) => h.id === id)?.names ?? ["someone"]);
   // Guests with money on the event: deleting them changes everyone's settle-up, so the page warns first.
   const hasMoney = new Set((await sql<{ id: string }[]>`
@@ -95,7 +103,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         <p className="mt-3 rounded-2xl bg-wash p-4 text-[16px]"><strong>Archived.</strong> The invite still works; it&apos;s just tucked away on your events list.</p>
       )}
 
-      <div className={`mt-4 grid gap-2 text-center ${event.bring_prompt ? "grid-cols-3" : "grid-cols-2"}`}>
+      <div className={`mt-4 grid gap-2 text-center ${tiles === 3 || tiles > 4 ? "grid-cols-3" : "grid-cols-2"}`}>
         <Stat n={adults + kids} label="coming" sub={kids ? `${adults} adult${adults === 1 ? "" : "s"}, ${kids} kid${kids === 1 ? "" : "s"}` : undefined} />
         <Stat
           n={answered.length}
@@ -103,6 +111,19 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           sub={answered.filter((h) => h.going === false).length ? `${answered.filter((h) => h.going === false).length} can't make it` : undefined}
         />
         {event.bring_prompt && <Stat n={open} label="still needed" />}
+        {cash && <Stat n={money(cash.owed.reduce((n, p) => n + p.amount, 0))} label="still owed" sub={cash.owed.length ? `${cash.owed.length} payment${cash.owed.length === 1 ? "" : "s"}` : cash.costs.length || cash.game.ready ? "everyone's even ✓" : undefined} />}
+        {cash && event.poker_on && (
+          <Stat
+            n={money(cash.game.totalIn)} label="in the pot"
+            sub={!cash.game.players.size ? "no buy-ins yet" : cash.game.ready ? "cashed out ✓" : `${[...cash.game.players.values()].filter((p) => p.out === null).length} to cash out`}
+          />
+        )}
+        {gift && (
+          <Stat
+            n={gift.in} label="giving gifts"
+            sub={gift.drawn ? `drawn ✓${gift.noIdeas ? ` · ${gift.noIdeas} without ideas` : ""}` : "not drawn yet"}
+          />
+        )}
       </div>
 
       {stages.length > 1 && (
@@ -281,7 +302,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   );
 }
 
-function Stat({ n, label, sub }: { n: number; label: string; sub?: string }) {
+function Stat({ n, label, sub }: { n: number | string; label: string; sub?: string }) {
   return (
     <div className="rounded-2xl bg-wash px-1 py-3">
       <div className="text-[28px] font-bold tabular-nums">{n}</div>

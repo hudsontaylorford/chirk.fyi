@@ -318,6 +318,8 @@ for (const [who, amount, kind] of [["Lee", "20"], ["Hudson", "55", "cashout"], [
 await h.goto(pokerHost);
 assert.match(await h.textContent("main"), /Poker night[\s\S]*In \$100 · Out \$100 ✓ Added to settle up\.\s*Hostie hasn't cashed out, so they're counted as the \$20 left on the table/); // the host never cashed out: their $20 is what's left
 assert.match(await h.textContent("main"), /Lee owes Hudson \$35[\s\S]*Lee owes Sam \$5/);
+// The tiles follow what the event uses: money still owed and the pot, beside coming and replies.
+assert.match(await h.textContent("main"), /\$40\s*still owed\s*2 payments\s*\$100\s*in the pot\s*cashed out ✓/);
 const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit')", "href");
 const lee = await phone();
 await lee.goto(new URL(leeLink + "/remember?to=invite", h.url()).href);
@@ -524,6 +526,7 @@ await h.click("form:has(select[aria-label='First person']) button:text-is('Add')
 await h.waitForSelector("text=Ann ↔ Ben");
 await h.click("button:text-is('Draw names')");
 await h.waitForSelector("text=Names drawn for 5 ✓"); // Ann, Ben, Cal, Dee & Eve, and the host
+assert.match(await h.textContent("main"), /5\s*giving gifts\s*drawn ✓ · 5 without ideas/);
 assert.equal(await h.locator("li:has-text('→')").first().isVisible(), false); // matches aren't shown on the host page…
 await openRow(h, "Gift exchange");
 await h.click("summary:has-text('Trouble with the draw?')");

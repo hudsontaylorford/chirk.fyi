@@ -70,7 +70,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **Coming list (invite):** each reply once: names in bold (+ kids), what they're bringing on the next line, and their note as an italic message bubble (wash-gray, rounded with a small tail corner) when the host shows notes.
 - **Form rows (host):** one line per optional part (label left, current setting right in soft, a › that turns when open). Tapping opens just that row; closed rows keep their values. Rows most chirks don't need (Schedule, Guest options, Shared costs, Gift exchange, Web address) sit inside a **More options** row that lists them; one that's switched on always shows on its own.
 - **List editor:** the host's list as removable chips (who's bringing it shown in soft; removing a covered item asks first) plus an "Add things (commas for several)" box.
-- **Stat tiles (host):** three wash tiles: coming, replies, still needed, with an optional tiny sub-line.
+- **Stat tiles (host):** wash tiles that follow what the event uses: coming, replies, still needed (bring list), still owed (costs or poker), in the pot (poker), giving gifts (gift exchange), each with an optional tiny sub-line. Three to a row; four make two rows of two.
 - **Formatting in the message:** `# Title`, `- bullet`, `**bold**`, auto-links; tools: Auto-format, Clear formatting, Preview.
 - **Two-step delete:** a quiet gray "Delete" link, then a red "Sure?" (no pop-ups). When more goes with it (a guest with costs or poker), an amber box says what, before "Sure?".
 - **Toggle pills (`pill-check`):** a checkbox or radio inside a pill; ticked inverts to ink. Used for Split between, Buy-in / Cash-out, Who's in. Choices stay as picked after each Add.

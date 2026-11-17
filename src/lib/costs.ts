@@ -95,3 +95,17 @@ export function poker(entries: PokerEntry[]) {
   const nets = new Map([...players].map(([who, p]) => [who, (p.out ?? 0) - p.in]));
   return { players, totalIn, totalOut, allOut, ready, nets, inferred };
 }
+
+/**
+ * The event's whole settle-up: its costs (only while "Split costs" is on) plus a poker game once it's ready.
+ * One place for the Costs section, Mark paid and the host page's tiles, so they always agree.
+ */
+export function settleUp<C extends { amount: number; paid_by: string; split: { who: string; shares: number }[] }>(
+  all: { costs: C[]; payments: Payment[]; poker: PokerEntry[] },
+  costsOn: boolean,
+) {
+  const costs = costsOn ? all.costs : [];
+  const game = poker(all.poker);
+  const owed = settle(balances(costs.map((c) => ({ amount: c.amount, paidBy: c.paid_by, split: c.split })), all.payments, game.ready ? game.nets : undefined));
+  return { costs, game, owed };
+}

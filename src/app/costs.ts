@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { hostRole } from "@/lib/auth";
-import { balances, money, parseMoney, poker, settle } from "@/lib/costs";
+import { money, parseMoney, settleUp } from "@/lib/costs";
 import { getCosts } from "@/lib/data";
 import { headcount } from "@/lib/format";
 import { sql } from "@/lib/db";
@@ -69,9 +69,7 @@ export async function markPaid(slug: string, token: string | null, from: string,
   await sql.begin(async (tx) => {
     await tx`select pg_advisory_xact_lock(hashtext(${a.eventId}))`;
     const [e] = await tx<{ costs_on: boolean }[]>`select costs_on from events where id = ${a.eventId}`;
-    const all = await getCosts(a.eventId);
-    const game = poker(all.poker);
-    const owed = settle(balances(e.costs_on ? all.costs.map((c) => ({ amount: c.amount, paidBy: c.paid_by, split: c.split })) : [], all.payments, game.ready ? game.nets : undefined));
+    const { owed } = settleUp(await getCosts(a.eventId), e.costs_on);
     if (!owed.some((p) => p.from === from && p.to === to && p.amount === Math.round(amount))) return;
     await tx`insert into payments ${sql({ event_id: a.eventId, from_household: from, to_household: to, amount: Math.round(amount) })}`;
   });

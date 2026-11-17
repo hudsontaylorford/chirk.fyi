@@ -2,7 +2,7 @@ import { addCost, addPoker, buyInAll, markPaid, removeCost, removePoker, saveVen
 import { Confirm } from "@/components/Confirm";
 import { SaveButton } from "@/components/SaveButton";
 import { BuyInAll, CostForm, PokerForm, VenmoForm } from "@/components/CostForms";
-import { balances, money, poker, settle, venmoUrl } from "@/lib/costs";
+import { money, settleUp, venmoUrl } from "@/lib/costs";
 import { headcount, several } from "@/lib/format";
 import { getCosts, joinNames } from "@/lib/data";
 import type { EventData } from "@/lib/types";
@@ -16,10 +16,9 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
   const { event, households } = data;
   const all = await getCosts(event.id);
   // Costs entered while "Split costs" was on stay saved but drop out of everything once it's off.
-  const { payments, poker: entries } = all;
-  const costs = event.costs_on ? all.costs : [];
+  const { poker: entries } = all;
   // A poker game joins the settle-up once everyone has cashed out and the chips add up.
-  const game = poker(entries);
+  const { costs, game, owed } = settleUp(all, event.costs_on);
   // The usual buy-in (the most common one so far), to prefill the boxes.
   const usual = (() => {
     const counts = new Map<number, number>();
@@ -32,7 +31,6 @@ export async function Costs({ data, token, host, inside = false }: { data: Event
   const going = households.filter((h) => h.going !== false);
   const name = (id: string) => (id === me?.id ? "you" : joinNames(households.find((h) => h.id === id)?.names ?? ["someone"]));
   const total = costs.reduce((n, c) => n + c.amount, 0);
-  const owed = settle(balances(costs.map((c) => ({ amount: c.amount, paidBy: c.paid_by, split: c.split })), payments, game.ready ? game.nets : undefined));
   const mine = host ? owed : owed.filter((p) => me && (p.from === me.id || p.to === me.id));
   const canAdd = host || !!me;
   const anything = costs.length > 0 || game.ready;
