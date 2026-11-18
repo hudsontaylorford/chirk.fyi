@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `freeze-v1`): Stage 5
+## Went live Nov 18 (`freeze-v1`): Stage 5
 - **UI patterns v1 frozen** (`docs/CHIRK_UI_PATTERNS.md`): rules, tokens, actions, choices, fields, focus and feedback, type and spacing, boxes, the invite / form / confirmation patterns, what's still provisional, and the old → new map for Stage 6 (~100 old-style uses across ~20 host files). Changing a frozen pattern needs a reason, Hudson's OK, the doc and new baselines.
 - **Guard test** (`src/lib/patterns.test.mts`): fails if a guest screen uses an old class (`btn`, `pill`, filled boxes, pill corners) or an off-token color, or if the accent becomes a fill. Docs and a test only; nothing on the site changes.
 - CLAUDE.md now points future work at the patterns doc.
