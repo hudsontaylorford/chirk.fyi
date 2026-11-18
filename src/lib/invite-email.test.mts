@@ -39,3 +39,10 @@ test("personal invites greet the guest; reminders ask plainly", () => {
   assert.match(r.text, /^Hi Sam! Can you make Jets <vs> Bills on Sunday, November 15\? Let us know by Tuesday, November 10\.\n\nRSVP: https/);
   assert.match(r.html, /href="https:\/\/chirk\.fyi\/t\/r\/abc\/remember\?to=invite"/);
 });
+
+test("a personal invite ends with chirk.fyi/me; a copied invite doesn't", () => {
+  const { html, text } = inviteEmail(event, "https://chirk.fyi/x", "Sam", "https://chirk.fyi/me");
+  assert.match(text, /\n\nAll your chirk invites: https:\/\/chirk\.fyi\/me$/);
+  assert.match(html, />chirk\.fyi\/me<\/a>/);
+  assert.doesNotMatch(inviteEmail(event, "https://chirk.fyi/x", "Sam").text, /chirk invites/);
+});

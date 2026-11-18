@@ -21,3 +21,10 @@ test("can't make it, and a named guest who hasn't answered", () => {
   const later = linkEmail({ ...base, going: null });
   assert.match(later.text, /haven't replied yet\.\n\nRSVP: https/);
 });
+
+test("chirk.fyi/me at the bottom when given", () => {
+  const e = linkEmail({ ...base, going: true, meUrl: "https://chirk.fyi/me" });
+  assert.match(e.text, /\nAll your chirk invites: https:\/\/chirk\.fyi\/me$/);
+  assert.match(e.html, />chirk\.fyi\/me<\/a>/);
+  assert.doesNotMatch(linkEmail({ ...base, going: true }).text, /All your chirk invites/);
+});

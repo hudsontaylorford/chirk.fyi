@@ -247,7 +247,7 @@ async function sendTo(slug: string, h: { token: string; names: string[]; email: 
   if (!e) return false;
   const url = await personalUrl(slug, h.token);
   const names = joinNames(h.names);
-  const mail = kind === "invite" ? inviteEmail(e, url, names) : reminderEmail(e, url, names);
+  const mail = kind === "invite" ? inviteEmail(e, url, names, `${await siteUrl()}/me`) : reminderEmail(e, url, names);
   // The same invite within a minute, or a second reminder the same day, is only sent once.
   const when = kind === "invite" ? Math.floor(Date.now() / 60_000) : new Date().toISOString().slice(0, 10);
   return sendEmail({ to: h.email, ...mail, replyTo: await ownerEmail(e.id), idempotencyKey: `${kind}-${h.token}-${when}` });

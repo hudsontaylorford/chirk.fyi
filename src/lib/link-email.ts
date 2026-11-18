@@ -7,7 +7,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 type LinkEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "long_times">;
 
 export function linkEmail(i: {
-  event: LinkEvent; names: string; going: boolean | null; parts: string[]; bringing: string[]; url: string; calendarUrl: string;
+  event: LinkEvent; names: string; going: boolean | null; parts: string[]; bringing: string[]; url: string; calendarUrl: string; meUrl?: string;
 }) {
   const e = i.event;
   const status = i.going === null ? "You're invited, and haven't replied yet." : i.going ? "You're going." : "You can't make it.";
@@ -23,6 +23,7 @@ export function linkEmail(i: {
     e.title, whenText(e), where, "", `${i.names}: ${status}`, ...lines, "",
     `${button}: ${i.url}`, ...(i.going ? [`Add to calendar: ${i.calendarUrl}`] : []), "",
     "This link is just for you (and anyone on your reply).",
+    ...(i.meUrl ? [`All your chirk invites: ${i.meUrl}`] : []),
   ].filter((l, n, a) => l || a[n - 1]).join("\n");
 
   const html = `<div style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
@@ -34,6 +35,7 @@ ${lines.map((l) => `<p style="margin:4px 0 0;">${esc(l)}</p>`).join("")}
 <p style="margin:20px 0 0;"><a href="${esc(i.url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:999px;">${button}</a></p>
 ${i.going ? `<p style="margin:12px 0 0;"><a href="${esc(i.calendarUrl)}" style="color:inherit;font-weight:600;">Add to calendar</a></p>` : ""}
 <p style="margin:16px 0 0;color:#78716c;font-size:14px;">This link is just for you (and anyone on your reply). Opening it on a phone or computer makes that device remember you.</p>
+${i.meUrl ? `<p style="margin:8px 0 0;color:#78716c;font-size:14px;">All your chirk invites: <a href="${esc(i.meUrl)}" style="color:#78716c;">${esc(i.meUrl.replace(/^https?:\/\//, ""))}</a></p>` : ""}
 </div>`;
   return { subject, html, text };
 }

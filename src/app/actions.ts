@@ -171,7 +171,7 @@ async function emailLinks(slug: string, by: { token: string } | { email: string 
     const mail = linkEmail({
       event: data.event, names: joinNames(h.names), going: h.going, parts: partsOf(data.event, h),
       bringing: claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name),
-      url: `${base}/${slug}/r/${h.token}/remember`, calendarUrl: `${base}/${slug}/calendar.ics`,
+      url: `${base}/${slug}/r/${h.token}/remember`, calendarUrl: `${base}/${slug}/calendar.ics`, meUrl: `${base}/me`,
     });
     await sendEmail({ to: h.email!, ...mail, idempotencyKey: `rsvp-link-${h.id}-${minute}` });
   }

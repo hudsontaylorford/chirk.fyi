@@ -4,7 +4,7 @@ import { sql } from "./db";
 import { splitNames } from "./format";
 
 // Static routes that an event's web address must not shadow.
-export const RESERVED = new Set(["host", "privacy", "terms", "robots.txt", "sitemap.xml", "api"]);
+export const RESERVED = new Set(["host", "me", "privacy", "terms", "robots.txt", "sitemap.xml", "api"]);
 
 /** A free web address made from the title. */
 export async function freeSlug(text: string) {

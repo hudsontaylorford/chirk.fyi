@@ -22,7 +22,7 @@ export function HostSignIn({ claiming, legacy, wrong, email: preset }: { claimin
         // Who can join: anyone on a chirk guest list (the code only goes to those emails).
         <div className="mt-2 space-y-2 text-[15px] text-soft">
           <p>chirk is a simple way to make plans with your people: one page per plan, with replies, who&apos;s bringing what, and shared costs.</p>
-          <p>Sign in with the email you were invited with to make plans of your own. We&apos;ll email you a 6-digit code, no password.</p>
+          <p>Sign in with the email you were invited with to see your invites and make plans of your own. We&apos;ll email you a 6-digit code, no password.</p>
         </div>
       )}
 

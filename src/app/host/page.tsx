@@ -38,10 +38,37 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
     ...r,
     going: coming.filter((h) => h.event_id === r.id).reduce((n, h) => n + headcount(h.names) + h.kids, 0),
   }));
+  // Invited: upcoming live events with a reply under your email (signing in proved it's yours), except ones you host.
+  // shortcut: past invites aren't listed; add a Past section here if people ask for their history.
+  const invites = await sql<{ slug: string; title: string; date: string; hosted_by: string | null; token: string; going: boolean | null }[]>`
+    select distinct on (e.id) e.slug, e.title, e.date::text, e.hosted_by, h.token, h.going
+    from households h join events e on e.id = h.event_id
+    where lower(h.email) = ${me.email} and e.status = 'live' and e.date >= (now() at time zone 'America/New_York')::date
+      and not exists (select 1 from event_hosts eh where eh.event_id = e.id and eh.user_id = ${me.id})
+    order by e.id, h.going is null, h.id`;
+  invites.sort((a, b) => a.date.localeCompare(b.date));
   const archived = events.filter((e) => e.status === "archived").reverse();
   const past = events.filter((e) => e.status !== "archived" && e.past).reverse();
   const upcoming = events.filter((e) => e.status !== "archived" && !e.past);
 
+  const invited = invites.length > 0 && (
+    <section className={events.length ? "mt-8" : "mt-6"}>
+      <h2 className="text-[20px] font-bold">Invited</h2>
+      <ul className="mt-3 divide-y divide-line border-y border-line">
+        {invites.map((i) => (
+          <li key={i.slug}>
+            <a href={`/${i.slug}/r/${i.token}/remember${i.going === null ? "?to=invite" : ""}`} className="flex items-baseline justify-between gap-3 py-4">
+              <span className="min-w-0">
+                <span className="block text-[17px] font-semibold">{i.title}</span>
+                <span className="block text-[15px] text-soft">{[shortDate(i.date), i.hosted_by && `Hosted by ${i.hosted_by}`].filter(Boolean).join(" · ")}</span>
+              </span>
+              <span className={`shrink-0 text-[15px] ${i.going ? "text-green-700" : "text-soft"}`}>{i.going === null ? "Reply" : i.going ? "Going" : "Can’t make it"}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
   return (
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
@@ -57,7 +84,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
           <SaveButton className="btn shrink-0 whitespace-nowrap px-4">Got it</SaveButton>
         </form>
       )}
-      {!me.name && (
+      {!me.name && events.length > 0 && (
         <form action={saveName} className="mt-4 rounded-2xl bg-wash p-4">
           <label className="text-[15px] font-semibold" htmlFor="name">What should co-hosts see you as?</label>
           <div className="mt-2 flex gap-2">
@@ -66,7 +93,8 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
           </div>
         </form>
       )}
-      <Link href="/host/new" className="btn mt-4 w-full">+ New event</Link>
+      {/* Someone who only has invites sees those first; making their own plan is a quiet link. */}
+      {events.length ? <Link href="/host/new" className="btn mt-4 w-full">+ New event</Link> : <>{invited}<Link href="/host/new" className="link tap mt-4 text-[17px]">+ Plan your own event</Link></>}
 
       {/* "Select" shows a checkbox on each event (in every section); archive or delete the ticked ones. */}
       <div className="[&_.pick]:hidden [&:has(details.bulk[open])_.pick]:flex">
@@ -81,7 +109,8 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
           ]}
         />
       )}
-      {upcoming.length ? <EventList events={upcoming} /> : <p className="mt-4 text-soft">Nothing coming up.</p>}
+      {upcoming.length ? <EventList events={upcoming} /> : !invites.length && <p className="mt-4 text-soft">Nothing coming up.</p>}
+      {events.length > 0 && invited}
       {past.length > 0 && (
         <details className="mt-6">
           <summary className="text-[16px] font-semibold text-soft">Past ({past.length})</summary>

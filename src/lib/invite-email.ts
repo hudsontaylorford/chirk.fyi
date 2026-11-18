@@ -10,8 +10,8 @@ type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" 
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
-/** `greeting`: the guest's names on a personal invite ("Hi Sam!" above the title). */
-export function inviteEmail(e: InviteEvent, url: string, greeting?: string) {
+/** `greeting`: the guest's names on a personal invite ("Hi Sam!" above the title). `meUrl`: chirk.fyi/me, only on invites chirk sends to a guest's own email. */
+export function inviteEmail(e: InviteEvent, url: string, greeting?: string, meUrl?: string) {
   const when = whenText(e);
   const where = [e.place, e.address].filter(Boolean).join(" · ");
   const subject = `You're invited: ${e.title}`;
@@ -42,13 +42,14 @@ ${details}
 ${sign ? `<p style="margin:12px 0 0;color:#78716c;">${esc(sign)}</p>` : ""}
 <p style="margin:24px 0 0;"><a href="${esc(url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:999px;">RSVP</a></p>
 ${reply ? `<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>` : ""}
+${meUrl ? `<p style="margin:24px 0 0;color:#78716c;font-size:14px;">All your chirk invites: <a href="${esc(meUrl)}" style="color:#78716c;">${esc(meUrl.replace(/^https?:\/\//, ""))}</a></p>` : ""}
 </div>`;
 
   const detailsText = parseDetails(e.details ?? "").map((block) =>
     block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1")).join("\n"),
   ).join("\n\n");
   const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
-  const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
+  const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? "", meUrl ? `\nAll your chirk invites: ${meUrl}` : ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
 
   return { subject, html, text };
 }
