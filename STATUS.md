@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `design-review`)
+## Went live Nov 18 (`design-review`)
 - **Stage 4 design reviews** (Anthropic frontend-design skill + Vercel Web Interface Guidelines, read from source): `docs/DESIGN_REVIEWS_V2.md`. Fixed: typographic apostrophes, balanced headings, the cover gets a description and loads first, Send RSVP always tappable (says what's missing and focuses it), no spellcheck in email boxes, press/hover feedback without color, no trailing "›". Five open calls for Hudson (typeface, middle dots, centered reply-by, photo size reservation, type scale); declines explained.
 
 ## Went live Nov 18 (`a11y`)
