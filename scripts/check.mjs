@@ -3,6 +3,8 @@
 // Run against a local server with a fresh database:  npm run build && npm start, then  node scripts/check.mjs
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
+import { randomBytes } from "node:crypto";
+import { crc32, deflateSync } from "node:zlib";
 const { chromium, devices } = createRequire(import.meta.url)("playwright");
 
 const B = (process.env.BASE_URL ?? "http://localhost:3000") + "/thanksgiving-2026";
@@ -483,6 +485,14 @@ if (process.env.AI_FAKE === "true") {
   await h.click("summary:text-is('Paste a text or screenshot')");
   await h.click("button:text-is('Fill in')");
   await h.waitForSelector("text=Paste something, or add a screenshot or PDF.");
+  // A big poster export (here a 12 MB PNG of noise) is shrunk in the browser instead of crashing the page at Vercel's 4.5 MB cap.
+  const chunk = (t, d) => { const n = Buffer.alloc(4); n.writeUInt32BE(d.length); const c = Buffer.alloc(4); c.writeUInt32BE(crc32(Buffer.concat([Buffer.from(t), d]))); return Buffer.concat([n, Buffer.from(t), d, c]); };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(1600, 0); ihdr.writeUInt32BE(2500, 4); ihdr.set([8, 2], 8);
+  const rows = Buffer.concat(Array.from({ length: 2500 }, () => Buffer.concat([Buffer.from([0]), randomBytes(4800)])));
+  const poster = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(rows, { level: 0 })), chunk("IEND", Buffer.alloc(0))]);
+  await h.setInputFiles("input[name=file]", { name: "poster.png", mimeType: "image/png", buffer: poster });
+  await h.waitForSelector("button:text-is('Fill in')");
+  assert.ok((await h.$eval("input[name=file]", (i) => i.files[0].size)) < 4 * 1024 * 1024);
   await h.fill("textarea[aria-label='Pasted text']", "Dinner at Sample Hall, Sat Dec 5 at 7. Bring a salad or dessert!");
   await h.click("button:text-is('Fill in')");
   await h.waitForURL(/\/host\/new\?t=import$/);

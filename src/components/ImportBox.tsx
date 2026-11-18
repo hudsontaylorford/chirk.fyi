@@ -2,6 +2,10 @@
 
 import { useActionState, useState } from "react";
 import { importPlan } from "@/app/import";
+import { shrinkPhoto } from "@/lib/shrink-photo";
+
+// Vercel turns away anything over 4.5 MB before chirk sees it, so big files are shrunk or stopped here.
+const MAX_SEND = 4 * 1024 * 1024;
 
 /**
  * One quiet line on New event; tapped, a small composer (two lines, a paperclip, Fill in) so it never crowds the form.
@@ -10,8 +14,34 @@ import { importPlan } from "@/app/import";
 export function ImportBox({ address }: { address: string | null }) {
   const [problem, read, reading] = useActionState(importPlan, null);
   const [file, setFile] = useState<string | null>(null);
+  const [tooBig, setTooBig] = useState<string | null>(null);
+  const [shrinking, setShrinking] = useState(false);
+
+  async function pick(input: HTMLInputElement) {
+    const f = input.files?.[0];
+    setTooBig(null);
+    setFile(f?.name ?? null);
+    if (!f) return;
+    try {
+      if (f.type.startsWith("image/") && f.size > 1024 * 1024) {
+        // A Canva export can be 10 MB+; 1600px is still plenty to read the words.
+        setShrinking(true);
+        const jpeg = await shrinkPhoto(f);
+        const dt = new DataTransfer();
+        dt.items.add(new File([jpeg], f.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" }));
+        input.files = dt.files;
+      } else if (f.size > MAX_SEND) throw new Error("That file is over 4 MB. Try a screenshot of just the part with the plan.");
+    } catch (e) {
+      input.value = "";
+      setFile(null);
+      setTooBig(e instanceof Error ? e.message : "Couldn't read that file.");
+    } finally {
+      setShrinking(false);
+    }
+  }
+  const shown = tooBig ?? problem;
   return (
-    <details className="mt-1 text-[15px]" open={!!problem}>
+    <details className="mt-1 text-[15px]" open={!!shown}>
       <summary className="cursor-pointer list-none text-soft underline underline-offset-2 [&::-webkit-details-marker]:hidden">Paste a text or screenshot</summary>
       <form action={read} className="mt-2">
         <div className="rounded-[14px] border-[1.5px] border-line bg-white focus-within:border-ink">
@@ -25,13 +55,13 @@ export function ImportBox({ address }: { address: string | null }) {
                 <path d="M21 11.5l-8.6 8.6a5 5 0 01-7.1-7.1l8.6-8.6a3.3 3.3 0 014.7 4.7l-8.6 8.6a1.7 1.7 0 01-2.4-2.4l7.9-7.9" />
               </svg>
               <span className="truncate">{file ?? "Add a screenshot or PDF"}</span>
-              <input name="file" type="file" accept="image/*,application/pdf" className="sr-only" onChange={(e) => setFile(e.target.files?.[0]?.name ?? null)} />
+              <input name="file" type="file" accept="image/*,application/pdf" className="sr-only" onChange={(e) => pick(e.currentTarget)} />
             </label>
-            <button className="btn shrink-0 px-4 text-[15px]" style={{ minHeight: 40 }} disabled={reading}>{reading ? "Reading…" : "Fill in"}</button>
+            <button className="btn shrink-0 px-4 text-[15px]" style={{ minHeight: 40 }} disabled={reading || shrinking}>{reading ? "Reading…" : shrinking ? "Getting it ready…" : "Fill in"}</button>
           </div>
         </div>
-        {problem
-          ? <p role="alert" className="mt-1 text-[14px] text-red-700">{problem}</p>
+        {shown
+          ? <p role="alert" className="mt-1 text-[14px] text-red-700">{shown}</p>
           : <p className="mt-1 text-[14px] text-soft">Fills in the form below. Nothing is saved until you create the event.</p>}
         {address && <p className="mt-1 text-[14px] text-soft">Or forward an email to <strong className="font-semibold text-ink">{address}</strong> from your chirk email; it becomes a draft in Your events.</p>}
       </form>

@@ -14,6 +14,9 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Ready, not live yet (`import-big-images`)
+- Fix: a big poster (e.g. a Canva export, often 5–20 MB) in "Paste a text or screenshot" crashed the page, because Vercel turns away anything over 4.5 MB before chirk sees it. Images over 1 MB are now shrunk on the phone first (the same shrinker as cover photos, 1600px); a PDF over 4 MB gets a plain message instead. The walkthrough attaches a 12 MB poster.
+
 ## Went live Nov 18 (`freeze-v1`): Stage 5
 - **UI patterns v1 frozen** (`docs/CHIRK_UI_PATTERNS.md`): rules, tokens, actions, choices, fields, focus and feedback, type and spacing, boxes, the invite / form / confirmation patterns, what's still provisional, and the old → new map for Stage 6 (~100 old-style uses across ~20 host files). Changing a frozen pattern needs a reason, Hudson's OK, the doc and new baselines.
 - **Guard test** (`src/lib/patterns.test.mts`): fails if a guest screen uses an old class (`btn`, `pill`, filled boxes, pill corners) or an off-token color, or if the accent becomes a fill. Docs and a test only; nothing on the site changes.
