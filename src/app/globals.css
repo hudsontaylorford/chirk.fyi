@@ -103,6 +103,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
   &[aria-pressed="true"]::before { content: "✓"; }
 }
 
+/* Long words (a title like "Thanksgiving" at Safari's 300% zoom) wrap instead of pushing the page sideways. */
+.guest { overflow-wrap: break-word; }
+.guest h1 { hyphens: auto; }
 .guest .field { border-radius: 8px; }
 .guest .field:focus { border-color: var(--color-accent); }
 /* One visible focus ring for keyboard users, in the accent (ink for now). */

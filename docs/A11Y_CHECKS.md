@@ -11,7 +11,7 @@ Runs on fixed fixture events (`scripts/fixtures.mjs`, the same ones as the visua
 - **Text contrast** ≥ 4.5:1 (3:1 for large text), against the real background.
 - **One h1**, and the heading outline.
 - **Keyboard**: Tab through the page; every stop shows a visible focus ring (outline, or a field's border change).
-- **320px wide**: no sideways scroll.
+- **320px wide and 130px wide** (an iPhone at Safari's largest, 300%, zoom): no sideways scroll.
 - **Reduced motion**: nothing animates.
 - `<html lang>` and a page title.
 
@@ -25,6 +25,17 @@ Runs on fixed fixture events (`scripts/fixtures.mjs`, the same ones as the visua
 | "No visible focus" on text fields | a false alarm in the script: fields show focus by changing their border; the check now compares focused vs. resting |
 
 Now: **no issues on any of the five screens.** Contrast, names, headings, keyboard order, 320px reflow and reduced motion all passed on the first run.
+
+## Real iPhone results (Hudson, Nov 18)
+
+| Check | Result |
+|---|---|
+| Safari AutoFill on "Your name" | ✓ fine: a name suggestion, nothing in the way |
+| No zoom when typing | ✓ |
+| Still needed → RSVP with the item picked | ✓ |
+| Add to calendar | ✓ "perfect" |
+| Largest Safari zoom (300%) | ✗ **found a bug**: "Thanksgiving" and the schedule ran off the right edge and the page scrolled sideways. **Fixed**: long words wrap (`.guest { overflow-wrap: break-word }`, hyphenated titles), the schedule's text column can shrink and stacks (time above, text below) when the page is under 240px wide, and the email + Send rows wrap. The a11y script now checks 130px wide too, so this can't come back unnoticed. |
+| VoiceOver | skipped for now |
 
 ## On a real iPhone (Hudson, ~10 minutes)
 

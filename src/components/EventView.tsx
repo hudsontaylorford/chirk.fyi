@@ -32,7 +32,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
         )}
         {event.hosted_by && !event.details && <p className="mt-1 text-[17px] text-soft">Hosted by {event.hosted_by}</p>}
         {stages.length > 0 && (
-          <ul className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[17px]">
+          <ul className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1 text-[17px] max-[240px]:grid-cols-1">
             {stages.map((s, i) => (
               <li key={i} className={`contents ${s.main ? "font-bold" : ""}`}>
                 <span className={`tabular-nums ${s.main ? "" : "text-soft"}`}>{s.when}</span><span>{s.what}</span>

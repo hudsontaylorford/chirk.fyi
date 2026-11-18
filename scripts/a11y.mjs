@@ -61,12 +61,13 @@ await withFixtures(async () => {
   const b = await chromium.launch();
   for (const [title, path, prep] of screens) {
     console.log(`\n${title}  ${path}`);
-    for (const [vw, ctx] of [["390", { ...devices["iPhone 13"] }], ["320", { ...devices["iPhone 13"], viewport: { width: 320, height: 640 } }]]) {
+    // 130px: an iPhone at Safari's largest zoom (300%) leaves about 130 CSS pixels of width.
+    for (const [vw, ctx] of [["390", { ...devices["iPhone 13"] }], ["320", { ...devices["iPhone 13"], viewport: { width: 320, height: 640 } }], ["130", { ...devices["iPhone 13"], viewport: { width: 130, height: 280 } }]]) {
       const p = await (await b.newContext({ ...ctx, reducedMotion: "reduce" })).newPage();
       await p.goto(ORIGIN + path);
       if (prep) await prep(p);
       const r = await p.evaluate(inspect);
-      if (vw === "320") { if (r.scrollX) fail("320px: the page scrolls sideways"); else console.log("  ✓ 320px: no sideways scroll"); await p.context().close(); continue; }
+      if (vw !== "390") { if (r.scrollX) fail(`${vw}px: the page scrolls sideways`); else console.log(`  ✓ ${vw}px: no sideways scroll`); await p.context().close(); continue; }
       if (r.lang !== "en") fail(`<html lang> is "${r.lang}"`);
       if (!r.title) fail("no page title");
       if (r.h1 !== 1) fail(`${r.h1} h1 headings (want 1)`);

@@ -16,7 +16,7 @@ Everything up to Nov 16's "fixes-3":
 
 ## Waiting to go live (branch `a11y`)
 - **Accessibility pass on the guest flow** (`docs/A11Y_CHECKS.md`, `node scripts/a11y.mjs`): tap targets, names, contrast, headings, keyboard focus, 320px, reduced motion. Fixed: two links under 44px (the RSVP page's event name, "Pick something to bring"), and the confirmation's event name is now a heading. Everything else passed. Baselines re-captured.
-- **Real-iPhone checklist** for Hudson in `docs/A11Y_CHECKS.md` (Safari AutoFill, no zoom on typing, larger text, VoiceOver order/headings/selected states).
+- **Real iPhone (Hudson):** AutoFill, no zoom on typing, Still needed → RSVP and Add to calendar all ✓. **Safari's largest zoom broke the layout** (long title and schedule ran off the screen): fixed (long words wrap, the schedule stacks under 240px, email rows wrap) and the a11y script now checks 130px wide. VoiceOver still to try (`docs/A11Y_CHECKS.md`).
 
 ## Went live Nov 18 (`b2-counts`)
 - **B2 fixed (Message your guests):** the Going / Haven't replied / Everyone choices no longer show a bare email count ("Going · 0" when 3 were going). One quiet line says delivery for the chosen group: "2 emails · 3 need a text".

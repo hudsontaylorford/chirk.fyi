@@ -168,9 +168,9 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
               </div>
               {allowOwn && (
                 <>
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <input
-                  className="field" value={typing} placeholder="Something else" aria-label="Add your own" autoFocus={ownFirst}
+                  className="field min-w-0 flex-[1_1_10rem]" value={typing} placeholder="Something else" aria-label="Add your own" autoFocus={ownFirst}
                   onChange={(e) => setTyping(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
                 />
