@@ -7,8 +7,7 @@
   --color-soft: #78716c;
   --color-line: #e7e5e4;
   --color-wash: #f5f5f4;
-  --color-accent: #1c1917;
-  --color-link: #2457F5; /* chirk blue: links, focus, selected choices. Never a surface. */
+  --color-accent: #1c1917; /* links, focus, picked choices (and older host buttons). Ink for now; the brand color goes here later. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -87,25 +86,25 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
   font-weight: 600; font-size: 16px; background: white; color: var(--color-ink); border: 1.5px solid var(--color-line);
   &:disabled { opacity: .4; }
 }
-/* Links and secondary actions: chirk blue, underlined. */
+/* Links and secondary actions: accent (ink for now), underlined. */
 @utility link {
-  color: var(--color-link); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
+  color: var(--color-accent); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px;
 }
 /* A link or text button that stands alone gets a 44px tap target without looking bigger. */
 @utility tap {
   display: inline-flex; align-items: center; min-height: 44px;
 }
-/* Something you pick (Going / Can't make it, what you're bringing): outlined; picked = blue outline, blue text, a check. */
+/* Something you pick (Going / Can't make it, what you're bringing): outlined; picked = accent outline, accent text, a check. */
 @utility choice {
   display: inline-flex; align-items: center; justify-content: center; gap: .4rem; min-height: 44px;
   padding: .5rem .9rem; border-radius: 8px; border: 1.5px solid var(--color-line); background: white;
   font-size: 16px; color: var(--color-ink); text-align: left;
-  &[aria-pressed="true"] { border-color: var(--color-link); box-shadow: inset 0 0 0 1px var(--color-link); color: var(--color-link); font-weight: 600; }
+  &[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); font-weight: 600; }
   &[aria-pressed="true"]::before { content: "✓"; }
 }
 
 .guest .field { border-radius: 8px; }
-.guest .field:focus { border-color: var(--color-link); }
-/* One visible focus ring for keyboard users: chirk blue. */
-.guest :is(a, button, summary, [role="button"]):focus-visible { outline: 2px solid var(--color-link); outline-offset: 2px; border-radius: 4px; }
+.guest .field:focus { border-color: var(--color-accent); }
+/* One visible focus ring for keyboard users, in the accent (ink for now). */
+.guest :is(a, button, summary, [role="button"]):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
 .guest :is(.button, .button-quiet, .choice):focus-visible { border-radius: 8px; }

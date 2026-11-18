@@ -17,28 +17,30 @@ Pages opt in with `class="guest"` on `<main>` (today: the invite, RSVP and reply
 | `--color-ink` | #1c1917 | text, the primary button |
 | `--color-soft` | #78716c | secondary text (dates in lists, hints, signatures) |
 | `--color-line` | #e7e5e4 | hairlines, outlines of fields and choices |
-| `--color-link` | **#2457F5** (chirk blue) | links, focus rings, picked choices. **Never a surface or fill.** |
+| `--color-accent` | #1c1917 (ink, **for now**) | links, focus rings, picked choices. The brand color goes here later; never a surface or fill. |
+
+**Monochrome for now (Nov 18):** chirk blue (#2457F5) was tried and taken out of the guest UI: on a formal invite it read too literally "HTML". The guest flow is ink, warm gray and white; links are ink and underlined. Components use `--color-accent`, so a brand color is one value away. (Older host buttons also use `--color-accent` for their fill; when a color returns, those move to `--color-ink` first.) Status colors stay only where they mean something (green = Going, amber/red alerts).
 
 ## Actions
 
 - **Primary: `button`.** Ink, white text, 8px corners, 52px tall, full width on phones. **One per screen**, and only where there's a real next step (the invite: RSVP; the RSVP form: Send RSVP / Save). A finished state (the confirmation) has none.
 - **Secondary beside a field: `button-quiet`.** White, hairline outline, 8px, ≥44px. For Send / Add next to an input. Never louder than the primary.
-- **Secondary elsewhere: `link`.** Chirk blue, underlined. Add to calendar, Change my reply, + Bring something else, Already replied?. Standalone links add **`tap`** (inline-flex, 44px tall) so the target is big without looking big. A link that *is* the next step (Add to calendar on the confirmation) is `link` + semibold.
+- **Secondary elsewhere: `link`.** Accent (ink), underlined. Add to calendar, Change my reply, + Bring something else, Already replied?. Standalone links add **`tap`** (inline-flex, 44px tall) so the target is big without looking big. A link that *is* the next step (Add to calendar on the confirmation) is `link` + semibold.
 - **Destructive:** unchanged for now (gray link, then a red "Sure?"); revisit with the host tools.
 
 ## Choices (Going / Can't make it, bring items, parts of the day, who's this)
 
-- **`choice`**: white, hairline outline, 8px, ≥44px. **Picked** (`aria-pressed="true"`): blue outline (2px), blue semibold text, a ✓ before the label. No fill.
+- **`choice`**: white, hairline outline, 8px, ≥44px. **Picked** (`aria-pressed="true"`): accent (ink) outline (2px), ink semibold text, a ✓ before the label. No fill.
 - Going / Can't make it: two equal choices side by side, 52px.
 - Bring items use the same `choice` everywhere: on the invite each Still needed item is a `choice` **link** that opens the RSVP with it picked (`?pick=<item id>`; returning guests land on their reply with it picked); in the form they're `choice` buttons.
 
 ## Fields
 
-- `field`, inside `.guest`: 8px corners, hairline outline, **blue outline on focus**. 17px text (no iPhone zoom).
+- `field`, inside `.guest`: 8px corners, hairline outline, **ink outline on focus**. 17px text (no iPhone zoom).
 
 ## Focus
 
-- One ring for keyboard users: **2px chirk blue, 2px offset** on links, buttons, summaries and choices (`.guest :focus-visible`). Fields show focus with a blue outline instead.
+- One ring for keyboard users: **2px ink, 2px offset** on links, buttons, summaries and choices (`.guest :focus-visible`). Fields show focus with an ink outline instead.
 
 ## Type and rhythm
 
@@ -67,6 +69,11 @@ Only where containment means something: **alerts** (red/amber, 8px) and, on othe
 4. Change my reply (link) → the form opens in place.
 5. Keep your link (a quiet section: one line, email + Send, Copy the link instead).
 No new primary button: the reply is done.
+
+## Cover photo
+
+- Full width of the column at the photo's **natural shape; never cropped** from 768px wide (no height cap there).
+- Phones still cap very tall photos at 70% of the screen height, trimmed from the bottom (since Nov 14). *Open: this crops tall photos (62px of the Thanksgiving poster); removing the cap would show them whole.*
 
 ## When optional content is absent
 

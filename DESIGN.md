@@ -1,6 +1,6 @@
 # chirk: design notes (as of Nov 18, 2026)
 
-> **v2 in progress:** the guest flow (invite → RSVP → confirmation) now follows `docs/CHIRK_UI_PATTERNS.md` (chirk blue #2457F5 for links, focus and picked choices; 8px buttons; no guest-side boxes or pills that do nothing). Host pages below still describe the older look until Stage 6. Audit: `docs/UI_AUDIT_V2.md`.
+> **v2 in progress:** the guest flow (invite → RSVP → confirmation) now follows `docs/CHIRK_UI_PATTERNS.md` (monochrome: ink links underlined, ink focus and picked choices via `--color-accent`; 8px buttons; no guest-side boxes or pills that do nothing; desktop covers never cropped). Host pages below still describe the older look until Stage 6. Audit: `docs/UI_AUDIT_V2.md`.
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 

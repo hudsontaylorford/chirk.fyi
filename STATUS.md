@@ -14,8 +14,12 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Waiting to go live (branch `mono-cover`)
+- **Cover regression fixed:** Stage 3's desktop cap (`md:max-h-[55vh]`) plus the existing `object-cover object-top` cropped the Thanksgiving poster by 196px at 1280×900 (273px on a 760px-tall laptop). From 768px wide the cap is gone: the photo shows whole at full column width (measured: 0px cut). Phones unchanged (a 70%-of-screen cap from Nov 14 still trims very tall photos; 62px of the poster; open question).
+- **Guest UI back to monochrome:** chirk blue removed; links ink and underlined, picked choices ink outline + ✓, ink focus ring. All via `--color-accent` (ink for now), so a brand color is one value later. Baselines re-captured.
+
 ## Went live Nov 18 (`guest-v2`): UI v2, Stage 3 guest slice
-- **Invite → RSVP → confirmation** in the v2 system (`docs/CHIRK_UI_PATTERNS.md`): chirk blue #2457F5 for links, focus and picked choices; 8px ink primary button; choices with a blue outline and ✓; no guest-side boxes; notes as plain quotes; RSVP right after what/when/where; Coming hidden until someone's going.
+- **Invite → RSVP → confirmation** in the v2 system (`docs/CHIRK_UI_PATTERNS.md`): (shipped with chirk blue #2457F5 for links, focus and picked choices, since taken back to monochrome); 8px ink primary button; choices with a blue outline and ✓; no guest-side boxes; notes as plain quotes; RSVP right after what/when/where; Coming hidden until someone's going.
 - **B1 fixed:** each Still needed item opens the RSVP with it already picked. **B3 fixed:** the confirmation shows the event, date, place and Add to calendar.
 - RSVP keeps the event name and date on top, then "Your RSVP" / "Are you coming?"; "Already replied?" is a quiet link at the bottom.
 - Desktop cover photo capped at 55% of the screen height; phones unchanged.

@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 /**
  * The cover photo. If the link doesn't load, guests simply see no photo (never a broken box),
  * and on the host's form a warning explains why.
+ * Full column width at its natural shape. Phones still cap very tall photos at 70% of the screen (trimmed from the bottom,
+ * since Nov 14); from 768px wide there's no cap, so nothing is cut.
  */
 export function Cover({ src, host = false }: { src: string; host?: boolean }) {
   const ref = useRef<HTMLImageElement>(null);
@@ -23,7 +25,7 @@ export function Cover({ src, host = false }: { src: string; host?: boolean }) {
       </p>
     ) : null;
   }
-  return <img ref={ref} src={src} alt={host ? "Current cover" : ""} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto max-h-[70svh] w-full object-cover object-top md:max-h-[55vh]"} />;
+  return <img ref={ref} src={src} alt={host ? "Current cover" : ""} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto max-h-[70svh] w-full object-cover object-top md:max-h-none"} />;
 }
 
 /** Resolves to whether an image link loads (used before copying an invite for email). */
