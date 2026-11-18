@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Ready, not live yet (`me`)
+## Went live Nov 18 (`me`)
 - chirk.fyi/me goes to Your events (sign in with the emailed code if needed), which now also lists **Invited**: upcoming live events with a reply under your email, except ones you host, each with Going / Can’t make it / Reply. Someone who only has invites sees them first, with "+ Plan your own event" as a quiet link, and isn't asked the co-host name question.
 - Invites chirk emails to a guest, and the "Your RSVP" link email, end with "All your chirk invites: chirk.fyi/me". Copied invites don't.
 - "me" is now a reserved web address. Not listed: past invites (add if people ask).
