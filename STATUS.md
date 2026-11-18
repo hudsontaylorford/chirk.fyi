@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `b2-counts`)
+## Went live Nov 18 (`b2-counts`)
 - **B2 fixed (Message your guests):** the Going / Haven't replied / Everyone choices no longer show a bare email count ("Going · 0" when 3 were going). One quiet line says delivery for the chosen group: "2 emails · 3 need a text".
 - **Copy cleanup (Hudson's brief):** "Send an update without changing the invite." · Going / No reply yet / Everyone · "Write a note" · "Include event details" · **Send update** (then the existing confirm, "Send to 2 guests", and "Sent to 2 ✓"). Copy only: recipients, sending and layout unchanged; the host redesign is still Stage 6. No database step.
 
