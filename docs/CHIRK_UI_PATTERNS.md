@@ -1,99 +1,131 @@
-# chirk UI patterns (v2)
+# chirk UI patterns · v1 (frozen)
 
-*Established Nov 18, 2026 in the Stage 3 guest slice (invite → RSVP → confirmation). Proven there first; the host tools adopt them in Stage 6. The audit: `docs/UI_AUDIT_V2.md`. The brief and constitution: `docs/UI_UX_V2_BRIEF.md`.*
+**Frozen Nov 18, 2026 (Stage 5).** Proven on the guest flow (invite → RSVP → confirmation), live, reviewed (`docs/DESIGN_REVIEWS_V2.md`) and checked (`docs/A11Y_CHECKS.md`). This is the reference for the host tools in Stage 6.
 
-Pages opt in with `class="guest"` on `<main>` (today: the invite, RSVP and reply pages). Host pages keep the older look (`btn`, `pill`, `pill-check`) until Stage 6, when those are replaced and deleted.
+**Changing a frozen pattern** needs: a reason (a usability problem, not taste alone), Hudson's OK, this doc updated, and the visual baselines re-captured (`node scripts/visual.mjs --update`). A unit test (`src/lib/patterns.test.mts`) fails if a guest screen uses an old class or an off-token color.
 
-## Constitution additions (approved Nov 18)
+Background: the brief and constitution (`docs/UI_UX_V2_BRIEF.md`), the audit (`docs/UI_AUDIT_V2.md`).
+
+---
+
+## 0. The idea in one line
+
+A very well-typeset web document that happens to be interactive: ink on white, warm gray for secondary things, hairlines for structure, underlined links, one black button when there's a real next step, and nothing that looks like a control unless it is one.
+
+## 1. Rules (constitution additions, approved Nov 18)
 
 1. **A pill never does nothing.** Anything shaped like a control is one.
-2. **Host page primary:** Share invite when live, Publish when draft.
-3. **Green means Going** only. Live is the normal state and gets no badge.
+2. **One primary action per screen**, only when there's a real next step. On host pages: **Share invite** when live, **Publish** when draft.
+3. **Green means Going**, only. Live is the normal state and gets no badge.
+4. **Photos are never cropped**, on any screen.
+5. **No color but the tokens.** The accent is ink until a brand color is chosen.
 
-## Tokens
+## 2. Tokens
 
 | Token | Value | Use |
 |---|---|---|
 | `--color-ink` | #1c1917 | text, the primary button |
-| `--color-soft` | #78716c | secondary text (dates in lists, hints, signatures) |
-| `--color-line` | #e7e5e4 | hairlines, outlines of fields and choices |
-| `--color-accent` | #1c1917 (ink, **for now**) | links, focus rings, picked choices. The brand color goes here later; never a surface or fill. |
+| `--color-soft` | #78716c | secondary text: hints, signatures, dates in lists |
+| `--color-line` | #e7e5e4 | hairlines; outlines of fields, choices, quiet buttons |
+| `--color-accent` | #1c1917 (ink, for now) | links, focus rings, picked choices. **The brand color goes here later. Never a fill or surface.** |
+| page | white | background |
+| status | green-700 (Going), amber, red-800 on red-50 (alerts) | only where they mean something |
 
-**Monochrome for now (Nov 18):** chirk blue (#2457F5) was tried and taken out of the guest UI: on a formal invite it read too literally "HTML". The guest flow is ink, warm gray and white; links are ink and underlined. Components use `--color-accent`, so a brand color is one value away. (Older host buttons also use `--color-accent` for their fill; when a color returns, those move to `--color-ink` first.) Status colors stay only where they mean something (green = Going, amber/red alerts).
+Font: the phone's system font (provisional, §12).
 
-## Actions
+## 3. Opting in
 
-- **Primary: `button`.** Ink, white text, 8px corners, 52px tall, full width on phones. **One per screen**, and only where there's a real next step (the invite: RSVP; the RSVP form: Send RSVP / Save). A finished state (the confirmation) has none.
-- **Secondary beside a field: `button-quiet`.** White, hairline outline, 8px, ≥44px. For Send / Add next to an input. Never louder than the primary.
-- **Secondary elsewhere: `link`.** Accent (ink), underlined. Add to calendar, Change my reply, + Bring something else, Already replied?. Standalone links add **`tap`** (inline-flex, 44px tall) so the target is big without looking big. A link that *is* the next step (Add to calendar on the confirmation) is `link` + semibold.
-- **Destructive:** unchanged for now (gray link, then a red "Sure?"); revisit with the host tools.
+Pages that follow v1 put `class="guest"` on their `<main>`. That scope turns on: 8px fields with an accent focus outline, the focus ring, wrapping of long words, balanced headings, press/hover feedback. (Stage 6 can rename `guest` to something page-neutral once every page uses it.)
 
-## Choices (Going / Can't make it, bring items, parts of the day, who's this)
+## 4. Actions
 
-- **`choice`**: white, hairline outline, 8px, ≥44px. **Picked** (`aria-pressed="true"`): accent (ink) outline (2px), ink semibold text, a ✓ before the label. No fill.
-- Going / Can't make it: two equal choices side by side, 52px.
-- Bring items use the same `choice` everywhere: on the invite each Still needed item is a `choice` **link** that opens the RSVP with it picked (`?pick=<item id>`; returning guests land on their reply with it picked); in the form they're `choice` buttons.
+| Pattern | Class | Looks | Use for | Don't |
+|---|---|---|---|---|
+| Primary | `button` | ink fill, white 17px semibold, **8px corners**, 52px tall, full width on phones | the one real next step: RSVP, Send RSVP / Save | two per screen; on a finished state (the confirmation has none) |
+| Quiet | `button-quiet` | white, 1.5px hairline outline, 8px, ≥44px, 16px semibold | an action **next to a field** (Send, Add) | as a page's main action; filled gray |
+| Link | `link` (+ `tap` when standalone) | accent text, 1px underline 3px below | every other action and all navigation: Add to calendar, Change my reply, + Bring something else, Already replied? | colored text; buttons styled as links for navigation |
+| Strong link | `link` + semibold | same, bolder | a link that *is* the next step (Add to calendar after replying) | more than one per screen |
+| Destructive | *(not in v1)* | today: gray link, then a red "Sure?" | — | decided with the host tools in Stage 6 |
 
-## Fields
+`tap` makes a standalone link or text button 44px tall without looking bigger. Links inside a sentence don't need it.
 
-- `field`, inside `.guest`: 8px corners, hairline outline, **ink outline on focus**. 17px text (no iPhone zoom).
+## 5. Choices (anything you pick)
 
-## Focus
+`choice`: white, hairline outline, 8px, ≥44px, 16px. **Picked** (`aria-pressed="true"`): accent outline (1.5px + 1px inset), accent semibold text, a ✓ before the label. No fill.
 
-- One ring for keyboard users: **2px ink, 2px offset** on links, buttons, summaries and choices (`.guest :focus-visible`). Fields show focus with an ink outline instead.
+- **Going / Can't make it:** two equal `choice` buttons side by side, 52px, 17px semibold.
+- **Bring items:** `choice` everywhere. On the invite each Still needed item is a `choice` **link** to the RSVP with it picked (`?pick=<item id>`); in the form they're `choice` buttons. Things you added yourself show picked with a ✕ to remove.
+- **Parts of the day, who's this:** `choice`.
+- Don't: a choice-shaped thing that isn't tappable (rule 1); filled selected states; color.
 
-## Type and rhythm
+## 6. Fields
 
-| Role | Size / weight |
+`field` inside the scope: full width, 8px, 1.5px hairline, 17px text (no iPhone zoom), **accent border on focus**. A field + its quiet button sit in a row that **wraps** (`flex flex-wrap`, field `min-w-0 flex-[1_1_10rem]`) so the button drops below on narrow screens. Email fields: `type=email`, `inputMode=email`, `autoComplete=email`, no spellcheck, no auto-capitals.
+
+## 7. Focus and feedback
+
+- **Keyboard focus:** 2px accent outline, 2px offset, on links, buttons, summaries and choices. Fields show focus with their border.
+- **Press:** links, choices and quiet buttons dim to 70%; the primary to 85%.
+- **Hover (mouse only):** links thicken their underline to 2px; outlines darken to soft gray; the primary dims to 90%.
+- **Every action shows it worked:** "Sending…/Saving…" on the button while busy, then the page changes ("You're in!") or a status line ("Sent to 2 ✓"). Send buttons stay tappable; a missing answer is named ("Pick Going or Can't make it.") and focused.
+- No motion. If any is ever added, it respects reduced motion.
+
+## 8. Type and rhythm
+
+| Role | Size / weight | Example |
+|---|---|---|
+| Invite title (h1) | 34px bold, tight tracking, 1.1 line height | Thanksgiving 2026 |
+| Page title (h1) | 28px bold | Your RSVP · You're going |
+| Section heading (h2) | 20px bold | Still needed · Coming |
+| Question / small heading (h2) | 17px semibold | Are you coming? · Keep your link |
+| Date line | 19px medium (invite), 17px (elsewhere) | Thursday, November 26 · 3 pm |
+| Body | 17px, relaxed line height for messages | the host's message |
+| Secondary | 15px soft | hints, signatures, Please reply by |
+| Small print | 14px soft | form footnotes |
+
+- **Spacing:** 20px side gutter (`px-5`), max column 512px (`max-w-lg`). Between sections 32–40px (`mt-8`/`mt-10`); between questions in a form 32px (`space-y-8`); within a block 4–12px.
+- **Hairlines** (`--color-line`) separate list rows (`divide-y`, top and bottom border) and set off a block that's a unit (the confirmation's plan). No boxes for grouping.
+- Headings balance their lines; paragraphs avoid a lone last word; long words wrap (at Safari's 300% zoom too). chirk's own words use ’ and “ ”; what people type stays as typed. Sentence case everywhere.
+- Lists are rows: name in semibold, details in body, notes as soft italic quotes ("Arriving around 5"). No cards, no bubbles.
+
+## 9. Boxes
+
+Only when containment means something: **alerts** (red/amber, 8px, `role=alert`) and **a secret** (the gift match card, Stage 6). Everything else is space + hairlines.
+
+## 10. Screen patterns
+
+**An invite / a plan:** photo (full width, never cropped) → title → date · time → place · address (address links to Maps) → schedule (stacks under 240px) → Add to calendar → **RSVP** → reply-by → the host's message, signed → Still needed → Coming. Optional parts vanish when empty (no heading, no "nothing yet"); Coming appears once someone's going. The lightest plan (title, when, where) is one screen.
+
+**A form:** the thing it's about stays visible on top (event name + date), then the page title ("Your RSVP"), then questions as h2s, one decision each, then the primary. Help text only where it explains a consequence ("Optional. Shows on the invite."). Rarely-needed paths go under the primary as a quiet link ("Already replied? Email me my link").
+
+**A confirmation:** what happened as the title ("You're in!"), names under it → the plan back between hairlines (name, when, where, **Add to calendar**) → what's next as links (Pick something to bring, Change my reply) → housekeeping last (Keep your link). No new primary.
+
+## 11. Stage 6: from the old look to v1 (host pages)
+
+| Old | New |
 |---|---|
-| Invite title | 34px bold, tight |
-| Page title (Your RSVP, You're going) | 28px bold |
-| Section heading (Still needed, Coming) | 20px bold |
-| Question / small heading (Are you coming?, Keep your link) | 17px semibold |
-| Date line | 19px medium (invite), 17px (elsewhere) |
-| Body | 17px |
-| Hints, signatures, reply-by | 15px soft |
+| `btn` (black pill) | `button` if it's the screen's one next step; otherwise `link` (or `button-quiet` beside a field) |
+| `btn btn-quiet` (gray pill) | `link` (+ `tap`), or `button-quiet` beside a field |
+| `pill` with `aria-pressed` | `choice` |
+| `pill-check` (checkbox/radio in a pill) | `choice` (button with `aria-pressed`) or a plain checkbox row; keep a real `<input>` where the form posts it |
+| `rounded-2xl bg-wash` boxes (Send the invite, Message your guests, stat tiles, cost cards…) | a section with a heading, spacing and hairlines; stats as one line ("7 coming · 4 of 5 replied · 5 still needed") |
+| Live / Draft / Host badges | words: "Draft" in the title line; Live says nothing; "Host" as plain soft text |
+| `rounded-full` round buttons (kids −/+) | `button-quiet` squares (done in the RSVP form) |
 
-- Sections are separated by **space (32–40px) and hairlines**, not boxes. The confirmation's plan block sits between two hairlines.
-- Lists: rows with hairline dividers (`divide-y`), no cards.
+Today that's about 100 uses across ~20 host files (`btn` 43, `btn-quiet` 11, `pill` 14, `pill-check` 4, `rounded-2xl` 20, `bg-wash` 14). Stage 6 does them page by page (Your events, the event host page, the event form, send/share, replies, bring list, co-hosts, costs, gifts), each checked against this doc, with baselines added for host screens.
 
-## Boxes
+## 12. Provisional (Hudson's open calls, Nov 18)
 
-Only where containment means something: **alerts** (red/amber, 8px) and, on other pages, the gift match card. The guest slice removed: the "Already replied?" box, the "Keep your link" box, note bubbles, the gray "Your RSVP" button.
+These are deliberately **not** frozen:
+1. **Typeface:** system font for now; the biggest remaining lever, decided with the brand color.
+2. **Middle dots** as separators (date line, place · address, "Coming · 5", "2 emails · 3 need a text").
+3. **"Please reply by"** centered under the button (the only centered text).
+4. **Reserving the photo's space** (store dimensions at upload).
+5. **Type scale** on a ratio.
 
-## Confirmation pattern
+## 13. Checks
 
-1. What happened, as the title: "You're in!" / "You're going" / "You can't make it", with the names under it.
-2. **The plan back**: event name · date and time · place (address as a link) · **Add to calendar** (going only).
-3. What you're bringing, or "Pick something to bring" (a link into the form) when the host asked.
-4. Change my reply (link) → the form opens in place.
-5. Keep your link (a quiet section: one line, email + Send, Copy the link instead).
-No new primary button: the reply is done.
-
-## Cover photo
-
-- Full width of the column at the photo's **natural shape, never cropped**, on every screen (no height cap; decided Nov 18). A very tall photo can fill the first screen on a phone; that's the host's choice to make.
-
-## When optional content is absent
-
-- No photo: a small top margin, then the title.
-- No message, schedule, bring list or reply-by: the section isn't there at all (no empty heading, no "nothing yet").
-- **Coming** appears only once someone's going.
-- A plain invite (title, when, where) is one screen: title → when → where → Add to calendar → RSVP.
-
-## Copy rules seen in the slice
-
-- The page title says what you're doing ("Your RSVP"); the event name stays visible above it.
-- One hint where it explains a consequence ("Optional. Shows on the invite."); none that describes the obvious ("Tap one or two…").
-
-## Feedback and typesetting (Stage 4)
-
-- Press: links, choices and quiet buttons dim while pressed; the main button dims a little. On a mouse: links thicken their underline, outlines darken. No color.
-- Headings balance their lines; paragraphs avoid a lone last word. chirk's own words use ’ and “ ” (what people type stays as typed).
-- Send buttons stay tappable; a missing answer is named and focused.
-
-## Checks
-
-- `npm run check` walks the flow (including picking from Still needed and the confirmation's calendar link).
-- `node scripts/a11y.mjs` checks tap targets, names, contrast, headings, keyboard focus, 320px reflow and reduced motion on the guest screens (`docs/A11Y_CHECKS.md`).
-- `node scripts/visual.mjs` compares the 7 guest screens (390px + desktop) to `visual/baseline`; `--update` after an approved change.
+- `npm test`: includes the pattern guard (`src/lib/patterns.test.mts`).
+- `npm run check`: walks the whole app, including the guest flow.
+- `node scripts/a11y.mjs`: tap targets, names, contrast, headings, keyboard focus, 320px and 130px reflow, reduced motion.
+- `node scripts/visual.mjs`: the 7 guest screens against `visual/baseline`.
