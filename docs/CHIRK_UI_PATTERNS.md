@@ -89,4 +89,5 @@ No new primary button: the reply is done.
 ## Checks
 
 - `npm run check` walks the flow (including picking from Still needed and the confirmation's calendar link).
+- `node scripts/a11y.mjs` checks tap targets, names, contrast, headings, keyboard focus, 320px reflow and reduced motion on the guest screens (`docs/A11Y_CHECKS.md`).
 - `node scripts/visual.mjs` compares the 7 guest screens (390px + desktop) to `visual/baseline`; `--update` after an approved change.

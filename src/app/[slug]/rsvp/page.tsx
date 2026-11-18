@@ -18,8 +18,8 @@ export default async function RsvpPage({ params, searchParams }: { params: Promi
     <>
     <main className="guest mx-auto max-w-lg px-5 pt-4 pb-12">
       {/* The event stays in view: what you're replying to. */}
-      <a href={`/${slug}`} className="block text-[17px] font-semibold">{data.event.title}</a>
-      <p className="text-[15px] text-soft">{when(data.event)}</p>
+      <a href={`/${slug}`} className="tap text-[17px] font-semibold">{data.event.title}</a>
+      <p className="-mt-2 text-[15px] text-soft">{when(data.event)}</p>
       <h1 className="mt-6 mb-6 text-[28px] font-bold">Your RSVP</h1>
       <RsvpForm
         slug={slug} bringPrompt={data.event.bring_prompt} askKids={data.event.ask_kids} notePrompt={data.event.note_prompt} noteHint={data.event.note_hint}

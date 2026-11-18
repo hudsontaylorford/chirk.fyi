@@ -14,6 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
+## Waiting to go live (branch `a11y`)
+- **Accessibility pass on the guest flow** (`docs/A11Y_CHECKS.md`, `node scripts/a11y.mjs`): tap targets, names, contrast, headings, keyboard focus, 320px, reduced motion. Fixed: two links under 44px (the RSVP page's event name, "Pick something to bring"), and the confirmation's event name is now a heading. Everything else passed. Baselines re-captured.
+- **Real-iPhone checklist** for Hudson in `docs/A11Y_CHECKS.md` (Safari AutoFill, no zoom on typing, larger text, VoiceOver order/headings/selected states).
+
 ## Went live Nov 18 (`b2-counts`)
 - **B2 fixed (Message your guests):** the Going / Haven't replied / Everyone choices no longer show a bare email count ("Going · 0" when 3 were going). One quiet line says delivery for the chosen group: "2 emails · 3 need a text".
 - **Copy cleanup (Hudson's brief):** "Send an update without changing the invite." · Going / No reply yet / Everyone · "Write a note" · "Include event details" · **Send update** (then the existing confirm, "Send to 2 guests", and "Sent to 2 ✓"). Copy only: recipients, sending and layout unchanged; the host redesign is still Stage 6. No database step.

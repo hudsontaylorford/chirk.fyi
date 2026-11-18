@@ -35,8 +35,8 @@ export default async function YourRsvp({
       {h.going === null ? (
         // A named guest who hasn't answered: say hi, and the reply form is right here with their names in it.
         <>
-          <a href={`/${slug}`} className="block text-[17px] font-semibold">{data.event.title}</a>
-          <p className="text-[15px] text-soft">{when(data.event)}</p>
+          <a href={`/${slug}`} className="tap text-[17px] font-semibold">{data.event.title}</a>
+          <p className="-mt-2 text-[15px] text-soft">{when(data.event)}</p>
           <h1 className="mt-6 text-[28px] leading-tight font-bold">Hi {joinNames(h.names)}!</h1>
           <p className="mt-1 mb-6 text-[17px] text-soft">Your RSVP</p>
           <div>
@@ -71,7 +71,7 @@ export default async function YourRsvp({
       </p>
 
       <section className="mt-6 border-y border-line py-4">
-        <a href={`/${slug}`} className="text-[19px] font-semibold">{data.event.title}</a>
+        <h2><a href={`/${slug}`} className="tap text-[19px] font-semibold">{data.event.title}</a></h2>
         <p className="mt-1 text-[17px]">{when(data.event)}</p>
         {(data.event.place || data.event.address) && (
           <p className="text-[17px]">
@@ -88,7 +88,7 @@ export default async function YourRsvp({
           {parts.length > 0 && <>Coming to: <strong>{listText(parts)}</strong><br /></>}
           {data.event.bring_prompt && (bringing.length
             ? <>Bringing: <strong>{bringing.join(", ")}</strong></>
-            : <a href="?change=1" className="link">Pick something to bring</a>)}
+            : <a href="?change=1" className="link tap">Pick something to bring</a>)}
         </p>
       )}
 
