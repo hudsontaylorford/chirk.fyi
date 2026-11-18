@@ -15,7 +15,9 @@ Everything up to Nov 16's "fixes-3":
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
 ## Ready, not live yet (`import-big-images`)
+- Auto-refresh: Your events and each event's host page pick up new replies every 20 seconds while on screen, and right away when you come back to the tab (never while you're typing in a field).
 - Fix: a big poster (e.g. a Canva export, often 5–20 MB) in "Paste a text or screenshot" crashed the page, because Vercel turns away anything over 4.5 MB before chirk sees it. Images over 1 MB are now shrunk on the phone first (the same shrinker as cover photos, 1600px); a PDF over 4 MB gets a plain message instead. The walkthrough attaches a 12 MB poster.
+- Next round: chirk.fyi/me, every event you host or are invited to, linked from the emails chirk already sends.
 
 ## Went live Nov 18 (`freeze-v1`): Stage 5
 - **UI patterns v1 frozen** (`docs/CHIRK_UI_PATTERNS.md`): rules, tokens, actions, choices, fields, focus and feedback, type and spacing, boxes, the invite / form / confirmation patterns, what's still provisional, and the old → new map for Stage 6 (~100 old-style uses across ~20 host files). Changing a frozen pattern needs a reason, Hudson's OK, the doc and new baselines.

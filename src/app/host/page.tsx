@@ -1,3 +1,4 @@
+import { AutoRefresh } from "@/components/AutoRefresh";
 import Link from "next/link";
 import { HostSignIn } from "@/components/HostSignIn";
 import { BulkBar, Pick } from "@/components/BulkBar";
@@ -44,6 +45,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
   return (
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
+      <AutoRefresh />
       <div className="flex justify-end text-[16px] text-soft">
         <form action={signOut}><button>Sign out</button></form>
       </div>

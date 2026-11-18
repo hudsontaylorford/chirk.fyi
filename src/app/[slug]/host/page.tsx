@@ -15,6 +15,7 @@ import { MessageGuests } from "@/components/MessageGuests";
 import { currentUser, hostRole } from "@/lib/auth";
 import { sql } from "@/lib/db";
 import { AddCohost } from "@/components/AddCohost";
+import { AutoRefresh } from "@/components/AutoRefresh";
 import { arrivals, bringList, getCosts, getDraws, getEventData, getSentJobs, joinNames, partsOf } from "@/lib/data";
 import { money, settleUp } from "@/lib/costs";
 import { daysBefore } from "@/lib/due";
@@ -75,6 +76,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
   return (
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
+      <AutoRefresh />
       <div className="flex justify-between text-[16px] text-soft">
         <Link href="/host">‹ Your events</Link>
         <a href={`/${slug}`} className="font-semibold text-ink">View event</a>
