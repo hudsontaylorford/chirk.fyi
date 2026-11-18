@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `a11y`)
+## Went live Nov 18 (`a11y`)
 - **Accessibility pass on the guest flow** (`docs/A11Y_CHECKS.md`, `node scripts/a11y.mjs`): tap targets, names, contrast, headings, keyboard focus, 320px, reduced motion. Fixed: two links under 44px (the RSVP page's event name, "Pick something to bring"), and the confirmation's event name is now a heading. Everything else passed. Baselines re-captured.
 - **Real iPhone (Hudson):** AutoFill, no zoom on typing, Still needed → RSVP and Add to calendar all ✓. **Safari's largest zoom broke the layout** (long title and schedule ran off the screen): fixed (long words wrap, the schedule stacks under 240px, email rows wrap) and the a11y script now checks 130px wide. VoiceOver still to try (`docs/A11Y_CHECKS.md`).
 
