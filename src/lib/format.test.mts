@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { calendarSpan, headcount, listText, several, splitNames, when } from "./format.ts";
+import { calendarSpan, headcount, listText, reach, several, splitNames, when } from "./format.ts";
 
 test("time range text", () => {
   assert.equal(when({ date: "2026-11-15", time: "07:45:00", end_time: "16:00:00" }), "Sunday, November 15 · 7:45 am – 4 pm");
@@ -31,4 +31,14 @@ test("people typed together count separately", () => {
   assert.equal(headcount(["Hudson", "Molly"]), 2);
   assert.equal(headcount(["Graham and Ellen"]), 2);
   assert.equal(headcount(["Brandon"]), 1); // "and" inside a name isn't a split
+});
+
+test("message reach: replies and emails, never a bare zero", () => {
+  assert.equal(reach({ email: 0, total: 0 }), "Nobody in this group yet.");
+  assert.equal(reach({ email: 0, total: 3 }), "None of these 3 replies have an email on file, so text them yourself.");
+  assert.equal(reach({ email: 0, total: 1 }), "No email on file for this reply, so text them yourself.");
+  assert.equal(reach({ email: 2, total: 3 }), "Goes to 2 of 3 replies. 1 has no email on file, so text them yourself.");
+  assert.equal(reach({ email: 1, total: 4 }), "Goes to 1 of 4 replies. 3 have no email on file, so text them yourself.");
+  assert.equal(reach({ email: 3, total: 3 }), "Goes to all 3 replies.");
+  assert.equal(reach({ email: 1, total: 1 }), "Goes to the 1 reply.");
 });

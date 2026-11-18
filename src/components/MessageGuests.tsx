@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { Audience } from "@/app/[slug]/host/actions";
+import { reach } from "@/lib/format";
 
 /**
  * "Message your guests": a separate email from the hosts (updates, a day-before note), not part of the invite.
@@ -27,13 +28,12 @@ export function MessageGuests({ counts, action }: {
         <div className="flex flex-wrap gap-2" role="group" aria-label="Who it's for">
           {(Object.keys(labels) as Audience[]).map((a) => (
             <button key={a} type="button" className="pill px-3 py-1.5 text-[15px]" aria-pressed={to === a} onClick={() => { setTo(a); setSure(false); }}>
-              {labels[a]} · {counts[a].email}
+              {labels[a]}
             </button>
           ))}
         </div>
-        {c.total > c.email && (
-          <p className="text-[14px] text-soft">{c.total - c.email} in this group {c.total - c.email === 1 ? "has" : "have"} no email on file, so text them yourself.</p>
-        )}
+        {/* Who it actually reaches: replies in the group, and how many of them have an email (B2: no bare "· 0"). */}
+        <p className="text-[14px] text-soft">{reach(c)}</p>
         <textarea name="note" rows={4} className="field" value={note} onChange={(e) => { setNote(e.target.value); setSure(false); }} placeholder="Write your note…" aria-label="Your note" />
         <label className="flex items-center gap-3 text-[16px]">
           <input type="checkbox" name="details" defaultChecked className="h-5 w-5 shrink-0" />
@@ -52,3 +52,4 @@ export function MessageGuests({ counts, action }: {
     </section>
   );
 }
+

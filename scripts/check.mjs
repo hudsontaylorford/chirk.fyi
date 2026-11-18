@@ -340,6 +340,10 @@ await h.waitForSelector("li:has-text('Lee') [role=alert]:has-text('Deleting them
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("button.pill:has-text('Everyone')");
+// B2: the group says who it reaches (replies, and how many have an email), never a bare "· 0".
+const reachLine = await h.textContent("section:has(h2:text-is('Message your guests'))");
+assert.match(reachLine, /Goes to (1 of \d+ replies\. \d+ (has|have) no email on file, so text them yourself|the 1 reply)\./);
+assert.doesNotMatch(reachLine, /· \d/);
 await h.fill("textarea[aria-label='Your note']", "Parking is on the street.");
 await h.click("button:text-is('Send…')");
 await h.click("button:has-text('Send to 1 guest')");

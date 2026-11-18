@@ -185,7 +185,7 @@ Voice check: no startup language anywhere; "chirk reads it and fills in…" styl
 ## 7. Behavior bugs (not cosmetic)
 
 - **B1 Still needed items look tappable but do nothing.** On the invite they're bordered pills; only "+ Add your own" is a link. Either make each one a link into the reply with that item picked (best: one tap from "Mashed potatoes" to claiming it), or render them as plain text.
-- **B2 "Message your guests" counts read as zero people.** With 3 going, the toggles say "Going · 0", because they count only guests with an email. The warning line below explains it, but the number is wrong for what the label says. Show "Going · 3" and say "0 have an email" in the line, or label it "0 emails".
+- **B2 "Message your guests" counts read as zero people.** *(Fixed Nov 18: one "Goes to N of M replies" line.)* With 3 going, the toggles say "Going · 0", because they count only guests with an email. The warning line below explains it, but the number is wrong for what the label says. Show "Going · 3" and say "0 have an email" in the line, or label it "0 emails".
 - **B3 The confirmation page has no date, place or calendar link.** A guest who replies and closes the tab has nothing to add to their calendar from the page they land on (the invite has it; the reply page doesn't).
 - Watch item: **"Hosts: you (owner)"** shows on events where a household like "Hudson & Molly" exists without an email, so the Host label doesn't attach (copied events). Not new; noted earlier as a known limit.
 

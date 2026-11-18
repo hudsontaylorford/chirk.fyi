@@ -54,3 +54,12 @@ export const splitNames = (names: string[]) =>
 
 /** How many people a reply is (before kids). */
 export const headcount = (names: string[]) => splitNames(names).length;
+
+/** Who a guest message reaches: replies in the group and how many have an email (never a bare "0"). */
+export function reach({ email, total }: { email: number; total: number }) {
+  if (!total) return "Nobody in this group yet.";
+  if (!email) return total === 1 ? "No email on file for this reply, so text them yourself." : `None of these ${total} replies have an email on file, so text them yourself.`;
+  const head = email < total ? `Goes to ${email} of ${total} replies.` : total === 1 ? "Goes to the 1 reply." : `Goes to all ${total} replies.`;
+  const missing = total - email;
+  return missing ? `${head} ${missing} ${missing === 1 ? "has" : "have"} no email on file, so text them yourself.` : head;
+}
