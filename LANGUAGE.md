@@ -33,7 +33,7 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 - **Hosts / Guests.** Hosts make and run a chirk (owner and co-hosts); guests reply.
 - **Going / Can't make it / No reply yet.** No "Maybe" for now (it produces piles of non-answers; revisit later).
 - **Still needed / Covered** for the bring list; **Coming** for who's coming; **Notes** are guests' messages.
-- **Message** is the host's words on the invite; **Message your guests** is a separate email, apart from the invite.
+- **Message** is the host's words on the invite; **Message your guests** is a separate email: "Send an update without changing the invite." Groups: Going / No reply yet / Everyone; delivery line "2 emails · 3 need a text"; button **Send update**.
 - **Hosted by** signs the message ("— Hudson & Molly").
 - **By invitation only** in the footer: chirk is reached through links people send.
 - **Host** label on the guest list: hosts are on their own list as going, but never counted as a reply.

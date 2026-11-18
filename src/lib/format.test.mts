@@ -33,12 +33,11 @@ test("people typed together count separately", () => {
   assert.equal(headcount(["Brandon"]), 1); // "and" inside a name isn't a split
 });
 
-test("message reach: replies and emails, never a bare zero", () => {
+test("message reach: emails and texts for the chosen group, never a bare zero", () => {
   assert.equal(reach({ email: 0, total: 0 }), "Nobody in this group yet.");
-  assert.equal(reach({ email: 0, total: 3 }), "None of these 3 replies have an email on file, so text them yourself.");
-  assert.equal(reach({ email: 0, total: 1 }), "No email on file for this reply, so text them yourself.");
-  assert.equal(reach({ email: 2, total: 3 }), "Goes to 2 of 3 replies. 1 has no email on file, so text them yourself.");
-  assert.equal(reach({ email: 1, total: 4 }), "Goes to 1 of 4 replies. 3 have no email on file, so text them yourself.");
-  assert.equal(reach({ email: 3, total: 3 }), "Goes to all 3 replies.");
-  assert.equal(reach({ email: 1, total: 1 }), "Goes to the 1 reply.");
+  assert.equal(reach({ email: 2, total: 5 }), "2 emails · 3 need a text");
+  assert.equal(reach({ email: 1, total: 2 }), "1 email · 1 needs a text");
+  assert.equal(reach({ email: 3, total: 3 }), "3 emails");
+  assert.equal(reach({ email: 0, total: 3 }), "3 need a text");
+  assert.equal(reach({ email: 0, total: 1 }), "1 needs a text");
 });

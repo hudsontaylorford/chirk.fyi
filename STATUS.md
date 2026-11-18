@@ -15,7 +15,8 @@ Everything up to Nov 16's "fixes-3":
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
 ## Waiting to go live (branch `b2-counts`)
-- **B2 fixed (Message your guests):** the Going / Haven't replied / Everyone choices no longer show a bare email count ("Going · 0" when 3 were going). One line says who it reaches: "Goes to 2 of 5 replies. 3 have no email on file, so text them yourself." Only this box changed; the host redesign is still Stage 6. No database step.
+- **B2 fixed (Message your guests):** the Going / Haven't replied / Everyone choices no longer show a bare email count ("Going · 0" when 3 were going). One quiet line says delivery for the chosen group: "2 emails · 3 need a text".
+- **Copy cleanup (Hudson's brief):** "Send an update without changing the invite." · Going / No reply yet / Everyone · "Write a note" · "Include event details" · **Send update** (then the existing confirm, "Send to 2 guests", and "Sent to 2 ✓"). Copy only: recipients, sending and layout unchanged; the host redesign is still Stage 6. No database step.
 
 ## Went live Nov 18 (`mono-cover`)
 - **Cover regression fixed:** Stage 3's desktop cap (`md:max-h-[55vh]`) plus the existing `object-cover object-top` cropped the Thanksgiving poster by 196px at 1280×900 (273px on a 760px-tall laptop). From 768px wide the cap is gone: the photo shows whole at full column width (measured: 0px cut). The phone cap (70% of the screen, since Nov 14) is gone too: covers are never cropped on any screen.

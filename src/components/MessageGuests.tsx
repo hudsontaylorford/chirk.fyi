@@ -17,12 +17,12 @@ export function MessageGuests({ counts, action }: {
   const [note, setNote] = useState("");
   const [sure, setSure] = useState(false);
   const c = counts[to];
-  const labels: Record<Audience, string> = { going: "Going", waiting: "Haven't replied", everyone: "Everyone" };
+  const labels: Record<Audience, string> = { going: "Going", waiting: "No reply yet", everyone: "Everyone" };
 
   return (
     <section className="mt-8 rounded-2xl bg-wash p-4">
       <h2 className="text-[17px] font-semibold">Message your guests</h2>
-      <p className="text-[15px] text-soft">An email to your guests, apart from the invite. Use it for updates or a day-before note. The invite doesn&apos;t change.</p>
+      <p className="text-[15px] text-soft">Send an update without changing the invite.</p>
       <form action={send} onSubmit={() => setSure(false)} className="mt-3 space-y-3">
         <input type="hidden" name="to" value={to} />
         <div className="flex flex-wrap gap-2" role="group" aria-label="Who it's for">
@@ -32,12 +32,12 @@ export function MessageGuests({ counts, action }: {
             </button>
           ))}
         </div>
-        {/* Who it actually reaches: replies in the group, and how many of them have an email (B2: no bare "· 0"). */}
+        {/* Delivery for the chosen group: who gets an email, who needs a text (B2: no bare "· 0"). */}
         <p className="text-[14px] text-soft">{reach(c)}</p>
-        <textarea name="note" rows={4} className="field" value={note} onChange={(e) => { setNote(e.target.value); setSure(false); }} placeholder="Write your note…" aria-label="Your note" />
+        <textarea name="note" rows={4} className="field" value={note} onChange={(e) => { setNote(e.target.value); setSure(false); }} placeholder="Write a note" aria-label="Your note" />
         <label className="flex items-center gap-3 text-[16px]">
           <input type="checkbox" name="details" defaultChecked className="h-5 w-5 shrink-0" />
-          Include the date, place and schedule
+          Include event details
         </label>
         {sure ? (
           <div className="flex items-center gap-3">
@@ -45,7 +45,7 @@ export function MessageGuests({ counts, action }: {
             <button type="button" className="text-[15px] text-soft underline" onClick={() => setSure(false)}>Cancel</button>
           </div>
         ) : (
-          <button type="button" className="btn w-full text-[16px]" disabled={!note.trim() || !c.email} onClick={() => setSure(true)}>Send…</button>
+          <button type="button" className="btn w-full text-[16px]" disabled={!note.trim() || !c.email} onClick={() => setSure(true)}>Send update</button>
         )}
         {result && <p role="status" className="text-[15px] text-soft">{result}</p>}
       </form>

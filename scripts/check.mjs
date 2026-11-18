@@ -342,10 +342,10 @@ await h.goto(kidless.replace(/\/rsvp$/, "/host"));
 await h.click("button.pill:has-text('Everyone')");
 // B2: the group says who it reaches (replies, and how many have an email), never a bare "· 0".
 const reachLine = await h.textContent("section:has(h2:text-is('Message your guests'))");
-assert.match(reachLine, /Goes to (1 of \d+ replies\. \d+ (has|have) no email on file, so text them yourself|the 1 reply)\./);
-assert.doesNotMatch(reachLine, /· \d/);
+assert.match(reachLine, /1 email( · \d+ needs? a text)?/);
+assert.doesNotMatch(reachLine, /(Going|No reply yet|Everyone) · \d/); // no counts on the choices themselves
 await h.fill("textarea[aria-label='Your note']", "Parking is on the street.");
-await h.click("button:text-is('Send…')");
+await h.click("button:text-is('Send update')");
 await h.click("button:has-text('Send to 1 guest')");
 await h.waitForSelector("text=Email only sends from the live site.");
 
