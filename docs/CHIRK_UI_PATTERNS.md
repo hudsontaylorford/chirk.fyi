@@ -72,8 +72,7 @@ No new primary button: the reply is done.
 
 ## Cover photo
 
-- Full width of the column at the photo's **natural shape; never cropped** from 768px wide (no height cap there).
-- Phones still cap very tall photos at 70% of the screen height, trimmed from the bottom (since Nov 14). *Open: this crops tall photos (62px of the Thanksgiving poster); removing the cap would show them whole.*
+- Full width of the column at the photo's **natural shape, never cropped**, on every screen (no height cap; decided Nov 18). A very tall photo can fill the first screen on a phone; that's the host's choice to make.
 
 ## When optional content is absent
 

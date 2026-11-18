@@ -14,8 +14,8 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting to go live (branch `mono-cover`)
-- **Cover regression fixed:** Stage 3's desktop cap (`md:max-h-[55vh]`) plus the existing `object-cover object-top` cropped the Thanksgiving poster by 196px at 1280×900 (273px on a 760px-tall laptop). From 768px wide the cap is gone: the photo shows whole at full column width (measured: 0px cut). Phones unchanged (a 70%-of-screen cap from Nov 14 still trims very tall photos; 62px of the poster; open question).
+## Went live Nov 18 (`mono-cover`)
+- **Cover regression fixed:** Stage 3's desktop cap (`md:max-h-[55vh]`) plus the existing `object-cover object-top` cropped the Thanksgiving poster by 196px at 1280×900 (273px on a 760px-tall laptop). From 768px wide the cap is gone: the photo shows whole at full column width (measured: 0px cut). The phone cap (70% of the screen, since Nov 14) is gone too: covers are never cropped on any screen.
 - **Guest UI back to monochrome:** chirk blue removed; links ink and underlined, picked choices ink outline + ✓, ink focus ring. All via `--color-accent` (ink for now), so a brand color is one value later. Baselines re-captured.
 
 ## Went live Nov 18 (`guest-v2`): UI v2, Stage 3 guest slice

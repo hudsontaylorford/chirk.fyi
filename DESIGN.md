@@ -1,6 +1,6 @@
 # chirk: design notes (as of Nov 18, 2026)
 
-> **v2 in progress:** the guest flow (invite → RSVP → confirmation) now follows `docs/CHIRK_UI_PATTERNS.md` (monochrome: ink links underlined, ink focus and picked choices via `--color-accent`; 8px buttons; no guest-side boxes or pills that do nothing; desktop covers never cropped). Host pages below still describe the older look until Stage 6. Audit: `docs/UI_AUDIT_V2.md`.
+> **v2 in progress:** the guest flow (invite → RSVP → confirmation) now follows `docs/CHIRK_UI_PATTERNS.md` (monochrome: ink links underlined, ink focus and picked choices via `--color-accent`; 8px buttons; no guest-side boxes or pills that do nothing; covers never cropped). Host pages below still describe the older look until Stage 6. Audit: `docs/UI_AUDIT_V2.md`.
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 
@@ -85,7 +85,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 
 ## Screens
 **Guest side**
-- **Invite (`/event`):** cover photo full width (tall photos capped at ~70% of the screen height, trimmed from the bottom), title, date and time, place (tap for Maps), "Hosted by" when there's no message, schedule, Add to calendar, the host's message signed "— Hosts", RSVP button with "Please reply by …" under it, Still needed, Coming.
+- **Invite (`/event`):** cover photo full width at its natural shape, never cropped, title, date and time, place (tap for Maps), "Hosted by" when there's no message, schedule, Add to calendar, the host's message signed "— Hosts", RSVP button with "Please reply by …" under it, Still needed, Coming.
 - **RSVP (`/event/rsvp`):** Going / Can't make it, names (+ Add someone, limited by the host), kids if asked, "When are you coming?" if the event asks, what you're bringing (multi-pick chips + add your own), a note (with a hint saying whether it shows on the invite).
 - **Your reply (`/event/r/<token>`):** "You're in!", what you're bringing, when you're coming, keep-your-link card, Change my reply.
 - **Home (`chirk.fyi`):** "chirk / By invitation only", plus "Your plans" for events this phone replied to.
