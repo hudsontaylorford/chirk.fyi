@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
  * and on the host's form a warning explains why.
  * Full column width at its natural shape, on every screen: never cropped (the photo is the host's, edges and all).
  */
-export function Cover({ src, host = false }: { src: string; host?: boolean }) {
+export function Cover({ src, host = false, title }: { src: string; host?: boolean; title?: string }) {
   const ref = useRef<HTMLImageElement>(null);
   const [broken, setBroken] = useState(false);
   useEffect(() => {
@@ -24,7 +24,7 @@ export function Cover({ src, host = false }: { src: string; host?: boolean }) {
       </p>
     ) : null;
   }
-  return <img ref={ref} src={src} alt={host ? "Current cover" : ""} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto w-full"} />;
+  return <img ref={ref} src={src} alt={host ? "Current cover" : title ? `Invitation photo for ${title}` : "Invitation photo"} fetchPriority={host ? undefined : "high"} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto w-full"} />;
 }
 
 /** Resolves to whether an image link loads (used before copying an invite for email). */

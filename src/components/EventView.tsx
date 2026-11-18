@@ -16,11 +16,11 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
 
   return (
     <article>
-      {event.cover_url ? <Cover src={event.cover_url} /> : <div className="h-6" />}
+      {event.cover_url ? <Cover src={event.cover_url} title={event.title} /> : <div className="h-6" />}
 
       {/* The decision first: what, when, where (and the day's parts), then the one action. */}
       <header className="px-5 pt-6">
-        {greeting && <p className="mb-2 text-[17px] text-soft">Hi {greeting}, you&apos;re invited!</p>}
+        {greeting && <p className="mb-2 text-[17px] text-soft">Hi {greeting}, you’re invited!</p>}
         <h1 className="text-[34px] leading-[1.1] font-bold tracking-tight">{event.title}</h1>
         <p className="mt-3 text-[19px] font-medium">{when(event)}</p>
         {(event.place || event.address) && (

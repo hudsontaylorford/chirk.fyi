@@ -64,8 +64,8 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 
   function submit(sameNameOk = false) {
     setError(null);
-    if (going === null) return setError({ text: "Are you coming?" });
-    if (!names.some((n) => n.trim())) return setError({ text: "Add your name." });
+    if (going === null) { document.getElementById("going-yes")?.focus(); return setError({ text: "Pick Going or Can’t make it." }); }
+    if (!names.some((n) => n.trim())) { document.getElementById("name-0")?.focus(); return setError({ text: "Add your name." }); }
     const input: RsvpInput = {
       slug, token: initial?.token, names, going, kids, note, parts,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
@@ -86,7 +86,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   return (
     <form onSubmit={(e) => { e.preventDefault(); submit(); }} className="space-y-8">
       {initial && initial.going !== null && initial.names.length > 1 && (
-        <Q label="Who's this?">
+        <Q label="Who’s this?">
           <div className="flex flex-wrap gap-2">
             {initial.names.map((n) => (
               <button key={n} type="button" className="choice" aria-pressed={me === n} onClick={() => setMe(n)}>{n}</button>
@@ -97,11 +97,11 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 
       <Q label="Are you coming?">
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" className="choice min-h-[52px] text-[17px] font-semibold" aria-pressed={going === true} onClick={() => setGoing(true)}>
+          <button id="going-yes" type="button" className="choice min-h-[52px] text-[17px] font-semibold" aria-pressed={going === true} onClick={() => setGoing(true)}>
             Going
           </button>
           <button type="button" className="choice min-h-[52px] text-[17px] font-semibold" aria-pressed={going === false} onClick={() => setGoing(false)}>
-            Can&apos;t make it
+            Can’t make it
           </button>
         </div>
       </Q>
@@ -113,7 +113,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
           {names.map((n, i) => (
             <div key={i} className="flex gap-2">
               <input
-                className="field" value={n} onChange={(e) => setName(i, e.target.value)}
+                id={`name-${i}`} className="field" value={n} onChange={(e) => setName(i, e.target.value)}
                 placeholder={i === 0 ? "Your name" : "Their name"} autoComplete={i === 0 ? "given-name" : "off"}
                 aria-label={i === 0 ? "Your name" : `Name ${i + 1}`}
               />
@@ -198,13 +198,13 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
           {error.text}
           {error.sameName && (
             <button type="button" className="mt-2 block font-semibold underline" onClick={() => submit(true)}>
-              It&apos;s a different person. Send anyway.
+              It’s a different person. Send anyway.
             </button>
           )}
         </div>
       )}
 
-      <button className="button w-full" disabled={busy || going === null}>
+      <button className="button w-full" disabled={busy}>
         {busy ? (initial?.going != null ? "Saving…" : "Sending…") : initial?.going != null ? "Save" : "Send RSVP"}
       </button>
     </form>

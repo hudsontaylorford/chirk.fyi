@@ -40,6 +40,13 @@ const rsvp = async (page, name, dish) => {
   if (dish) await page.click(`button.choice:has-text("${dish}")`);
 };
 
+// Send RSVP stays tappable: without an answer it says what's missing and moves focus there.
+const early = await phone();
+await early.goto(B + "/rsvp");
+await early.click("text=Send RSVP");
+await early.waitForSelector("[role=alert]:has-text('Pick Going or Can’t make it.')");
+assert.equal(await early.evaluate(() => document.activeElement?.id), "going-yes");
+
 // Two guests race for the same dish: exactly one gets it.
 const [a, b] = [await phone(), await phone()];
 await rsvp(a, "Check A", "Rolls");
@@ -47,7 +54,7 @@ await rsvp(b, "Check B", "Rolls");
 await a.click("text=Send RSVP");
 await a.waitForURL(/\/r\//);
 // The confirmation gives the plan back (B3): when, where and Add to calendar.
-assert.match(await a.textContent("main"), /You're in![\s\S]*Thanksgiving 2026[\s\S]*Thursday, November 26/);
+assert.match(await a.textContent("main"), /You’re in![\s\S]*Thanksgiving 2026[\s\S]*Thursday, November 26/);
 assert.equal(await a.getAttribute("main a:text-is('Add to calendar')", "href"), "/thanksgiving-2026/calendar.ics");
 await b.click("text=Send RSVP");
 await b.waitForSelector("text=Someone just grabbed Rolls");
@@ -57,7 +64,7 @@ const tokenA = a.url().match(/\/r\/([a-f0-9]+)/)[1];
 const other = await phone();
 await other.goto(`${B}/r/${tokenA}/remember`);
 await other.goto(B);
-assert.match(await other.textContent("main"), /You're going · Your RSVP ›/); // this phone remembers the reply
+assert.match(await other.textContent("main"), /You’re going · Your RSVP/); // this phone remembers the reply
 
 // A reused name is caught.
 const c = await phone();
@@ -68,7 +75,7 @@ await c.waitForSelector("text=Someone with that name already replied");
 // The invite shows the claim.
 await a.goto(B);
 assert.match(await a.textContent("main"), /Check A\s*Rolls/);
-assert.match(await a.textContent("main"), /You're going · Your RSVP ›/); // this phone remembers its reply
+assert.match(await a.textContent("main"), /You’re going · Your RSVP/); // this phone remembers its reply
 assert.match(await a.getAttribute("a:text-is('+ Bring something else')", "href"), /\/r\/[a-f0-9]+\?own=1$/); // opens their reply
 // Still needed items are ways in (B1): tapping one opens their reply with it already picked.
 assert.match(await a.getAttribute("main a.choice >> nth=0", "href"), /\/r\/[a-f0-9]+\?pick=[a-f0-9-]+$/);
@@ -211,14 +218,14 @@ const zedReply = await h.getAttribute("li:has-text('Zed') a:text-is('Edit')", "h
 const z = await phone();
 await z.goto(new URL(zedReply + "/remember?to=invite", h.url()).href);
 assert.equal(new URL(z.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, ""));
-assert.match(await z.textContent("header"), /Hi Zed, you're invited!/);
+assert.match(await z.textContent("header"), /Hi Zed, you’re invited!/);
 assert.doesNotMatch(await z.textContent("main"), /Yan & Xu/); // unanswered guests aren't listed as coming
 await z.click("a.button:text-is('RSVP')");
 assert.match(await z.textContent("main"), /Hi Zed!/);
 assert.equal(await z.inputValue('input[aria-label="Your name"]'), "Zed");
 await z.click("text=Going");
 await z.click("text=Send RSVP");
-await z.waitForSelector("text=You're in!");
+await z.waitForSelector("text=You’re in!");
 const y = await phone();
 await y.goto(kidless);
 await y.click("text=Going");

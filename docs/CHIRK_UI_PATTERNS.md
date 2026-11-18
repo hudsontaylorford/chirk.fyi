@@ -86,6 +86,12 @@ No new primary button: the reply is done.
 - The page title says what you're doing ("Your RSVP"); the event name stays visible above it.
 - One hint where it explains a consequence ("Optional. Shows on the invite."); none that describes the obvious ("Tap one or two…").
 
+## Feedback and typesetting (Stage 4)
+
+- Press: links, choices and quiet buttons dim while pressed; the main button dims a little. On a mouse: links thicken their underline, outlines darken. No color.
+- Headings balance their lines; paragraphs avoid a lone last word. chirk's own words use ’ and “ ” (what people type stays as typed).
+- Send buttons stay tappable; a missing answer is named and focused.
+
 ## Checks
 
 - `npm run check` walks the flow (including picking from Still needed and the confirmation's calendar link).

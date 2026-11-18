@@ -10,7 +10,7 @@ export function EmailMyLink({ slug }: { slug: string }) {
     <details className="text-[16px]">
       <summary className="link tap cursor-pointer list-none [&::-webkit-details-marker]:hidden">Already replied? Email me my link</summary>
       <form action={action} className="mt-2 flex flex-wrap gap-2">
-        <input name="email" type="email" inputMode="email" autoComplete="email" required placeholder="you@example.com" className="field min-w-0 flex-[1_1_10rem]" aria-label="Your email" />
+        <input name="email" type="email" inputMode="email" autoComplete="email" spellCheck={false} autoCapitalize="off" required placeholder="you@example.com" className="field min-w-0 flex-[1_1_10rem]" aria-label="Your email" />
         <button className="button-quiet shrink-0 min-h-[3.2rem]" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
       </form>
       {message && <p role="status" className="mt-2 text-[15px] text-soft">{message}</p>}

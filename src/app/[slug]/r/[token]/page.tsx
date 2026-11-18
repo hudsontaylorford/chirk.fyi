@@ -63,7 +63,7 @@ export default async function YourRsvp({
         <>
       {/* The reply is done: say so, then give the plan back (when, where, calendar). No new big button. */}
       <h1 className="mt-6 text-[28px] leading-tight font-bold">
-        {h.going ? (isNew ? "You're in!" : "You're going") : "You can't make it"}
+        {h.going ? (isNew ? "You’re in!" : "You’re going") : "You can’t make it"}
       </h1>
       <p className="mt-1 text-[17px] text-soft">
         {joinNames(h.names)}

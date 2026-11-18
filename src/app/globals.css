@@ -104,7 +104,16 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
 }
 
 /* Long words (a title like "Thanksgiving" at Safari's 300% zoom) wrap instead of pushing the page sideways. */
-.guest { overflow-wrap: break-word; }
+.guest { overflow-wrap: break-word; touch-action: manipulation; }
+.guest :is(h1, h2) { text-wrap: balance; }
+.guest p { text-wrap: pretty; }
+/* Feedback without color: a press dims; on a mouse, links thicken their underline and outlines darken. */
+.guest :is(.link, .choice, .button-quiet):active { opacity: .7; }
+@media (hover: hover) {
+  .guest .link:hover { text-decoration-thickness: 2px; }
+  .guest :is(.choice, .button-quiet):hover { border-color: var(--color-soft); }
+  .guest .button:hover { opacity: .9; }
+}
 .guest h1 { hyphens: auto; }
 .guest .field { border-radius: 8px; }
 .guest .field:focus { border-color: var(--color-accent); }

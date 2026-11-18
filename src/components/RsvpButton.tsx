@@ -16,7 +16,7 @@ export function RsvpButton({ href, label, quiet }: { href: string; label: string
     return () => removeEventListener("scroll", check);
   }, []);
   // Already replied: no second big button, just the way back to their reply.
-  if (quiet) return <a href={href} className="link tap text-[17px] font-semibold">{label} ›</a>;
+  if (quiet) return <a href={href} className="link tap text-[17px] font-semibold">{label}</a>;
   const cls = "button w-full";
   return (
     <>

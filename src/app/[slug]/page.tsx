@@ -47,7 +47,7 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
         data={data}
         rsvpHref={href}
         greeting={mine && mine.going === null ? joinNames(mine.names) : undefined}
-        rsvp={<RsvpButton href={href} label={mine?.going === true ? "You're going · Your RSVP" : mine?.going === false ? "You can't make it · Your RSVP" : "RSVP"} quiet={mine?.going != null} />}
+        rsvp={<RsvpButton href={href} label={mine?.going === true ? "You’re going · Your RSVP" : mine?.going === false ? "You can’t make it · Your RSVP" : "RSVP"} quiet={mine?.going != null} />}
       />
     </main>
     {(data.event.costs_on || data.event.poker_on) && <Costs data={data} token={mine?.token ?? null} host={host} />}

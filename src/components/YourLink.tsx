@@ -21,14 +21,14 @@ export function KeepLink({ slug, token, email }: { slug: string; token: string; 
       <h2 className="text-[17px] font-semibold">Keep your link</h2>
       {email && !editing ? (
         <p className="mt-0.5 text-[15px] text-soft">
-          It&apos;s in your inbox at {email}. Use it to change your reply from any device.{" "}
+          It’s in your inbox at {email}. Use it to change your reply from any device.{" "}
           <button type="button" className="link" onClick={() => setEditing(true)}>Use a different email</button>
         </p>
       ) : (
         <>
           <p className="mt-0.5 text-[15px] text-soft">Email yourself the link to change your reply from another device.</p>
           <form action={action} className="mt-3 flex flex-wrap gap-2">
-            <input name="email" type="email" inputMode="email" autoComplete="email" required defaultValue={email ?? ""} placeholder="you@example.com" className="field min-w-0 flex-[1_1_10rem]" aria-label="Your email" />
+            <input name="email" type="email" inputMode="email" autoComplete="email" spellCheck={false} autoCapitalize="off" required defaultValue={email ?? ""} placeholder="you@example.com" className="field min-w-0 flex-[1_1_10rem]" aria-label="Your email" />
             <button className="button-quiet shrink-0 min-h-[3.2rem]" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
           </form>
         </>
