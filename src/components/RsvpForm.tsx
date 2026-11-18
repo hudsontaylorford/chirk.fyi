@@ -17,6 +17,9 @@ export interface RsvpFormProps {
   arrivals: string[]; // parts of the day they can pick; empty = don't ask
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
+  /** From the invite: an item tapped under Still needed (already picked), or "+ Bring something else" (focus that box). */
+  prePick?: string;
+  ownFirst?: boolean;
   initial?: {
     token: string;
     names: string[];
@@ -29,17 +32,17 @@ export interface RsvpFormProps {
   };
 }
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, choices, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, choices, prePick, ownFirst, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
   const [error, setError] = useState<{ text: string; sameName?: boolean } | null>(null);
 
-  const [going, setGoing] = useState<boolean | null>(initial?.going ?? null);
+  const [going, setGoing] = useState<boolean | null>(initial?.going ?? (prePick || ownFirst ? true : null));
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
   const [parts, setParts] = useState<string[]>(initial?.parts ?? []);
-  const [picks, setPicks] = useState<string[]>(initial?.picks ?? []);
+  const [picks, setPicks] = useState<string[]>(() => [...new Set([...(initial?.picks ?? []), ...(prePick && choices.some((c) => c.id === prePick) ? [prePick] : [])])]);
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
   const [note, setNote] = useState(initial?.note ?? "");
@@ -86,7 +89,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
         <Q label="Who's this?">
           <div className="flex flex-wrap gap-2">
             {initial.names.map((n) => (
-              <button key={n} type="button" className="pill" aria-pressed={me === n} onClick={() => setMe(n)}>{n}</button>
+              <button key={n} type="button" className="choice" aria-pressed={me === n} onClick={() => setMe(n)}>{n}</button>
             ))}
           </div>
         </Q>
@@ -94,10 +97,10 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 
       <Q label="Are you coming?">
         <div className="grid grid-cols-2 gap-2">
-          <button type="button" className="pill py-3.5 text-[17px] font-semibold" aria-pressed={going === true} onClick={() => setGoing(true)}>
+          <button type="button" className="choice min-h-[52px] text-[17px] font-semibold" aria-pressed={going === true} onClick={() => setGoing(true)}>
             Going
           </button>
-          <button type="button" className="pill py-3.5 text-[17px] font-semibold" aria-pressed={going === false} onClick={() => setGoing(false)}>
+          <button type="button" className="choice min-h-[52px] text-[17px] font-semibold" aria-pressed={going === false} onClick={() => setGoing(false)}>
             Can&apos;t make it
           </button>
         </div>
@@ -105,7 +108,6 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 
       <Q
         label={names.length > 1 ? "Names" : "Your name"}
-        hint={names.length === 1 && maxNames > 1 ? (maxGuests === 1 ? "Bringing a plus-one? Add them too." : "Bringing someone? Add them too, one reply for everyone.") : undefined}
       >
         <div className="space-y-2">
           {names.map((n, i) => (
@@ -116,13 +118,13 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                 aria-label={i === 0 ? "Your name" : `Name ${i + 1}`}
               />
               {i > 0 && (
-                <button type="button" className="px-2 text-soft" aria-label="Remove" onClick={() => setNames((ns) => ns.filter((_, j) => j !== i))}>✕</button>
+                <button type="button" className="min-w-11 px-2 text-soft" aria-label="Remove" onClick={() => setNames((ns) => ns.filter((_, j) => j !== i))}>✕</button>
               )}
             </div>
           ))}
           {names.length < Math.min(maxNames, 6) && (
-            <button type="button" className="py-1 text-[16px] font-semibold" onClick={() => setNames((ns) => [...ns, ""])}>
-              + Add someone
+            <button type="button" className="link tap text-[16px]" onClick={() => setNames((ns) => [...ns, ""])}>
+              {maxGuests === 1 ? "+ Add your plus-one" : "+ Add someone coming with you"}
             </button>
           )}
         </div>
@@ -133,33 +135,33 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
           {askKids && <div className="flex items-center justify-between">
             <span className="text-[17px] font-semibold">Kids coming</span>
             <div className="flex items-center gap-1">
-              <button type="button" className="h-11 w-11 rounded-full bg-wash text-xl disabled:opacity-30" disabled={kids === 0} onClick={() => setKids(kids - 1)} aria-label="Fewer kids">−</button>
+              <button type="button" className="button-quiet h-11 w-11 px-0 text-xl disabled:opacity-30" disabled={kids === 0} onClick={() => setKids(kids - 1)} aria-label="Fewer kids">−</button>
               <span className="w-8 text-center text-[18px] tabular-nums">{kids}</span>
-              <button type="button" className="h-11 w-11 rounded-full bg-wash text-xl" onClick={() => setKids(Math.min(10, kids + 1))} aria-label="More kids">+</button>
+              <button type="button" className="button-quiet h-11 w-11 px-0 text-xl" onClick={() => setKids(Math.min(10, kids + 1))} aria-label="More kids">+</button>
             </div>
           </div>}
 
           {arrivals.length > 1 && (
-            <Q label="Which parts are you coming to?" hint="Optional. Tap all that apply.">
+            <Q label="Which parts are you coming to?" hint="Optional.">
               <div className="flex flex-wrap gap-2">
                 {arrivals.map((a) => (
-                  <button key={a} type="button" className="pill" aria-pressed={parts.includes(a)} onClick={() => setParts(parts.includes(a) ? parts.filter((p) => p !== a) : [...parts, a])}>{a}</button>
+                  <button key={a} type="button" className="choice" aria-pressed={parts.includes(a)} onClick={() => setParts(parts.includes(a) ? parts.filter((p) => p !== a) : [...parts, a])}>{a}</button>
                 ))}
               </div>
             </Q>
           )}
 
           {bringPrompt && (
-            <Q label={bringPrompt} hint={allowOwn ? "Tap one or two, or add your own." : "Tap what you'll bring."}>
+            <Q label={bringPrompt}>
               <div className="flex flex-wrap gap-2">
                 {choices.map((c) => (
-                  <button key={c.id} type="button" className="pill" aria-pressed={livePicks.includes(c.id)} onClick={() => togglePick(c)}>
+                  <button key={c.id} type="button" className="choice" aria-pressed={livePicks.includes(c.id)} onClick={() => togglePick(c)}>
                     {c.name}
                     {c.by && !livePicks.includes(c.id) && <span className="text-soft"> · {c.by}</span>}
                   </button>
                 ))}
                 {own.map((o) => (
-                  <button key={o} type="button" className="pill" aria-pressed onClick={() => setOwn(own.filter((x) => x !== o))} aria-label={`Remove ${o}`}>
+                  <button key={o} type="button" className="choice" aria-pressed onClick={() => setOwn(own.filter((x) => x !== o))} aria-label={`Remove ${o}`}>
                     {o} <span aria-hidden>✕</span>
                   </button>
                 ))}
@@ -168,11 +170,11 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
                 <>
               <div className="mt-3 flex gap-2">
                 <input
-                  className="field" value={typing} placeholder="Add your own" aria-label="Add your own"
+                  className="field" value={typing} placeholder="Something else" aria-label="Add your own" autoFocus={ownFirst}
                   onChange={(e) => setTyping(e.target.value)}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addOwn(typing); } }}
                 />
-                <button type="button" className="btn btn-quiet shrink-0 px-4" disabled={!typing.trim()} onClick={() => addOwn(typing)}>Add</button>
+                <button type="button" className="button-quiet shrink-0 min-h-[3.2rem]" disabled={!typing.trim()} onClick={() => addOwn(typing)}>Add</button>
               </div>
                 </>
               )}
@@ -192,7 +194,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 
 
       {error && (
-        <div role="alert" className="rounded-2xl bg-red-50 p-4 text-[16px] text-red-800">
+        <div role="alert" className="rounded-lg bg-red-50 p-4 text-[16px] text-red-800">
           {error.text}
           {error.sameName && (
             <button type="button" className="mt-2 block font-semibold underline" onClick={() => submit(true)}>
@@ -202,7 +204,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
         </div>
       )}
 
-      <button className="btn w-full" disabled={busy || going === null}>
+      <button className="button w-full" disabled={busy || going === null}>
         {busy ? (initial?.going != null ? "Saving…" : "Sending…") : initial?.going != null ? "Save" : "Send RSVP"}
       </button>
     </form>
@@ -212,7 +214,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
 function Q({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="text-[17px] font-semibold">{label}</p>
+      <h2 className="text-[17px] font-semibold">{label}</h2>
       {hint && <p className="text-[15px] text-soft">{hint}</p>}
       <div className="mt-3">{children}</div>
     </div>

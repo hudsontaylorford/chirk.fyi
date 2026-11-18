@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
-import { listText } from "@/lib/format";
+import { listText, mapsUrl, when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
 import { Costs } from "@/components/Costs";
 import { Gifts } from "@/components/Gifts";
@@ -14,10 +14,13 @@ export default async function YourRsvp({
   params, searchParams,
 }: {
   params: Promise<{ slug: string; token: string }>;
-  searchParams: Promise<{ new?: string }>;
+  searchParams: Promise<{ new?: string; pick?: string; own?: string; change?: string }>;
 }) {
   const { slug, token } = await params;
-  const isNew = !!(await searchParams).new;
+  const q = await searchParams;
+  const isNew = !!q.new;
+  // From the invite's Still needed (or "pick something"): open the reply with that item ready.
+  const changing = !!(q.pick || q.own || q.change);
   const data = await getEventData(slug, true);
   const h = data?.households.find((x) => x.token === token);
   if (!data || !h) notFound();
@@ -27,15 +30,16 @@ export default async function YourRsvp({
 
   return (
     <>
-    <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
-      <a href={`/${slug}`} className="text-[16px] text-soft">‹ {data.event.title}</a>
+    <main className="guest mx-auto max-w-lg px-5 pt-4 pb-12">
 
       {h.going === null ? (
         // A named guest who hasn't answered: say hi, and the reply form is right here with their names in it.
         <>
+          <a href={`/${slug}`} className="block text-[17px] font-semibold">{data.event.title}</a>
+          <p className="text-[15px] text-soft">{when(data.event)}</p>
           <h1 className="mt-6 text-[28px] leading-tight font-bold">Hi {joinNames(h.names)}!</h1>
-          <p className="mt-1 text-[17px] text-soft">You&apos;re invited to {data.event.title}.</p>
-          <div className="mt-8">
+          <p className="mt-1 mb-6 text-[17px] text-soft">Your RSVP</p>
+          <div>
         <RsvpForm
           slug={slug}
           bringPrompt={data.event.bring_prompt}
@@ -47,6 +51,7 @@ export default async function YourRsvp({
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
           choices={choices}
+          prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
             token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
             picks, own,
@@ -56,6 +61,7 @@ export default async function YourRsvp({
         </>
       ) : (
         <>
+      {/* The reply is done: say so, then give the plan back (when, where, calendar). No new big button. */}
       <h1 className="mt-6 text-[28px] leading-tight font-bold">
         {h.going ? (isNew ? "You're in!" : "You're going") : "You can't make it"}
       </h1>
@@ -63,19 +69,31 @@ export default async function YourRsvp({
         {joinNames(h.names)}
         {h.kids > 0 && ` + ${h.kids} kid${h.kids > 1 ? "s" : ""}`}
       </p>
-      {h.going && (
-        <p className="mt-3 text-[17px]">
+
+      <section className="mt-6 border-y border-line py-4">
+        <a href={`/${slug}`} className="text-[19px] font-semibold">{data.event.title}</a>
+        <p className="mt-1 text-[17px]">{when(data.event)}</p>
+        {(data.event.place || data.event.address) && (
+          <p className="text-[17px]">
+            {data.event.place}
+            {data.event.place && data.event.address && <span className="text-soft"> · </span>}
+            {data.event.address && <a href={mapsUrl(data.event.address)} className="link">{data.event.address}</a>}
+          </p>
+        )}
+        {h.going && <a href={`/${slug}/calendar.ics`} className="link tap text-[17px] font-semibold">Add to calendar</a>}
+      </section>
+
+      {h.going && (parts.length > 0 || data.event.bring_prompt) && (
+        <p className="mt-4 text-[17px]">
           {parts.length > 0 && <>Coming to: <strong>{listText(parts)}</strong><br /></>}
-          {bringing.length ? <>Bringing: <strong>{bringing.join(", ")}</strong></> : "Not bringing anything yet."}
+          {data.event.bring_prompt && (bringing.length
+            ? <>Bringing: <strong>{bringing.join(", ")}</strong></>
+            : <a href="?change=1" className="link">Pick something to bring</a>)}
         </p>
       )}
 
-      <div className="mt-6">
-        <KeepLink slug={slug} token={token} email={h.email} />
-      </div>
-
-      <details className="group mt-3">
-        <summary className="btn btn-quiet list-none group-open:hidden">Change my reply</summary>
+      <details className="group mt-2" open={changing}>
+        <summary className="link tap cursor-pointer list-none text-[17px] group-open:hidden [&::-webkit-details-marker]:hidden">Change my reply</summary>
         <div className="mt-8 border-t border-line pt-6">
         <RsvpForm
           slug={slug}
@@ -88,6 +106,7 @@ export default async function YourRsvp({
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
           choices={choices}
+          prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
             token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
             picks, own,
@@ -95,6 +114,10 @@ export default async function YourRsvp({
         />
         </div>
       </details>
+
+      <div className="mt-8">
+        <KeepLink slug={slug} token={token} email={h.email} />
+      </div>
         </>
       )}
     </main>

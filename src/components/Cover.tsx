@@ -23,7 +23,7 @@ export function Cover({ src, host = false }: { src: string; host?: boolean }) {
       </p>
     ) : null;
   }
-  return <img ref={ref} src={src} alt={host ? "Current cover" : ""} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto max-h-[70svh] w-full object-cover object-top"} />;
+  return <img ref={ref} src={src} alt={host ? "Current cover" : ""} onError={() => setBroken(true)} className={host ? "h-auto w-32 rounded-lg" : "h-auto max-h-[70svh] w-full object-cover object-top md:max-h-[55vh]"} />;
 }
 
 /** Resolves to whether an image link loads (used before copying an invite for email). */

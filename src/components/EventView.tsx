@@ -18,20 +18,21 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
     <article>
       {event.cover_url ? <Cover src={event.cover_url} /> : <div className="h-6" />}
 
+      {/* The decision first: what, when, where (and the day's parts), then the one action. */}
       <header className="px-5 pt-6">
         {greeting && <p className="mb-2 text-[17px] text-soft">Hi {greeting}, you&apos;re invited!</p>}
         <h1 className="text-[34px] leading-[1.1] font-bold tracking-tight">{event.title}</h1>
         <p className="mt-3 text-[19px] font-medium">{when(event)}</p>
         {(event.place || event.address) && (
-          <p className="mt-1 text-[17px] text-soft">
+          <p className="mt-1 text-[17px]">
             {event.place}
-            {event.place && event.address && " · "}
-            {event.address && <a href={mapsUrl(event.address)} className="underline underline-offset-2">{event.address}</a>}
+            {event.place && event.address && <span className="text-soft"> · </span>}
+            {event.address && <a href={mapsUrl(event.address)} className="link">{event.address}</a>}
           </p>
         )}
         {event.hosted_by && !event.details && <p className="mt-1 text-[17px] text-soft">Hosted by {event.hosted_by}</p>}
         {stages.length > 0 && (
-          <ul className="mt-3 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[17px]">
+          <ul className="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[17px]">
             {stages.map((s, i) => (
               <li key={i} className={`contents ${s.main ? "font-bold" : ""}`}>
                 <span className={`tabular-nums ${s.main ? "" : "text-soft"}`}>{s.when}</span><span>{s.what}</span>
@@ -39,49 +40,45 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
             ))}
           </ul>
         )}
-        <a href={`/${event.slug}/calendar.ics`} className="mt-3 inline-block text-[15px] font-medium underline underline-offset-2">
-          Add to calendar
-        </a>
+        <a href={`/${event.slug}/calendar.ics`} className="link tap mt-1 text-[16px]">Add to calendar</a>
       </header>
 
+      {rsvp && (
+        <div className="mt-4 px-5">
+          {rsvp}
+          {event.rsvp_by && <p className="mt-2 text-center text-[15px] text-soft">Please reply by {shortDate(event.rsvp_by)}</p>}
+        </div>
+      )}
+
       {event.details && (
-        <section className="mt-5 space-y-3 px-5 text-[17px] leading-relaxed">
+        <section className="mt-8 space-y-3 px-5 text-[17px] leading-relaxed">
           <Details text={event.details} />
           {/* The message is signed by whoever's hosting, so it reads as a note from them. */}
           {event.hosted_by && <p className="text-soft">— {event.hosted_by}</p>}
         </section>
       )}
 
-      {rsvp && (
-        <div className="mt-6 px-5">
-          {rsvp}
-          {event.rsvp_by && <p className="mt-2 text-center text-[15px] text-soft">Please reply by {shortDate(event.rsvp_by)}</p>}
-        </div>
-      )}
-
+      {/* Still needed: each item is a way in. Tapping one opens the reply with it already picked. */}
       {event.bring_prompt && open.length > 0 && (
         <section className="mt-10 px-5">
           <h2 className="text-[20px] font-bold">Still needed</h2>
           <div className="mt-3 flex flex-wrap gap-2">
-            {open.map((i) => (
-              <span key={i.id} className="rounded-full border-[1.5px] border-dashed border-line px-3 py-1.5 text-[16px]">{i.name}</span>
-            ))}
-            {/* Guests can bring something that isn't listed: say so, and tapping it starts their reply. */}
-            {event.allow_own && rsvpHref && (
-              <a href={rsvpHref} className="rounded-full bg-wash px-3 py-1.5 text-[16px] text-soft">+ Add your own</a>
+            {open.map((i) =>
+              rsvpHref
+                ? <a key={i.id} href={`${rsvpHref}?pick=${i.id}`} className="choice">{i.name}</a>
+                : <span key={i.id} className="py-2 pr-3 text-[16px]">{i.name}</span>,
             )}
           </div>
+          {event.allow_own && rsvpHref && <a href={`${rsvpHref}?own=1`} className="link tap text-[16px]">+ Bring something else</a>}
         </section>
       )}
 
-      {/* Each reply once: who, what they're bringing, and their note. */}
-      <section className="mt-10 px-5">
-        <h2 className="text-[20px] font-bold">
-          Coming {people > 0 && <span className="font-normal text-soft">· {people}</span>}
-        </h2>
-        {going.length === 0 ? (
-          <p className="mt-2 text-soft">Nobody&apos;s said they&apos;re going yet. Be the first!</p>
-        ) : (
+      {/* Each reply once: who, what they're bringing, and their note. Hidden until someone's going. */}
+      {going.length > 0 && (
+        <section className="mt-10 px-5">
+          <h2 className="text-[20px] font-bold">
+            Coming <span className="font-normal text-soft">· {people}</span>
+          </h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
             {going.map((h) => {
               const things = event.bring_prompt ? bringing(h.id) : [];
@@ -93,15 +90,13 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
                     {h.kids > 0 && <span className="font-normal text-soft"> +{h.kids} kid{h.kids > 1 ? "s" : ""}</span>}
                   </p>
                   {things.length > 0 && <p>{things.join(" · ")}</p>}
-                  {note && (
-                    <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 text-[16px] leading-snug whitespace-pre-line italic">{note}</p>
-                  )}
+                  {note && <p className="mt-1 text-[16px] leading-snug whitespace-pre-line text-soft italic">&ldquo;{note}&rdquo;</p>}
                 </li>
               );
             })}
           </ul>
-        )}
-      </section>
+        </section>
+      )}
     </article>
   );
 }

@@ -48,7 +48,7 @@ psql "$DATABASE_URL" -f db/thanksgiving-2026.sql
 npm run dev
 ```
 
-Checks before anything goes live:
+Checks before anything goes live (and `node scripts/visual.mjs` compares the guest screens to `visual/baseline`):
 ```bash
 npm test                      # unit tests
 npm run build && npm start    # then, in another terminal, with LOGIN_TEST_CODE=123456 CRON_SECRET=testcron set for the server:

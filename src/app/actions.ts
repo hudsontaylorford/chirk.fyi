@@ -62,7 +62,7 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     if (dupe) {
       return {
         ok: false, sameName: true,
-        error: "Someone with that name already replied. If it was you, use your saved link, or \"Email me my link\" above (or ask the host to resend it).",
+        error: "Someone with that name already replied. If it was you, use your saved link, or \"Email me my link\" below (or ask the host to resend it).",
       };
     }
   }
