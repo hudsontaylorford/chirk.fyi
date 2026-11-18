@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Ready, not live yet (`import-big-images`)
+## Went live Nov 18 (`import-big-images`)
 - Auto-refresh: Your events and each event's host page pick up new replies every 20 seconds while on screen, and right away when you come back to the tab (never while you're typing in a field).
 - Fix: a big poster (e.g. a Canva export, often 5–20 MB) in "Paste a text or screenshot" crashed the page, because Vercel turns away anything over 4.5 MB before chirk sees it. Images over 1 MB are now shrunk on the phone first (the same shrinker as cover photos, 1600px); a PDF over 4 MB gets a plain message instead. The walkthrough attaches a 12 MB poster.
 - Next round: chirk.fyi/me, every event you host or are invited to, linked from the emails chirk already sends.
