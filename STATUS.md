@@ -14,13 +14,14 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (branch `guest-v2`): UI v2, Stage 3 guest slice
+## Went live Nov 18 (`guest-v2`): UI v2, Stage 3 guest slice
 - **Invite → RSVP → confirmation** in the v2 system (`docs/CHIRK_UI_PATTERNS.md`): chirk blue #2457F5 for links, focus and picked choices; 8px ink primary button; choices with a blue outline and ✓; no guest-side boxes; notes as plain quotes; RSVP right after what/when/where; Coming hidden until someone's going.
 - **B1 fixed:** each Still needed item opens the RSVP with it already picked. **B3 fixed:** the confirmation shows the event, date, place and Add to calendar.
 - RSVP keeps the event name and date on top, then "Your RSVP" / "Are you coming?"; "Already replied?" is a quiet link at the bottom.
 - Desktop cover photo capped at 55% of the screen height; phones unchanged.
 - Visual baselines: `node scripts/visual.mjs` (7 screens, 390px + desktop). Host pages untouched. No database step.
-- Still waiting on its own branch: the forwarded-email 401 fix (`svix-headers`).
+- Also live: the forwarded-email 401 fix (accepts Resend's `svix-*` signature headers). Next for forwarding: retry the webhook in Resend.
+- Next for UI v2: B2 (message-guests counts), real-iPhone + screen-reader checks, Anthropic Frontend Design + Vercel guideline reviews, then Stage 5/6 (host tools).
 
 ## Went live Nov 17 (`forward-email`)
 - **Forward an email to chirk (roadmap 44):** forward an invite, reservation or ticket email from your chirk sign-in address to the forwarding address; it becomes a **draft** in Your events (same reader as Paste a text), and you get "Draft ready: …" with a link. Signature-checked, only chirk accounts' own addresses, one draft per email, 20 a day. The address shows inside "Paste a text or screenshot". Setup in Resend, Cloudflare and Vercel: SETUP.md §8.
