@@ -1,6 +1,6 @@
 # chirk: design notes (as of Nov 18, 2026)
 
-> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **Since Nov 20 every page, host tools included, follows `docs/CHIRK_UI_PATTERNS.md`** (slate blue `#3d5a99` links, focus and picked choices via `--color-accent`; ink 8px buttons; hairlines, no boxes or pills; covers never cropped). Where the sections below describe pills or gray boxes, they're history. Audit: `docs/UI_AUDIT_V2.md`.
+> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **Since Nov 20 every page, host tools included, follows `docs/CHIRK_UI_PATTERNS.md`** (slate blue `#3d5a99` links via `--color-accent`, everything else ink; ink 8px buttons; hairlines, no boxes or pills; covers never cropped). Where the sections below describe pills or gray boxes, they're history. Audit: `docs/UI_AUDIT_V2.md`.
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 
@@ -33,7 +33,7 @@ Warm stone neutrals (Tailwind stone scale); plus one accent, slate blue. Light m
 | Token | Hex | Used for |
 |---|---|---|
 | ink | #1c1917 | text, primary buttons |
-| accent | #3d5a99 | links, focus, picked choices (never a fill) |
+| accent | #3d5a99 | links only (never a fill) |
 | soft | #78716c | hints, secondary text, times in the schedule, quiet actions |
 | line | #e7e5e4 | borders, dividers, chip outlines, note bubbles |
 | wash | #f5f5f4 | cards, quiet buttons, stat tiles, "Covered" and "+ Add your own" chips |

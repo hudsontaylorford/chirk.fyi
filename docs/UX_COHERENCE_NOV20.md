@@ -50,7 +50,7 @@ Rendered on the real screens (invite, RSVP with a picked item and a focused fiel
 | Emails | ink button, gray links | ink button, blue links | ink button, blue links |
 | Picture | ![](color/color-mono.png) | ![](color/color-chirkblue.png) | ![](color/color-linkblue.png) |
 
-**Decided Nov 20: slate blue `#3d5a99`** (6.7:1 on white), Hudson's call, a quieter cousin of B. Shipped for links, focus and picked choices; the primary stays ink. Emails, the wordmark and the spark are unchanged for now (ink).
+**Decided Nov 20: slate blue `#3d5a99`** (6.7:1 on white), Hudson's call, a quieter cousin of B. Links only: focus rings, picked choices and buttons stay ink. Emails, the wordmark and the spark are unchanged for now (ink).
 
 ![](color/color-slate.png)
 

@@ -18,7 +18,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 2. **One primary action per screen**, only when there's a real next step. On host pages: **Share invite** when live, **Publish** when draft. A form's own submit (Save, Create event) is its primary.
 3. **Green means Going**, only. Live is the normal state and gets no badge.
 4. **Photos are never cropped**, on any screen.
-5. **No color but the tokens.** The accent (slate blue) means "you can tap this" or "this is picked".
+5. **No color but the tokens.** The accent (slate blue) is for links only: "you can tap this".
 
 ## 2. Tokens
 
@@ -27,7 +27,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 | `--color-ink` | #1c1917 | text, the primary button |
 | `--color-soft` | #78716c | secondary text: hints, signatures, dates in lists |
 | `--color-line` | #e7e5e4 | hairlines; outlines of fields, choices, quiet buttons |
-| `--color-accent` | #3d5a99 (slate blue, Nov 20) | links, focus rings, picked choices. **Never a fill or surface.** |
+| `--color-accent` | #3d5a99 (slate blue, Nov 20) | links only. Focus rings and picked choices are ink. **Never a fill or surface.** |
 | page | white | background |
 | status | green-700 (Going), amber, red-800 on red-50 (alerts) | only where they mean something |
 
@@ -35,7 +35,7 @@ Font: the phone's system font (provisional, §12).
 
 ## 3. Scope
 
-Every page (since Nov 20): 8px fields with an accent focus outline, the focus ring, wrapping of long words, balanced headings, press/hover feedback. The old utilities (`btn`, `btn-quiet`, `pill`, `pill-check`, `--color-wash`) are gone.
+Every page (since Nov 20): 8px fields with an ink focus border, the focus ring, wrapping of long words, balanced headings, press/hover feedback. The old utilities (`btn`, `btn-quiet`, `pill`, `pill-check`, `--color-wash`) are gone.
 
 ## 4. Actions
 
@@ -51,7 +51,7 @@ Every page (since Nov 20): 8px fields with an accent focus outline, the focus ri
 
 ## 5. Choices (anything you pick)
 
-`choice`: white, hairline outline, 8px, ≥44px, 16px. **Picked** (`aria-pressed="true"`): accent outline (1.5px + 1px inset), accent semibold text, a ✓ before the label. No fill.
+`choice`: white, hairline outline, 8px, ≥44px, 16px. **Picked** (`aria-pressed="true"`): ink outline (1.5px + 1px inset), semibold text, a ✓ before the label. No fill.
 
 - **Going / Can't make it:** two equal `choice` buttons side by side, 52px, 17px semibold.
 - **Bring items:** `choice` everywhere. On the invite each Still needed item is a `choice` **link** to the RSVP with it picked (`?pick=<item id>`); in the form they're `choice` buttons. Things you added yourself show picked with a ✕ to remove.
@@ -61,11 +61,11 @@ Every page (since Nov 20): 8px fields with an accent focus outline, the focus ri
 
 ## 6. Fields
 
-`field` inside the scope: full width, 8px, 1.5px hairline, 17px text (no iPhone zoom), **accent border on focus**. A field + its quiet button sit in a row that **wraps** (`flex flex-wrap`, field `min-w-0 flex-[1_1_10rem]`) so the button drops below on narrow screens. Email fields: `type=email`, `inputMode=email`, `autoComplete=email`, no spellcheck, no auto-capitals.
+`field` inside the scope: full width, 8px, 1.5px hairline, 17px text (no iPhone zoom), **ink border on focus**. A field + its quiet button sit in a row that **wraps** (`flex flex-wrap`, field `min-w-0 flex-[1_1_10rem]`) so the button drops below on narrow screens. Email fields: `type=email`, `inputMode=email`, `autoComplete=email`, no spellcheck, no auto-capitals.
 
 ## 7. Focus and feedback
 
-- **Keyboard focus:** 2px accent outline, 2px offset, on links, buttons, summaries and choices. Fields show focus with their border.
+- **Keyboard focus:** 2px ink outline, 2px offset, on links, buttons, summaries and choices. Fields show focus with their border.
 - **Press:** links, choices and quiet buttons dim to 70%; the primary to 85%.
 - **Hover (mouse only):** links thicken their underline to 2px; outlines darken to soft gray; the primary dims to 90%.
 - **Every action shows it worked:** "Sending…/Saving…" on the button while busy, then the page changes ("You're in!") or a status line ("Sent to 2 ✓"). Send buttons stay tappable; a missing answer is named ("Pick Going or Can't make it.") and focused.

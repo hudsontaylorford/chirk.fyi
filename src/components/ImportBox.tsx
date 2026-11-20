@@ -44,7 +44,7 @@ export function ImportBox({ address }: { address: string | null }) {
     <details className="mt-1 text-[15px]" open={!!shown}>
       <summary className="link tap cursor-pointer list-none [&::-webkit-details-marker]:hidden">Paste a text or screenshot</summary>
       <form action={read} className="mt-2">
-        <div className="rounded-lg border-[1.5px] border-line bg-white focus-within:border-accent">
+        <div className="rounded-lg border-[1.5px] border-line bg-white focus-within:border-ink">
           <textarea
             name="text" rows={2} aria-label="Pasted text" placeholder="Paste a group text, an email, an invite…"
             className="block w-full resize-none rounded-lg bg-transparent px-4 pt-3 text-[17px] outline-none"
