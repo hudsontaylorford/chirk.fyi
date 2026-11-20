@@ -37,12 +37,12 @@ export function CoverInput({ value, canUpload }: { value: string | null; canUplo
       {url && <div className="mt-2"><Cover src={url} host /></div>}
       {canUpload && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
-          <label className={`btn btn-quiet border border-line bg-white px-4 text-[15px] ${busy ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
+          <label className={`button-quiet text-[15px] ${busy ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
             {url ? "Change photo" : "Choose photo"}
             <input type="file" accept="image/jpeg,image/png,image/*" className="sr-only" disabled={busy} onChange={(e) => pick(e.target.files?.[0])} />
           </label>
           {url && !busy && (
-            <button type="button" className="text-[15px] text-soft underline" onClick={() => { setUrl(""); setStatus("Photo removed. Tap Save to keep the change."); }}>
+            <button type="button" className="tap text-[15px] text-soft underline underline-offset-2" onClick={() => { setUrl(""); setStatus("Photo removed. Tap Save to keep the change."); }}>
               Remove
             </button>
           )}

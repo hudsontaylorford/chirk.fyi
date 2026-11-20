@@ -3,7 +3,7 @@ import { mapsUrl, when as whenText } from "./format.ts";
 import { parseSchedule } from "./schedule.ts";
 import type { Event } from "./types.ts";
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+import { button, esc, wrap } from "./email-parts.ts";
 
 type MessageEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "schedule" | "hosted_by" | "long_times">;
 
@@ -15,18 +15,16 @@ export function messageEmail(e: MessageEvent, names: string, note: string, url: 
   const stages = details ? parseSchedule(e.schedule, e.time, e.long_times) : [];
   const sign = e.hosted_by ? `— ${e.hosted_by}` : null;
 
-  const html = `<div style="max-width:560px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-<p style="margin:0;">Hi ${esc(names)},</p>
+  const html = wrap(`<p style="margin:0;">Hi ${esc(names)},</p>
 ${paras.map((p) => `<p style="margin:12px 0 0;">${esc(p).replace(/\n/g, "<br>")}</p>`).join("")}
 ${sign ? `<p style="margin:12px 0 0;color:#78716c;">${esc(sign)}</p>` : ""}
-${details ? `<div style="margin:20px 0 0;padding:14px 16px;border-radius:14px;background:#f5f5f4;color:#1c1917;">
+${details ? `<div style="margin:20px 0 0;padding:12px 0;border-top:1px solid #e7e5e4;border-bottom:1px solid #e7e5e4;">
 <p style="margin:0;font-weight:700;">${esc(e.title)}</p>
 <p style="margin:2px 0 0;">${esc(whenText(e))}</p>
 ${where ? `<p style="margin:2px 0 0;">${e.address ? `<a href="${esc(mapsUrl(e.address))}" style="color:inherit;">${esc(where)}</a>` : esc(where)}</p>` : ""}
 ${stages.map((s) => `<p style="margin:2px 0 0;${s.main ? "font-weight:700;" : ""}">${esc(s.when)}&nbsp;&nbsp;${esc(s.what)}</p>`).join("")}
 </div>` : ""}
-<p style="margin:20px 0 0;"><a href="${esc(url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px;">See the invite</a></p>
-</div>`;
+${button(url, "See the invite")}`, 560);
 
   const text = [
     `Hi ${names},`, "", paras.join("\n\n"), ...(sign ? ["", sign] : []),

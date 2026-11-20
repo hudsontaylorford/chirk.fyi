@@ -19,12 +19,12 @@ export function DetailsInput({ value }: { value: string }) {
         <code># Title</code> · <code>- bullet</code> · <code>**bold**</code> · blank line = new paragraph · links work on their own
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
-        <button type="button" className="pill px-3 py-1.5 text-[14px]" disabled={empty} onClick={() => setText(autoFormat(text))}>Auto-format</button>
-        <button type="button" className="pill px-3 py-1.5 text-[14px]" disabled={empty} onClick={() => setText(clearFormatting(text))}>Clear formatting</button>
-        <button type="button" className="pill px-3 py-1.5 text-[14px]" disabled={empty} aria-pressed={preview} onClick={() => setPreview(!preview)}>Preview</button>
+        <button type="button" className="button-quiet text-[15px]" disabled={empty} onClick={() => setText(autoFormat(text))}>Auto-format</button>
+        <button type="button" className="button-quiet text-[15px]" disabled={empty} onClick={() => setText(clearFormatting(text))}>Clear formatting</button>
+        <button type="button" className="choice text-[15px] font-semibold" disabled={empty} aria-pressed={preview} onClick={() => setPreview(!preview)}>Preview</button>
       </div>
       {preview && !empty && (
-        <div className="mt-3 space-y-3 rounded-2xl border border-line bg-white p-4 text-[16px] leading-relaxed">
+        <div className="mt-3 space-y-3 border-y border-line py-4 text-[16px] leading-relaxed">
           <Details text={text} />
         </div>
       )}

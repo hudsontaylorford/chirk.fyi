@@ -39,14 +39,15 @@ export default async function EventPage({ params }: { params: Promise<{ slug: st
   const host = !!(await hostRole(slug));
   return (
     <>
-    <main className="guest mx-auto max-w-lg">
+    <main className="mx-auto max-w-lg">
       {host && (
-        <a href={`/${slug}/host`} className="block bg-ink px-5 py-2.5 text-[15px] font-semibold text-white">‹ Back to host page</a>
+        <a href={`/${slug}/host`} className="flex min-h-[44px] items-center border-b border-line px-5 text-[15px] font-semibold">‹ Back to host page</a>
       )}
       <EventView
         data={data}
         rsvpHref={href}
         greeting={mine && mine.going === null ? joinNames(mine.names) : undefined}
+        replied={mine?.going != null}
         rsvp={<RsvpButton href={href} label={mine?.going === true ? "You’re going · Your RSVP" : mine?.going === false ? "You can’t make it · Your RSVP" : "RSVP"} quiet={mine?.going != null} />}
       />
     </main>

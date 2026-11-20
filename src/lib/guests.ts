@@ -18,5 +18,5 @@ export function parseGuests(text: string) {
 /** A short nudge for someone who hasn't answered, for a text or an email. */
 export function reminderText(e: { title: string; date: string; rsvp_by: string | null }, names: string, url?: string) {
   const by = e.rsvp_by ? ` by ${longDate(e.rsvp_by)}` : "";
-  return `Hi ${names}! Can you make ${e.title} on ${longDate(e.date)}? ${url ? `Let us know here${by}: ${url}` : `Let us know${by}.`}`;
+  return `Hi ${names}, can you make ${e.title} on ${longDate(e.date)}? ${url ? `Let us know here${by}: ${url}` : `Let us know${by}.`}`;
 }

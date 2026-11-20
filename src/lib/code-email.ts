@@ -1,8 +1,5 @@
 // The sign-in code email, and the "you've been added as a co-host" email. Pure.
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-const wrap = (inner: string) => `<div style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">${inner}</div>`;
-const button = (href: string, label: string) =>
-  `<p style="margin:20px 0 0;"><a href="${esc(href)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px;">${esc(label)}</a></p>`;
+import { button, esc, wrap } from "./email-parts.ts";
 
 export function codeEmail(code: string) {
   const subject = `Your chirk code: ${code}`;

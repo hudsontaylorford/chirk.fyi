@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
-/* Deliberately plain for now: system font, black on white, big tap targets.
-   The real look gets designed later. Change these tokens and everything follows. */
+/* chirk's look: ink on white, warm gray, hairlines, one accent (docs/CHIRK_UI_PATTERNS.md). Change these tokens and everything follows. */
 @theme {
   --color-ink: #1c1917;
   --color-soft: #78716c;
   --color-line: #e7e5e4;
-  --color-wash: #f5f5f4;
-  --color-accent: #1c1917; /* links, focus, picked choices (and older host buttons). Ink for now; the brand color goes here later. */
+  --color-accent: #1c1917; /* links, focus, picked choices. Ink for now; the brand color goes here. Never a fill. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -28,26 +26,10 @@ input[type="date"], input[type="time"] {
 }
 input::-webkit-date-and-time-value { text-align: left; }
 
-@utility btn {
-  display: flex; align-items: center; justify-content: center;
-  min-height: 3.25rem; padding: 0 1.25rem; border-radius: 999px;
-  font-weight: 600; font-size: 17px;
-  background: var(--color-accent); color: white;
-  &:active { opacity: .8; }
-  &:disabled { opacity: .4; }
-}
-@utility btn-quiet {
-  background: var(--color-wash); color: var(--color-ink);
-}
-@utility pill {
-  border: 1.5px solid var(--color-line); border-radius: 999px;
-  padding: .55rem 1rem; font-size: 16px; background: white;
-  &[aria-pressed="true"] { background: var(--color-accent); border-color: var(--color-accent); color: white; }
-}
 @utility field {
-  width: 100%; border: 1.5px solid var(--color-line); border-radius: 14px;
+  width: 100%; border: 1.5px solid var(--color-line); border-radius: 8px;
   padding: .8rem 1rem; background: white; color: var(--color-ink); font-size: 17px;
-  &:focus { outline: none; border-color: var(--color-ink); }
+  &:focus { outline: none; border-color: var(--color-accent); }
   /* Drop-downs: the same box as every other field, with a simple chevron instead of the browser's own look. */
   &:is(select) {
     appearance: none; -webkit-appearance: none; padding-right: 2.5rem;
@@ -56,20 +38,10 @@ input::-webkit-date-and-time-value { text-align: left; }
   }
 }
 
-/* Checkboxes and radios that stay visible (event settings) use the ink color, not the system blue. */
-input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
+/* Checkboxes and radios that stay visible (event settings) use the accent, not the system blue. */
+input[type="checkbox"], input[type="radio"] { accent-color: var(--color-accent); }
 
-/* A checkbox or radio shown as a pill: outlined when off, solid ink with white text when on (like .pill[aria-pressed]). */
-@utility pill-check {
-  position: relative; display: inline-flex; align-items: center; gap: .35rem; cursor: pointer; user-select: none;
-  border: 1.5px solid var(--color-line); border-radius: 999px; padding: .5rem 1rem; font-size: 15px; background: white;
-  & input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
-  &:has(input:checked) { background: var(--color-accent); border-color: var(--color-accent); color: white; }
-  &:has(input:focus-visible) { outline: 2px solid var(--color-ink); outline-offset: 2px; }
-}
-
-/* ── chirk v2 (guest flow first; docs/CHIRK_UI_PATTERNS.md) ─────────────────────────────────────────────
-   Pages opt in with class "guest" on their <main>. The host pages keep the older look until they're redone. */
+/* ── chirk v1 patterns (docs/CHIRK_UI_PATTERNS.md), on every page ───────────────────────────────────── */
 
 /* The one main action on a screen: ink, 8px corners, full-width on phones. */
 @utility button {
@@ -102,21 +74,28 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--color-ink); }
   &[aria-pressed="true"] { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); font-weight: 600; }
   &[aria-pressed="true"]::before { content: "✓"; }
 }
+/* A choice that wraps a real checkbox or radio (the form posts it): same look, checked = picked. */
+@utility choice-check {
+  position: relative; display: inline-flex; align-items: center; gap: .4rem; min-height: 44px; cursor: pointer; user-select: none;
+  padding: .5rem .9rem; border-radius: 8px; border: 1.5px solid var(--color-line); background: white; font-size: 16px;
+  & input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+  &:has(input:checked) { border-color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); color: var(--color-accent); font-weight: 600; }
+  &:has(input:checked)::before { content: "✓"; }
+  &:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+}
 
 /* Long words (a title like "Thanksgiving" at Safari's 300% zoom) wrap instead of pushing the page sideways. */
-.guest { overflow-wrap: break-word; touch-action: manipulation; }
-.guest :is(h1, h2) { text-wrap: balance; }
-.guest p { text-wrap: pretty; }
+body { overflow-wrap: break-word; touch-action: manipulation; }
+:is(h1, h2) { text-wrap: balance; }
+p { text-wrap: pretty; }
+h1 { hyphens: auto; }
 /* Feedback without color: a press dims; on a mouse, links thicken their underline and outlines darken. */
-.guest :is(.link, .choice, .button-quiet):active { opacity: .7; }
+:is(.link, .choice, .choice-check, .button-quiet):active { opacity: .7; }
 @media (hover: hover) {
-  .guest .link:hover { text-decoration-thickness: 2px; }
-  .guest :is(.choice, .button-quiet):hover { border-color: var(--color-soft); }
-  .guest .button:hover { opacity: .9; }
+  .link:hover { text-decoration-thickness: 2px; }
+  :is(.choice, .choice-check, .button-quiet):hover { border-color: var(--color-soft); }
+  .button:hover { opacity: .9; }
 }
-.guest h1 { hyphens: auto; }
-.guest .field { border-radius: 8px; }
-.guest .field:focus { border-color: var(--color-accent); }
 /* One visible focus ring for keyboard users, in the accent (ink for now). */
-.guest :is(a, button, summary, [role="button"]):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
-.guest :is(.button, .button-quiet, .choice):focus-visible { border-radius: 8px; }
+:is(a, button, summary, [role="button"]):focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
+:is(.button, .button-quiet, .choice):focus-visible { border-radius: 8px; }

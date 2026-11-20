@@ -35,18 +35,16 @@ export function CopyInvite({ event }: { event: Event }) {
   }
 
   return (
-    <div className="rounded-2xl bg-wash p-4">
-      <p className="text-[17px] font-semibold">Send the invite</p>
-      <p className="text-[15px] text-soft">Text it to a group, or copy it into an email (the photo, message and RSVP button come along).</p>
-      <div className="mt-3 grid gap-2">
-        <button type="button" onClick={share} className="btn w-full text-[16px]">
-          {shared === "copied" ? "Link copied ✓" : "Share invite (text, WhatsApp…)"}
-        </button>
-        <button type="button" onClick={copy} className="btn btn-quiet w-full border border-line bg-white text-[16px]">
-          {state === "copied" ? "Copied ✓ Now paste it into an email" : state === "failed" ? "Couldn't copy" : "Copy invite for email"}
-        </button>
-      </div>
-    </div>
+    <section>
+      <h2 className="text-[20px] font-bold">Send the invite</h2>
+      <p className="text-[15px] text-soft">Text the link to a group, or paste the whole invite into an email. Guests reply from the link, no account needed.</p>
+      <button type="button" onClick={share} className="button mt-3 w-full">
+        {shared === "copied" ? "Link copied ✓" : "Share invite"}
+      </button>
+      <button type="button" onClick={copy} className="link tap mt-1 text-[16px]">
+        {state === "copied" ? "Copied ✓ Now paste it into an email" : state === "failed" ? "Couldn’t copy" : "Copy invite for email"}
+      </button>
+    </section>
   );
 }
 

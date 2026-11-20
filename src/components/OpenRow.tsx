@@ -4,7 +4,7 @@
 export function OpenRow({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <button
-      type="button" className="text-[16px] font-semibold underline underline-offset-2"
+      type="button" className="link tap text-[16px] font-semibold"
       onClick={() => {
         const row = document.getElementById(id) as HTMLDetailsElement | null;
         if (!row) return;

@@ -4,7 +4,7 @@ import { useActionState, useState } from "react";
 import { emailMyReply } from "@/app/actions";
 
 /**
- * "Keep your link": one card after replying. With an email on the reply it says where the link went;
+ * "This page is your reply": after replying, teaches that the link is the reply. With an email on the reply it says where the link went;
  * without one, it asks for an email (the easiest way back from any device), with copying as the fallback.
  */
 export function KeepLink({ slug, token, email }: { slug: string; token: string; email: string | null }) {
@@ -18,15 +18,15 @@ export function KeepLink({ slug, token, email }: { slug: string; token: string; 
   }
   return (
     <div>
-      <h2 className="text-[17px] font-semibold">Keep your link</h2>
+      <h2 className="text-[17px] font-semibold">This page is your reply</h2>
       {email && !editing ? (
         <p className="mt-0.5 text-[15px] text-soft">
-          It’s in your inbox at {email}. Use it to change your reply from any device.{" "}
+          Come back here to change your reply or see the latest details. The link is in your inbox at {email}, so it works from any device.{" "}
           <button type="button" className="link" onClick={() => setEditing(true)}>Use a different email</button>
         </p>
       ) : (
         <>
-          <p className="mt-0.5 text-[15px] text-soft">Email yourself the link to change your reply from another device.</p>
+          <p className="mt-0.5 text-[15px] text-soft">Come back here to change your reply or see the latest details. Email yourself the link to open it on another device.</p>
           <form action={action} className="mt-3 flex flex-wrap gap-2">
             <input name="email" type="email" inputMode="email" autoComplete="email" spellCheck={false} autoCapitalize="off" required defaultValue={email ?? ""} placeholder="you@example.com" className="field min-w-0 flex-[1_1_10rem]" aria-label="Your email" />
             <button className="button-quiet shrink-0 min-h-[3.2rem]" disabled={pending}>{pending ? "Sending…" : "Send"}</button>
@@ -46,7 +46,7 @@ export function CopyLink({ path, label = "Copy link" }: { path: string; label?: 
   const [done, setDone] = useState(false);
   return (
     <button
-      type="button" className="underline underline-offset-2"
+      type="button" className="link tap"
       onClick={async () => {
         await navigator.clipboard.writeText(location.origin + path).catch(() => {});
         setDone(true);

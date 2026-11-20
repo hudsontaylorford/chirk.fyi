@@ -41,7 +41,7 @@ export function BringFields({
         {names.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {names.map((n) => (
-              <button key={n} type="button" className="pill px-3 py-1 text-[15px]" onClick={() => remove(n)} aria-label={`Remove ${n}`}>
+              <button key={n} type="button" className="choice" onClick={() => remove(n)} aria-label={`Remove ${n}`}>
                 {n}
                 {by.get(n.toLowerCase()) && <span className="text-soft"> · {by.get(n.toLowerCase())}</span>}
                 <span aria-hidden className="ml-1.5 text-soft">✕</span>
@@ -49,13 +49,13 @@ export function BringFields({
             ))}
           </div>
         )}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <input
-            className="field" value={typing} placeholder="Add things (commas for several)" aria-label="Add things"
+            className="field min-w-0 flex-[1_1_10rem]" value={typing} placeholder="Add things (commas for several)" aria-label="Add things"
             onChange={(e) => setTyping(e.target.value)}
             onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
           />
-          <button type="button" className="btn btn-quiet shrink-0 px-4" disabled={!typing.trim()} onClick={add}>Add</button>
+          <button type="button" className="button-quiet shrink-0 min-h-[3.2rem]" disabled={!typing.trim()} onClick={add}>Add</button>
         </div>
         <label className="block">
           <span className="text-[15px] text-soft">The question guests see</span>

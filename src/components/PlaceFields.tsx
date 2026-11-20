@@ -62,7 +62,7 @@ export function PlaceFields({ place: p0, address: a0, search }: { place: string 
           onKeyDown={(e) => { if (e.key === "Escape") setOpen(null); }}
         />
         {list.length > 0 && (
-          <div className="mt-1 overflow-hidden rounded-2xl border border-line bg-white">
+          <div className="mt-1 overflow-hidden rounded-lg border border-line bg-white">
             <ul id={`${box}-places`} role="listbox" aria-label="Places from Google">
               {list.map((s) => (
                 <li key={s.placeId} role="option" aria-selected={false}>

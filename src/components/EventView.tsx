@@ -6,7 +6,7 @@ import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
 /** The invite in three parts: the plan (when, where, your message, RSVP), what's still needed, and who's coming. */
-export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string; greeting?: string }) {
+export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: EventData; rsvp?: React.ReactNode; rsvpHref?: string; greeting?: string; replied?: boolean }) {
   const { event, households } = data;
   const going = households.filter((h) => h.going);
   const people = going.reduce((n, h) => n + headcount(h.names) + h.kids, 0);
@@ -46,7 +46,10 @@ export function EventView({ data, rsvp, rsvpHref, greeting }: { data: EventData;
       {rsvp && (
         <div className="mt-4 px-5">
           {rsvp}
-          {event.rsvp_by && <p className="mt-2 text-center text-[15px] text-soft">Please reply by {shortDate(event.rsvp_by)}</p>}
+          {/* Said once, right where it matters: replying takes no account. */}
+          <p className="mt-2 text-center text-[15px] text-soft">
+            {[event.rsvp_by && `Please reply by ${shortDate(event.rsvp_by)}.`, !replied && "No account needed."].filter(Boolean).join(" ")}
+          </p>
         </div>
       )}
 

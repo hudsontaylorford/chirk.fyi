@@ -7,10 +7,10 @@ export function AddCohost({ action }: { action: (prev: string | null, f: FormDat
   const [result, add, adding] = useActionState(action, null);
   return (
     <details className="mt-1">
-      <summary className="inline cursor-pointer list-none font-semibold text-ink underline underline-offset-2 [&::-webkit-details-marker]:hidden">+ Add a co-host</summary>
-      <form action={add} className="mt-2 flex gap-2">
-        <input name="email" type="email" inputMode="email" className="field" placeholder="Their email" aria-label="Co-host's email" required />
-        <button className="btn shrink-0 px-4" disabled={adding}>{adding ? "Adding…" : "Add"}</button>
+      <summary className="link tap cursor-pointer list-none font-semibold [&::-webkit-details-marker]:hidden">+ Add a co-host</summary>
+      <form action={add} className="mt-1 flex flex-wrap gap-2">
+        <input name="email" type="email" inputMode="email" autoComplete="off" spellCheck={false} autoCapitalize="off" className="field min-w-0 flex-[1_1_10rem]" placeholder="Their email" aria-label="Co-host's email" required />
+        <button className="button-quiet shrink-0 min-h-[3.2rem]" disabled={adding}>{adding ? "Adding…" : "Add"}</button>
       </form>
       {result && <p role="status" className="mt-1 text-[14px]">{result}</p>}
     </details>

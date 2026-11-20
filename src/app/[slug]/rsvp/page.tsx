@@ -16,7 +16,7 @@ export default async function RsvpPage({ params, searchParams }: { params: Promi
   const { choices } = bringChoices(data);
   return (
     <>
-    <main className="guest mx-auto max-w-lg px-5 pt-4 pb-12">
+    <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
       {/* The event stays in view: what you're replying to. */}
       <a href={`/${slug}`} className="tap text-[17px] font-semibold">{data.event.title}</a>
       <p className="-mt-2 text-[15px] text-soft">{when(data.event)}</p>
