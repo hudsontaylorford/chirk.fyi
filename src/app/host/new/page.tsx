@@ -32,33 +32,33 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
   return (
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
-      <Link href="/host" className="text-[16px] text-soft">‹ Your events</Link>
-      <h1 className="mt-4 text-[28px] font-bold">New event</h1>
+      <Link href="/host" className="tap text-[16px] text-soft">‹ Your events</Link>
+      <h1 className="mt-2 text-[28px] font-bold">New event</h1>
       {/* Templates stay out of the way: one quiet line, and picking one only fills in settings you can change. */}
       {start ? (
         <p className="mt-1 text-[15px] text-soft">
           {start.id === "import"
             ? <>Filled in from what you pasted. <strong className="font-semibold text-ink">Check everything</strong>, then create the event.</>
             : <>Started from <strong className="font-semibold text-ink">{start.label}</strong></>}{" "}
-          · <Link href="/host/new" className="underline underline-offset-2">Start blank</Link>
+          · <Link href="/host/new" className="link">Start blank</Link>
         </p>
       ) : (
         <>
         {importOn() && <ImportBox address={process.env.INBOUND_ADDRESS?.trim() || null} />}
         <details className="mt-1 text-[15px]">
-          <summary className="cursor-pointer list-none text-soft underline underline-offset-2 [&::-webkit-details-marker]:hidden">Start from a template</summary>
+          <summary className="link tap cursor-pointer list-none [&::-webkit-details-marker]:hidden">Start from a template</summary>
           {mine.length > 0 && (
             <ul className="mt-2 divide-y divide-line border-y border-line">
               {mine.map((m) => (
                 <li key={m.id} className="flex min-h-[48px] items-center justify-between gap-3 py-1">
-                  <Link href={`/host/new?t=${m.id}`} className="font-semibold text-ink underline underline-offset-2">{m.label}</Link>
+                  <Link href={`/host/new?t=${m.id}`} className="link font-semibold">{m.label}</Link>
                   <span className="shrink-0 text-[14px] text-soft"><Confirm label="Remove" action={removeTemplate.bind(null, m.id.slice(2))} /></span>
                 </li>
               ))}
             </ul>
           )}
           <div className="mt-2 flex flex-wrap gap-2">
-            {TEMPLATES.map((t) => <Link key={t.id} href={`/host/new?t=${t.id}`} className="pill px-3 py-1.5 text-[15px]">{t.label}</Link>)}
+            {TEMPLATES.map((t) => <Link key={t.id} href={`/host/new?t=${t.id}`} className="choice">{t.label}</Link>)}
           </div>
           <p className="mt-2 text-[14px] text-soft">It only fills things in; change anything after. To make your own, open any event and tap Save as a template.</p>
         </details>
@@ -66,7 +66,7 @@ export default async function NewEvent({ searchParams }: { searchParams: Promise
       )}
       <form action={createEvent} className="mt-4 space-y-3">
         <EventFields key={start?.id ?? "blank"} start={start} needed={(start?.items ?? []).map((name) => ({ name, by: null }))} />
-        <SaveButton className="btn w-full">Create event</SaveButton>
+        <SaveButton className="button w-full">Create event</SaveButton>
       </form>
     </main>
     <Footer />

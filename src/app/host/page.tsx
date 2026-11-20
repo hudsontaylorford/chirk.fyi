@@ -53,7 +53,8 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
 
   const invited = invites.length > 0 && (
     <section className={events.length ? "mt-8" : "mt-6"}>
-      <h2 className="text-[20px] font-bold">Invited</h2>
+      {events.length > 0 && <h2 className="text-[20px] font-bold">Your plans</h2>}
+      <p className="text-[15px] text-soft">Every invite you get, in one place.</p>
       <ul className="mt-3 divide-y divide-line border-y border-line">
         {invites.map((i) => (
           <li key={i.slug}>
@@ -62,7 +63,7 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
                 <span className="block text-[17px] font-semibold">{i.title}</span>
                 <span className="block text-[15px] text-soft">{[shortDate(i.date), i.hosted_by && `Hosted by ${i.hosted_by}`].filter(Boolean).join(" · ")}</span>
               </span>
-              <span className={`shrink-0 text-[15px] ${i.going ? "text-green-700" : "text-soft"}`}>{i.going === null ? "Reply" : i.going ? "Going" : "Can’t make it"}</span>
+              <span className={`shrink-0 text-[15px] ${i.going ? "text-green-700" : "text-soft"}`}>{i.going === null ? "No reply yet" : i.going ? "Going" : "Can’t make it"}</span>
             </a>
           </li>
         ))}
@@ -74,27 +75,30 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <AutoRefresh />
       <div className="flex justify-end text-[16px] text-soft">
-        <form action={signOut}><button>Sign out</button></form>
+        <form action={signOut}><button className="tap">Sign out</button></form>
       </div>
-      <h1 className="mt-4 text-[28px] font-bold">Your events</h1>
+      {/* Someone who only has invites sees "Your plans" first; making their own is a link either way. */}
+      <div className="mt-2 flex items-baseline justify-between gap-3">
+        <h1 className="text-[28px] font-bold">{events.length ? "Your events" : "Your plans"}</h1>
+        {events.length > 0 && <Link href="/host/new" className="link tap shrink-0 text-[17px] font-semibold">+ New event</Link>}
+      </div>
       <p className="text-[15px] text-soft">Signed in as {me.email}</p>
       {me.terms_version !== TERMS_VERSION && (
-        <form action={acceptTerms} className="mt-4 flex items-center justify-between gap-3 rounded-2xl bg-wash p-4 text-[15px]">
-          <span>chirk now has <Link href="/terms" className="underline underline-offset-2">Terms</Link>. Using chirk means you agree to them and the <Link href="/privacy" className="underline underline-offset-2">Privacy</Link> policy.</span>
-          <SaveButton className="btn shrink-0 whitespace-nowrap px-4">Got it</SaveButton>
+        <form action={acceptTerms} className="mt-4 flex items-center justify-between gap-3 border-y border-line py-4 text-[15px]">
+          <span>chirk now has <Link href="/terms" className="link">Terms</Link>. Using chirk means you agree to them and the <Link href="/privacy" className="link">Privacy</Link> policy.</span>
+          <SaveButton className="button-quiet shrink-0 whitespace-nowrap">Got it</SaveButton>
         </form>
       )}
       {!me.name && events.length > 0 && (
-        <form action={saveName} className="mt-4 rounded-2xl bg-wash p-4">
+        <form action={saveName} className="mt-4 border-y border-line py-4">
           <label className="text-[15px] font-semibold" htmlFor="name">What should co-hosts see you as?</label>
-          <div className="mt-2 flex gap-2">
-            <input id="name" name="name" className="field" placeholder="Your first name" required />
-            <SaveButton>Save</SaveButton>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <input id="name" name="name" className="field min-w-0 flex-[1_1_10rem]" placeholder="Your first name" required />
+            <SaveButton className="button-quiet shrink-0 min-h-[3.2rem]">Save</SaveButton>
           </div>
         </form>
       )}
-      {/* Someone who only has invites sees those first; making their own plan is a quiet link. */}
-      {events.length ? <Link href="/host/new" className="btn mt-4 w-full">+ New event</Link> : <>{invited}<Link href="/host/new" className="link tap mt-4 text-[17px]">+ Plan your own event</Link></>}
+      {!events.length && <>{invited}<Link href="/host/new" className="link tap mt-4 text-[17px]">+ Plan your own event</Link></>}
 
       {/* "Select" shows a checkbox on each event (in every section); archive or delete the ticked ones. */}
       <div className="[&_.pick]:hidden [&:has(details.bulk[open])_.pick]:flex">
@@ -140,13 +144,13 @@ function EventList({ events }: { events: Row[] }) {
             <span className="min-w-0">
               <span className="block text-[17px] font-semibold">
                 {e.title}
-                {e.status === "draft" && <span className="ml-2 rounded-full bg-amber-50 px-2 py-0.5 text-[13px] font-semibold text-amber-900">Draft</span>}
-                {e.status === "live" && !e.past && <span className="ml-2 rounded-full bg-green-50 px-2 py-0.5 text-[13px] font-semibold text-green-800">Live</span>}
+                {/* Live is the normal state and says nothing. */}
+                {e.status === "draft" && <span className="font-normal text-soft"> · Draft</span>}
               </span>
               <span className="block text-[15px] text-soft">{[shortDate(e.date), e.hosted_by && `Hosted by ${e.hosted_by}`].filter(Boolean).join(" · ")}</span>
               <span className="block truncate text-[14px] text-soft">chirk.fyi/{e.slug}</span>
             </span>
-            <span className="shrink-0 text-[15px] text-soft">{e.going} coming ›</span>
+            <span className="shrink-0 text-[15px] text-soft">{e.going} coming</span>
           </a>
         </li>
       ))}

@@ -1,6 +1,6 @@
 # chirk: design notes (as of Nov 18, 2026)
 
-> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **v2 in progress:** the guest flow (invite → RSVP → confirmation) now follows `docs/CHIRK_UI_PATTERNS.md` (monochrome: ink links underlined, ink focus and picked choices via `--color-accent`; 8px buttons; no guest-side boxes or pills that do nothing; covers never cropped). Host pages below still describe the older look until Stage 6. Audit: `docs/UI_AUDIT_V2.md`.
+> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **Since Nov 20 every page, host tools included, follows `docs/CHIRK_UI_PATTERNS.md`** (slate blue `#3d5a99` links via `--color-accent`, everything else ink; ink 8px buttons; hairlines, no boxes or pills; covers never cropped). Where the sections below describe pills or gray boxes, they're history. Audit: `docs/UI_AUDIT_V2.md`.
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 
@@ -28,11 +28,12 @@ chirk is a tiny, phone-first invite and RSVP site, a DIY Partiful. A host makes 
 - Considered and set aside for now: `c.`, `c))` (reads as Wi-Fi/tap-to-pay small), `c_`, a ping dot.
 
 ## Color (current)
-Warm stone neutrals (Tailwind stone scale); one ink color doubles as the accent. Light mode only; dark mode for the app isn't designed yet.
+Warm stone neutrals (Tailwind stone scale); plus one accent, slate blue. Light mode only; dark mode for the app isn't designed yet.
 
 | Token | Hex | Used for |
 |---|---|---|
-| ink / accent | #1c1917 | text, primary buttons, selected chips |
+| ink | #1c1917 | text, primary buttons |
+| accent | #3d5a99 | links only (never a fill) |
 | soft | #78716c | hints, secondary text, times in the schedule, quiet actions |
 | line | #e7e5e4 | borders, dividers, chip outlines, note bubbles |
 | wash | #f5f5f4 | cards, quiet buttons, stat tiles, "Covered" and "+ Add your own" chips |
@@ -40,7 +41,7 @@ Warm stone neutrals (Tailwind stone scale); one ink color doubles as the accent.
 
 Status colors, used sparingly: "Going" and "Live" green-700/green-50; "Draft" amber; errors red-50 fill with red-800 text; red-700 only on the final "Sure?" of a delete. Saved/copied states use "✓" in the label, not color.
 
-Tokens live in `src/app/globals.css` (Tailwind v4 `@theme`: `--color-ink`, `--color-soft`, `--color-line`, `--color-wash`, `--color-accent`).
+Tokens live in `src/app/globals.css` (Tailwind v4 `@theme`: `--color-ink`, `--color-soft`, `--color-line`, `--color-accent`).
 
 ## Type (current)
 The phone's system font (San Francisco on iPhone): nothing to load, feels native. Weights 400, 600, 700. Any Google Font can replace it.

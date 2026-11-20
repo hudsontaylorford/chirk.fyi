@@ -2,7 +2,7 @@
 import { listText, mapsUrl, when as whenText } from "./format.ts";
 import type { Event } from "./types.ts";
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+import { button, esc, meHtml, meLine, wrap } from "./email-parts.ts";
 
 type LinkEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "long_times">;
 
@@ -17,25 +17,23 @@ export function linkEmail(i: {
     i.going && i.parts.length ? `Coming to: ${listText(i.parts)}` : null,
     i.going && i.bringing.length ? `Bringing: ${listText(i.bringing)}` : null,
   ].filter((l): l is string => !!l);
-  const button = i.going === null ? "RSVP" : "See or change your reply";
+  const label = i.going === null ? "RSVP" : "See or change your reply";
 
   const text = [
     e.title, whenText(e), where, "", `${i.names}: ${status}`, ...lines, "",
-    `${button}: ${i.url}`, ...(i.going ? [`Add to calendar: ${i.calendarUrl}`] : []), "",
-    "This link is just for you (and anyone on your reply).",
-    ...(i.meUrl ? [`All your chirk invites: ${i.meUrl}`] : []),
+    `${label}: ${i.url}`, ...(i.going ? [`Add to calendar: ${i.calendarUrl}`] : []), "",
+    "This link is your reply. Open it any time to change it or see the latest details. It’s just for you and anyone on your reply.",
+    ...(i.meUrl ? [meLine(i.meUrl)] : []),
   ].filter((l, n, a) => l || a[n - 1]).join("\n");
 
-  const html = `<div style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-<p style="margin:0;font-size:24px;font-weight:700;">${esc(e.title)}</p>
+  const html = wrap(`<p style="margin:0;font-size:24px;font-weight:700;">${esc(e.title)}</p>
 <p style="margin:4px 0 0;font-weight:600;">${esc(whenText(e))}</p>
 ${where ? `<p style="margin:2px 0 0;color:#78716c;">${e.address ? `<a href="${esc(mapsUrl(e.address))}" style="color:#78716c;">${esc(where)}</a>` : esc(where)}</p>` : ""}
 <p style="margin:16px 0 0;"><strong>${esc(i.names)}</strong>: ${esc(status)}</p>
 ${lines.map((l) => `<p style="margin:4px 0 0;">${esc(l)}</p>`).join("")}
-<p style="margin:20px 0 0;"><a href="${esc(i.url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 24px;border-radius:999px;">${button}</a></p>
+${button(i.url, label)}
 ${i.going ? `<p style="margin:12px 0 0;"><a href="${esc(i.calendarUrl)}" style="color:inherit;font-weight:600;">Add to calendar</a></p>` : ""}
-<p style="margin:16px 0 0;color:#78716c;font-size:14px;">This link is just for you (and anyone on your reply). Opening it on a phone or computer makes that device remember you.</p>
-${i.meUrl ? `<p style="margin:8px 0 0;color:#78716c;font-size:14px;">All your chirk invites: <a href="${esc(i.meUrl)}" style="color:#78716c;">${esc(i.meUrl.replace(/^https?:\/\//, ""))}</a></p>` : ""}
-</div>`;
+<p style="margin:16px 0 0;color:#78716c;font-size:14px;">This link is your reply. Open it any time to change it or see the latest details. It’s just for you and anyone on your reply.</p>
+${i.meUrl ? meHtml(i.meUrl, 8) : ""}`);
   return { subject, html, text };
 }

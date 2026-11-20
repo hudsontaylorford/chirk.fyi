@@ -40,7 +40,9 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 - **Costs:** "Split between", "Settle up" (hosts) / "Your share" (guests), "owes", "Pay with Venmo", "Mark paid", "Everyone's even ✓" / "You're even ✓".
 - **Poker night:** Buy-in / Cash-out, "Buy in all", In · Out · Net, "counted as the $X left on the table" for a worked-out cash-out.
 - **Gift exchange:** Who's in, Never draw each other, Rules, Draw names, "You're giving a gift to", "Your gift ideas".
-- **Sign in:** "Been invited to an event? You're invited to chirk." Anyone on a chirk guest list can sign in.
+- **Sign in:** "Sign in to chirk". "See every invite you get in one place, and plan your own. You never need to sign in to reply to an invite." Anyone on a chirk guest list can sign in.
+- **The three newcomer facts** (Nov 20; each said once, where it's needed): "No account needed." beside RSVP; **This page is your reply** / "Come back here to change your reply or see the latest details." after replying; "Every invite you get, in one place: chirk.fyi/me" in emails to a guest's own address. **Your plans** = the invites you've got (home page and /me).
+- **One term per thing (Nov 20):** guests are **removed**, events **deleted**; **View invite**; **Edit reply**; **Send invite** on a guest who hasn't answered; every email opens **Hi Sam,**. Full table: `docs/UX_COHERENCE_NOV20.md`.
 - **Paste a text or screenshot:** "Fill in" (busy: "Reading…"), then "Filled in from what you pasted. Check everything, then create the event." Never says "AI" in the interface except in setup errors.
 - **Forward an email:** "Or forward an email to new@in.chirk.fyi from your chirk email; it becomes a draft in Your events." Reply email: "Draft ready: …", "Open the draft".
 - **Templates:** "Start from a template", "Started from …", "Start blank". A template only fills in settings and example wording.

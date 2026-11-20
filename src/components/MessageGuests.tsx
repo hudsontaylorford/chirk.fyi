@@ -20,14 +20,14 @@ export function MessageGuests({ counts, action }: {
   const labels: Record<Audience, string> = { going: "Going", waiting: "No reply yet", everyone: "Everyone" };
 
   return (
-    <section className="mt-8 rounded-2xl bg-wash p-4">
-      <h2 className="text-[17px] font-semibold">Message your guests</h2>
+    <section className="mt-10">
+      <h2 className="text-[20px] font-bold">Message your guests</h2>
       <p className="text-[15px] text-soft">Send an update without changing the invite.</p>
       <form action={send} onSubmit={() => setSure(false)} className="mt-3 space-y-3">
         <input type="hidden" name="to" value={to} />
         <div className="flex flex-wrap gap-2" role="group" aria-label="Who it's for">
           {(Object.keys(labels) as Audience[]).map((a) => (
-            <button key={a} type="button" className="pill px-3 py-1.5 text-[15px]" aria-pressed={to === a} onClick={() => { setTo(a); setSure(false); }}>
+            <button key={a} type="button" className="choice" aria-pressed={to === a} onClick={() => { setTo(a); setSure(false); }}>
               {labels[a]}
             </button>
           ))}
@@ -41,11 +41,11 @@ export function MessageGuests({ counts, action }: {
         </label>
         {sure ? (
           <div className="flex items-center gap-3">
-            <button className="btn px-5 text-[16px]" disabled={sending}>{sending ? "Sending…" : `Send to ${c.email} guest${c.email === 1 ? "" : "s"}`}</button>
-            <button type="button" className="text-[15px] text-soft underline" onClick={() => setSure(false)}>Cancel</button>
+            <button className="button" disabled={sending}>{sending ? "Sending…" : `Send to ${c.email} guest${c.email === 1 ? "" : "s"}`}</button>
+            <button type="button" className="link tap text-[16px] text-soft" onClick={() => setSure(false)}>Cancel</button>
           </div>
         ) : (
-          <button type="button" className="btn w-full text-[16px]" disabled={!note.trim() || !c.email} onClick={() => setSure(true)}>Send update</button>
+          <button type="button" className="button-quiet" disabled={!note.trim() || !c.email} onClick={() => setSure(true)}>Send update</button>
         )}
         {result && <p role="status" className="text-[15px] text-soft">{result}</p>}
       </form>

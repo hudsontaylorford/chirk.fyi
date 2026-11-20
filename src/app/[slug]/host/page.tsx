@@ -77,11 +77,14 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
     <>
     <main className="mx-auto max-w-lg px-5 pt-4 pb-16">
       <AutoRefresh />
-      <div className="flex justify-between text-[16px] text-soft">
-        <Link href="/host">‹ Your events</Link>
-        <a href={`/${slug}`} className="font-semibold text-ink">View event</a>
+      <div className="flex justify-between text-[16px]">
+        <Link href="/host" className="tap text-soft">‹ Your events</Link>
+        <a href={`/${slug}`} className="link tap font-semibold">View invite</a>
       </div>
-      <h1 className="mt-4 text-[28px] font-bold">{event.title}</h1>
+      <h1 className="mt-2 text-[28px] font-bold">
+        {event.title}
+        {event.status !== "live" && <span className="font-normal text-soft"> · {event.status === "draft" ? "Draft" : "Archived"}</span>}
+      </h1>
       {/* Who hosts this: everyone here can edit and send; only the owner removes hosts or deletes the event. */}
       <div id="hosts" className="mt-1 text-[15px] text-soft">
         Hosts:{" "}
@@ -95,17 +98,19 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         ))}
         <AddCohost action={act.addCohost.bind(null, slug)} />
       </div>
+      {/* A draft's one next step is Publish; it takes the place Send the invite has once it's live. */}
       {event.status === "draft" && (
-        <div className="mt-3 flex items-center justify-between gap-3 rounded-2xl bg-amber-50 p-4 text-[16px]">
-          <span><strong>Draft.</strong> Only hosts can see it. Check the details, then publish.</span>
-          <form action={act.setStatus.bind(null, slug, "live")}><SaveButton>Publish</SaveButton></form>
-        </div>
+        <form action={act.setStatus.bind(null, slug, "live")} className="mt-4">
+          <p className="text-[16px]">Only hosts can see a draft. Check the details below, then publish.</p>
+          <SaveButton className="button mt-3 w-full">Publish</SaveButton>
+        </form>
       )}
       {event.status === "archived" && (
-        <p className="mt-3 rounded-2xl bg-wash p-4 text-[16px]"><strong>Archived.</strong> The invite still works; it&apos;s just tucked away on your events list.</p>
+        <p className="mt-3 text-[16px] text-soft">The invite still works. It&apos;s just tucked away under Archived on Your events.</p>
       )}
 
-      <div className={`mt-4 grid gap-2 text-center ${tiles === 3 || tiles > 4 ? "grid-cols-3" : "grid-cols-2"}`}>
+      {/* The numbers: one row between hairlines, no boxes. */}
+      <div className={`mt-6 grid border-y border-line py-1 text-center ${tiles === 3 || tiles > 4 ? "grid-cols-3" : "grid-cols-2"}`}>
         <Stat n={adults + kids} label="coming" sub={kids ? `${adults} adult${adults === 1 ? "" : "s"}, ${kids} kid${kids === 1 ? "" : "s"}` : undefined} />
         <Stat
           n={answered.length}
@@ -145,9 +150,9 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       {/* Everyone you've named and everyone who replied, in one list. */}
       <h2 className="mt-8 text-[20px] font-bold">Guests</h2>
       <form action={act.addGuests.bind(null, slug)} className="mt-2">
-        <div className="flex gap-2">
-          <input name="guests" className="field" placeholder="Sam, Graham & Ellen" aria-label="Add guests" />
-          <SaveButton>Add</SaveButton>
+        <div className="flex flex-wrap gap-2">
+          <input name="guests" className="field min-w-0 flex-[1_1_10rem]" placeholder="Sam, Graham & Ellen" aria-label="Add guests" />
+          <SaveButton className="button-quiet shrink-0 min-h-[3.2rem]">Add</SaveButton>
         </div>
         <p className="mt-1 text-[14px] text-soft">Commas between guests. Add an email after a name to send it from here.</p>
       </form>
@@ -174,7 +179,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         />
       )}
       <ul className="mt-3 divide-y divide-line border-y border-line">
-        {households.length === 0 && <li className="py-3 text-soft">Nobody yet.</li>}
+        {households.length === 0 && <li className="py-3 text-soft">Nobody yet. Add guests above, or share the invite: replies show up here.</li>}
         {households.map((h) => {
           const bringing = list.claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
           return (
@@ -184,16 +189,14 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                 <span className="mr-auto text-[17px] font-semibold">
                   {joinNames(h.names)}
                   {h.kids > 0 && <span className="font-normal text-soft"> +{h.kids} kid{h.kids > 1 ? "s" : ""}</span>}
-                  {isHost(h.email) && (
-                    <span className="ml-2 rounded-full bg-wash px-2 py-0.5 text-[13px] font-semibold text-soft">Host</span>
-                  )}
+                  {isHost(h.email) && <span className="font-normal text-soft"> · Host</span>}
                 </span>
                 <span className={`shrink-0 ${h.going ? "text-green-700" : "text-soft"}`}>{h.going === null ? "No reply yet" : h.going ? "Going" : "Can't make it"}</span>
               </div>
               {h.going && partsOf(event, h).length > 0 && <p className="text-soft">Coming to {listText(partsOf(event, h))}</p>}
               {bringing.length > 0 && <p>{bringing.join(" · ")}</p>}
               {h.note && (
-                <p className="mt-2 w-fit max-w-[85%] rounded-[20px] rounded-bl-[6px] bg-line px-4 py-2 leading-snug whitespace-pre-line italic">{h.note}</p>
+                <p className="mt-1 leading-snug whitespace-pre-line text-soft italic">&ldquo;{h.note}&rdquo;</p>
               )}
               {h.updated_by && <p className="text-[14px] text-soft">Last changed by {h.updated_by}</p>}
               {h.email && <p className="text-[14px] text-soft">{h.email}</p>}
@@ -204,12 +207,12 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                   emailReminder={act.emailGuest.bind(null, slug, h.id, "reminder")}
                 />
               )}
-              <div className="mt-2 flex gap-5 text-[14px] text-soft">
+              <div className="flex flex-wrap gap-x-5 text-[15px] text-soft">
                 {h.going !== null && <CopyLink path={`/${slug}/r/${h.token}`} label="Copy their link" />}
-                <a href={`/${slug}/r/${h.token}`} className="underline underline-offset-2">Edit</a>
+                <a href={`/${slug}/r/${h.token}`} className="link tap">Edit reply</a>
                 <Confirm
-                  label="Delete" action={act.removeHousehold.bind(null, slug, h.id)}
-                  warn={hasMoney.has(h.id) ? "They have costs or poker on this event. Deleting them also deletes what they paid and what they owe, so everyone's settle-up changes." : undefined}
+                  label="Remove" action={act.removeHousehold.bind(null, slug, h.id)}
+                  warn={hasMoney.has(h.id) ? "They have costs or poker on this event. Removing them also removes what they paid and what they owe, so everyone's settle-up changes." : undefined}
                 />
               </div>
             </li>
@@ -231,25 +234,12 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
             <h2 className="text-[20px] font-bold">What to bring</h2>
             <OpenRow id="bring">Edit list</OpenRow>
           </div>
+          {/* Plain lines: what's still needed, then what's covered and by whom. */}
           {list.open.length > 0 && (
-            <>
-              <p className="mt-3 text-[15px] text-soft">Still needed</p>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {list.open.map((i) => (
-                  <span key={i.id} className="rounded-full border-[1.5px] border-dashed border-line px-3 py-1.5 text-[16px]">{i.name}</span>
-                ))}
-              </div>
-            </>
+            <p className="mt-2 text-[16px]"><span className="text-soft">Still needed: </span>{list.open.map((i) => i.name).join(" · ")}</p>
           )}
           {list.claimed.length > 0 && (
-            <>
-              <p className="mt-3 text-[15px] text-soft">Covered</p>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {list.claimed.map((r) => (
-                  <span key={r.item.id} className="rounded-full bg-wash px-3 py-1.5 text-[16px]">{r.item.name}</span>
-                ))}
-              </div>
-            </>
+            <p className="mt-2 text-[16px]"><span className="text-soft">Covered: </span>{list.claimed.map((r) => r.item.name).join(" · ")}</p>
           )}
           {!list.open.length && !list.claimed.length && <p className="mt-2 text-soft">Nothing on the list yet.</p>}
         </section>
@@ -264,16 +254,17 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           event={event} needed={needed.map((i) => ({ name: i.name, by: whoHas.get(i.id) ?? null }))}
           matches={event.gift_on ? [...(await getDraws(event.id))].map(([g, r]) => `${nameOf(g)} → ${nameOf(r)}`) : []}
         />
-        <SaveButton className="btn w-full">Save</SaveButton>
+        <SaveButton className="button w-full">Save</SaveButton>
       </form>
 
-      <div className="mt-6 space-y-2">
+      {/* Everything else you can do with the event: plain links, one per line. */}
+      <div className="mt-8 flex flex-col items-start text-[16px]">
         <form action={act.copyToNextYear.bind(null, slug)}>
-          <SaveButton className="btn btn-quiet w-full">Copy to next year (as a draft)</SaveButton>
+          <SaveButton className="link tap">Copy to next year (as a draft)</SaveButton>
         </form>
         {/* Saves this event's setup (not its title, dates or guests) as a starting point for your next New event. */}
-        <details className="rounded-2xl bg-wash px-4">
-          <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-center text-[17px] font-semibold [&::-webkit-details-marker]:hidden">Save as a template</summary>
+        <details className="w-full">
+          <summary className="link tap cursor-pointer list-none [&::-webkit-details-marker]:hidden">Save as a template</summary>
           {myTemplates >= 30 ? (
             <p className="pb-4 text-[15px] text-soft">You have 30 templates. Remove one under New event → Start from a template first.</p>
           ) : (
@@ -283,17 +274,17 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
                 <input name="name" defaultValue={event.title} maxLength={60} className="field mt-1" />
               </label>
               <p className="text-[14px] text-soft">Keeps the settings, message, times, place, photo and what to bring. Not the title, dates or guests. It shows under Start from a template on New event.</p>
-              <SaveButton className="btn w-full">Save template</SaveButton>
+              <SaveButton className="button-quiet">Save template</SaveButton>
             </form>
           )}
         </details>
         {event.status !== "draft" && (
           <form action={act.setStatus.bind(null, slug, event.status === "archived" ? "live" : "archived")}>
-            <SaveButton className="btn btn-quiet w-full">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
+            <SaveButton className="link tap">{event.status === "archived" ? "Unarchive" : "Archive"}</SaveButton>
           </form>
         )}
         {role === "owner" && (
-          <p className="pt-2 text-center text-[15px] text-soft">
+          <p className="text-soft">
             <Confirm label="Delete this event" action={act.deleteEvent.bind(null, slug)} />
           </p>
         )}
@@ -306,7 +297,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
 
 function Stat({ n, label, sub }: { n: number | string; label: string; sub?: string }) {
   return (
-    <div className="rounded-2xl bg-wash px-1 py-3">
+    <div className="px-1 py-3">
       <div className="text-[28px] font-bold tabular-nums">{n}</div>
       <div className="text-[14px] text-soft">{label}</div>
       {sub && <div className="text-[12px] text-soft">{sub}</div>}

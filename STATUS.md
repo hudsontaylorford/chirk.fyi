@@ -1,4 +1,4 @@
-# chirk: status (Nov 16, 2026)
+# chirk: status (Nov 20, 2026)
 
 *A snapshot of where everything is. Update it after each round of work.*
 
@@ -13,6 +13,14 @@ Everything up to Nov 16's "fixes-3":
 - Shared costs, poker (missing cash-outs worked out when the math allows), Venmo links, Mark paid
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
+
+## Waiting for review (Nov 20, `unify`)
+- **One look on every page (Stage 6):** host pages, sign-in, New event, costs, poker and gifts now use the v1 patterns: no black pills or gray boxes, hairlines, 8px corners, one primary per screen (Share invite or Publish; Save on the form), links for everything else, gray Remove / Delete then a red Sure?. + New event is a link beside Your events. The old utilities are gone and the guard test checks every screen.
+- **Newcomer wording:** "No account needed." beside RSVP (page and invite email); "This page is your reply" after replying; "Every invite you get, in one place: chirk.fyi/me" in emails; sign-in is "Sign in to chirk"; /me with only invites says "Your plans".
+- **One vocabulary:** Remove (guests) vs Delete (events), View invite, Edit reply, Send invite, "Hi Sam," in every email, Your plans for invites. Emails share one button (8px, like the site).
+- **Audit, color comparison and Hannah walkthrough:** `docs/UX_COHERENCE_NOV20.md`. **Links are slate blue `#3d5a99`** (Hudson, Nov 20); everything else, including focus, picked choices and buttons, stays black. Emails unchanged.
+- Also: a plain "Something went wrong / Try again" page instead of the framework's blank error; a clearer empty guest list; Knip run (two needless exports removed); useful-later tools added to ROADMAP.md.
+- No behavior change, no database step. Checks: unit tests, `npm run check`, a11y all pass; guest baselines re-captured.
 
 ## Went live Nov 18 (`me`)
 - chirk.fyi/me goes to Your events (sign in with the emailed code if needed), which now also lists **Invited**: upcoming live events with a reply under your email, except ones you host, each with Going / Can’t make it / Reply. Someone who only has invites sees them first, with "+ Plan your own event" as a quiet link, and isn't asked the co-host name question.

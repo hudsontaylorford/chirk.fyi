@@ -1,7 +1,7 @@
 // "Sally is going": the note the host gets when someone replies (if the event's switch is on). Pure.
 import { listText, several as many, shortDate } from "./format.ts";
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+import { button, esc, wrap } from "./email-parts.ts";
 
 export function replyEmail(i: {
   title: string; date: string; names: string; going: boolean; adults: number; kids: number;
@@ -21,12 +21,10 @@ export function replyEmail(i: {
   const tally = `That's ${i.coming} coming so far${i.waiting ? `, and ${i.waiting} ${i.waiting === 1 ? "hasn't" : "haven't"} replied yet` : ""}.`;
   const sub = `${i.title} · ${shortDate(i.date)}`;
   const text = [subject, sub, "", ...lines, ...(lines.length ? [""] : []), tally, "", `All replies: ${i.hostUrl}`].join("\n");
-  const html = `<div style="max-width:520px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-<p style="margin:0;font-size:20px;font-weight:700;">${esc(i.names)} ${esc(verb)}</p>
+  const html = wrap(`<p style="margin:0;font-size:20px;font-weight:700;">${esc(i.names)} ${esc(verb)}</p>
 <p style="margin:2px 0 0;color:#78716c;">${esc(sub)}</p>
 ${lines.map((l) => `<p style="margin:8px 0 0;">${esc(l)}</p>`).join("")}
 <p style="margin:16px 0 0;color:#78716c;">${esc(tally)}</p>
-<p style="margin:20px 0 0;"><a href="${esc(i.hostUrl)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:12px 22px;border-radius:999px;">See all replies</a></p>
-</div>`;
+${button(i.hostUrl, "See all replies")}`);
   return { subject, html, text };
 }

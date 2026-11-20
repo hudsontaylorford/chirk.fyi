@@ -75,7 +75,7 @@ export function FormDraft({ id }: { id: string }) {
   return (
     <span ref={ref} className="block">
       {restored && (
-        <span role="status" className="block rounded-2xl bg-amber-50 p-3 text-[15px] text-amber-900">
+        <span role="status" className="block rounded-lg bg-amber-50 p-3 text-[15px] text-amber-900">
           Restored what you were typing.{" "}
           <button type="button" className="font-semibold underline underline-offset-2" onClick={discard}>Discard</button>
         </span>

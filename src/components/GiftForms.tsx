@@ -10,7 +10,7 @@ export function GiftButton({ action, label, confirm, quiet }: {
   return (
     <form action={run} className="inline">
       <button
-        className={quiet ? "btn btn-quiet border border-line bg-white px-4 text-[15px]" : "btn px-4 text-[15px]"} disabled={running}
+        className={quiet ? "button-quiet" : "button"} disabled={running}
         onClick={(e) => { if (confirm && !window.confirm(confirm)) e.preventDefault(); }}
       >
         {running ? "Working…" : label}
@@ -28,7 +28,7 @@ export function WishForm({ action, wish }: { action: (prev: string | null, f: Fo
       <label className="text-[15px] text-soft" htmlFor="wish">Your gift ideas, for whoever draws you</label>
       <textarea id="wish" name="wish" rows={2} defaultValue={wish ?? ""} className="field mt-1" placeholder="Sizes, favorites, things you'd love" />
       <div className="mt-2 flex items-center gap-3">
-        <button className="btn btn-quiet border border-line bg-white px-4" disabled={saving}>{saving ? "Saving…" : "Save ideas"}</button>
+        <button className="button-quiet" disabled={saving}>{saving ? "Saving…" : "Save ideas"}</button>
         {result && <span role="status" className="text-[14px] text-soft">{result}</span>}
       </div>
     </form>

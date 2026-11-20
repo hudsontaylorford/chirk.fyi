@@ -42,7 +42,7 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
           {!me.gift_in ? (
             <p className="mt-2 text-soft">You&apos;re not in this one.</p>
           ) : draws.get(me.id) ? (
-            <div className="mt-3 rounded-2xl bg-wash p-4">
+            <div className="mt-3 rounded-lg border-[1.5px] border-line p-4">
               <p className="text-[15px] text-soft">You&apos;re giving a gift to</p>
               <p className="text-[24px] font-bold">{name(draws.get(me.id)!)}</p>
               <p className="mt-1 text-[15px]">
@@ -65,13 +65,13 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
             <p className="text-[15px] text-soft">Who&apos;s in</p>
             <div className="mt-1 flex flex-wrap gap-2">
               {coming.map((h) => (
-                <label key={h.id} className="pill-check">
+                <label key={h.id} className="choice-check">
                   <input type="checkbox" name="in" value={h.id} defaultChecked={h.gift_in} className="h-4 w-4" />
                   {joinNames(h.names)}
                 </label>
               ))}
             </div>
-            <div className="mt-2"><SaveButton className="btn btn-quiet border border-line bg-white px-4 text-[15px]">Save who&apos;s in</SaveButton></div>
+            <div className="mt-2"><SaveButton className="button-quiet">Save who&apos;s in</SaveButton></div>
           </form>
 
           <div className="mt-5">
@@ -90,14 +90,14 @@ export async function Gifts({ data, token, host, inside = false }: { data: Event
                   {coming.map((h) => <option key={h.id} value={h.id}>{joinNames(h.names)}</option>)}
                 </select>
               ))}
-              <SaveButton className="btn shrink-0 px-4">Add</SaveButton>
+              <SaveButton className="button-quiet shrink-0 min-h-[3.2rem]">Add</SaveButton>
             </form>
             <p className="mt-1 text-[14px] text-soft">A couple who replied together is one giver, so they never draw each other anyway.</p>
           </div>
 
           {event.gift_draw_on && (
             // What's scheduled, and what's already gone out.
-            <ul className="mt-5 space-y-1 rounded-2xl bg-wash p-3 text-[15px]">
+            <ul className="mt-5 space-y-1 border-y border-line py-3 text-[15px]">
               {event.gift_remind_ideas && (
                 <li>Ideas reminder: {shortDate(daysBefore(event.gift_draw_on, 3))}{status("gift_ideas", daysBefore(event.gift_draw_on, 1))}</li>
               )}

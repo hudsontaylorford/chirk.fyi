@@ -205,7 +205,7 @@ async function notifyHost(slug: string, token: string, changed: boolean) {
   for (const addr of to) await sendEmail({ to: addr, ...mail, replyTo: h.email, idempotencyKey: `reply-note-${h.id}-${addr}-${minute}` });
 }
 
-/** "Keep your link": saves an email on a reply and sends the link there. */
+/** "This page is your reply": saves an email on a reply and sends the link there. */
 export async function emailMyReply(slug: string, token: string, _prev: string | null, f: FormData): Promise<string> {
   const email = String(f.get("email") ?? "").trim().toLowerCase().slice(0, 200);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "That email doesn't look right.";

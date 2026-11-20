@@ -296,6 +296,15 @@ The Craigslist version's *look* is great, but its table columns are what make it
 - Multi-day plans.
 - A map *link* (Apple/Google Maps), not a map provider.
 
+**Tools and checks, when they earn their place** (Nov 20, from an outside list; most of it was for bigger apps):
+- **Knip once a season** (`npx knip`): finds unused files and code. First run Nov 20 found almost nothing (scripts and types are expected hits).
+- **A banned-words check in the guard test** (`src/lib/patterns.test.mts`): a few lines that fail if retired words come back ("Delete" for a guest, "Invited", "Hi Sam!"). Does Vale's job without a new tool. Add when the vocabulary table has drifted once.
+- **Host-screen visual baselines** in `scripts/visual.mjs` (Your events, the event host page, New event), so the host side is guarded like the guest side.
+- **A "3-state" pass on each new screen:** empty, waiting, failed. Done for the host pages Nov 20.
+- **Shopify Polaris content guidelines** as the outside reference when wording questions come up (`LANGUAGE.md` stays the house rules).
+- **Lighthouse or axe** on a real deploy when the look changes again (`scripts/a11y.mjs` covers the guest flow today).
+- Skipped on purpose: moving all wording into an i18n file (one language), Storybook (about 30 components), SonarQube, Biome (ESLint already runs), session replay like PostHog or Clarity (it would record guests on private invites).
+
 **Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing, holding or moving money (shared costs only calculate and hand off to Venmo and the like), push notifications, ads.
 
 ## Migration notes (from the Postup chat, Nov 13)

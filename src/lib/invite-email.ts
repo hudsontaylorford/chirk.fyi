@@ -8,16 +8,17 @@ import type { Event } from "./types.ts";
 
 type InviteEvent = Pick<Event, "title" | "date" | "time" | "end_time" | "place" | "address" | "details" | "rsvp_by" | "cover_url"> & { long_times?: boolean; schedule?: string | null; hosted_by?: string | null };
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+import { button, esc, meHtml, meLine, wrap } from "./email-parts.ts";
 
-/** `greeting`: the guest's names on a personal invite ("Hi Sam!" above the title). `meUrl`: chirk.fyi/me, only on invites chirk sends to a guest's own email. */
+/** `greeting`: the guest's names on a personal invite ("Hi Sam, you're invited!" above the title). `meUrl`: chirk.fyi/me, only on invites chirk sends to a guest's own email. */
 export function inviteEmail(e: InviteEvent, url: string, greeting?: string, meUrl?: string) {
   const when = whenText(e);
   const where = [e.place, e.address].filter(Boolean).join(" · ");
   const subject = `You're invited: ${e.title}`;
   const stages = parseSchedule(e.schedule ?? null, e.time, e.long_times);
   const sign = e.hosted_by ? (e.details ? `— ${e.hosted_by}` : `Hosted by ${e.hosted_by}`) : null;
-  const reply = e.rsvp_by ? `Please reply by ${shortDate(e.rsvp_by)}.` : null;
+  // Said once, beside the button: replying takes no account.
+  const reply = [e.rsvp_by && `Please reply by ${shortDate(e.rsvp_by)}.`, "No account needed."].filter(Boolean).join(" ");
 
   const rich = (t: string) =>
     inline(t).map((p) =>
@@ -31,8 +32,7 @@ export function inviteEmail(e: InviteEvent, url: string, greeting?: string, meUr
     ).join(""),
   ).map((b) => `<div style="margin:12px 0 0;">${b}</div>`).join("");
 
-  const html = `<div style="max-width:560px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-${greeting ? `<p style="margin:0 0 12px;font-size:18px;">Hi ${esc(greeting)}, you're invited!</p>` : ""}
+  const html = wrap(`${greeting ? `<p style="margin:0 0 12px;font-size:18px;">Hi ${esc(greeting)}, you're invited!</p>` : ""}
 ${e.cover_url ? `<img src="${esc(e.cover_url)}" alt="" style="display:block;width:100%;max-width:560px;height:auto;border-radius:12px;">` : ""}
 <p style="margin:16px 0 0;font-size:28px;line-height:1.15;font-weight:700;">${esc(e.title)}</p>
 <p style="margin:8px 0 0;font-size:18px;font-weight:600;">${esc(when)}</p>
@@ -40,16 +40,15 @@ ${where ? `<p style="margin:2px 0 0;color:#78716c;">${e.address ? `<a href="${es
 ${stages.length ? `<div style="margin:12px 0 0;">${stages.map((s) => `<p style="margin:2px 0;${s.main ? "font-weight:700;" : ""}"><span style="${s.main ? "" : "color:#78716c;"}">${esc(s.when)}</span>&nbsp;&nbsp;${esc(s.what)}</p>`).join("")}</div>` : ""}
 ${details}
 ${sign ? `<p style="margin:12px 0 0;color:#78716c;">${esc(sign)}</p>` : ""}
-<p style="margin:24px 0 0;"><a href="${esc(url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:999px;">RSVP</a></p>
-${reply ? `<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>` : ""}
-${meUrl ? `<p style="margin:24px 0 0;color:#78716c;font-size:14px;">All your chirk invites: <a href="${esc(meUrl)}" style="color:#78716c;">${esc(meUrl.replace(/^https?:\/\//, ""))}</a></p>` : ""}
-</div>`;
+${button(url, "RSVP", 24)}
+<p style="margin:12px 0 0;color:#78716c;">${esc(reply)}</p>
+${meUrl ? meHtml(meUrl) : ""}`, 560);
 
   const detailsText = parseDetails(e.details ?? "").map((block) =>
     block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1")).join("\n"),
   ).join("\n\n");
   const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
-  const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply ?? "", meUrl ? `\nAll your chirk invites: ${meUrl}` : ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
+  const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply, meUrl ? `\n${meLine(meUrl)}` : ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();
 
   return { subject, html, text };
 }
@@ -58,9 +57,7 @@ ${meUrl ? `<p style="margin:24px 0 0;color:#78716c;font-size:14px;">All your chi
 export function reminderEmail(e: InviteEvent, url: string, names: string) {
   const line = reminderText(e, names);
   const subject = `Can you make ${e.title}?`;
-  const html = `<div style="max-width:560px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.5;">
-<p style="margin:0;">${esc(line)}</p>
-<p style="margin:20px 0 0;"><a href="${esc(url)}" style="display:inline-block;background:#1c1917;color:#ffffff;border:2px solid #ffffff;text-decoration:none;font-weight:600;padding:14px 28px;border-radius:999px;">RSVP</a></p>
-</div>`;
+  const html = wrap(`<p style="margin:0;">${esc(line)}</p>
+${button(url, "RSVP")}`, 560);
   return { subject, html, text: `${line}\n\nRSVP: ${url}` };
 }

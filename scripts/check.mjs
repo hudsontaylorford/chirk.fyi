@@ -216,20 +216,20 @@ assert.match(await h.textContent("main"), /of \d+ replied/);
 await h.click("li:has-text('Yan & Xu') summary:has-text('Send')");
 await h.click("li:has-text('Yan & Xu') button:text-is('Email invite')");
 await h.waitForSelector("li:has-text('Yan & Xu') >> text=Email only sends from the live site.");
-// chirk.fyi/me: a guest signs in with the email on their reply and finds the invite under Invited, then opens it.
+// chirk.fyi/me: a guest signs in with the email on their reply and finds the invite under Your plans, then opens it.
 const yan = await phone();
 await yan.goto(ORIGIN + "/me");
 await yan.fill("input[aria-label='Your email']", "yan@example.com");
 await yan.click("button:text-is('Email me a code')");
 await yan.fill("input[aria-label='Code']", process.env.LOGIN_TEST_CODE ?? "123456");
 await yan.click("button:text-is('Sign in')");
-await yan.waitForSelector("h2:text-is('Invited')");
+await yan.waitForSelector("h1:text-is('Your plans')");
 assert.doesNotMatch(await yan.textContent("main"), /Nothing coming up/);
-await yan.click("section:has(h2:text-is('Invited')) a:has-text('Reply')");
+await yan.click("main section a:has-text('No reply yet')");
 await yan.waitForURL((u) => u.pathname === new URL(kidless).pathname.replace(/\/rsvp$/, ""));
 assert.match(await yan.textContent("header"), /Hi Yan & Xu, you’re invited!/);
 await yan.context().close();
-const zedReply = await h.getAttribute("li:has-text('Zed') a:text-is('Edit')", "href");
+const zedReply = await h.getAttribute("li:has-text('Zed') a:text-is('Edit reply')", "href");
 const z = await phone();
 await z.goto(new URL(zedReply + "/remember?to=invite", h.url()).href);
 assert.equal(new URL(z.url()).pathname, new URL(kidless).pathname.replace(/\/rsvp$/, ""));
@@ -284,7 +284,7 @@ await h.check("input[name=poker_on]");
 await h.click("form:has(input[name=poker_on]) button:text-is('Save')");
 await h.waitForSelector("text=Saved");
 const pokerIn = async (page, who, amount, kind = "buyin") => {
-  await page.click(`label:has(input[name=kind][value=${kind}])`); // the pill is what people tap
+  await page.click(`label:has(input[name=kind][value=${kind}])`); // the choice is what people tap
   if (who) await page.selectOption("select[aria-label=Player]", { label: who });
   await page.fill("input[aria-label='Poker amount']", amount);
   await page.click("form:has(input[aria-label='Poker amount']) button:text-is('Add')");
@@ -349,19 +349,19 @@ assert.match(await h.textContent("main"), /Poker night[\s\S]*In \$100 · Out \$1
 assert.match(await h.textContent("main"), /Lee owes Hudson \$35[\s\S]*Lee owes Sam \$5/);
 // The tiles follow what the event uses: money still owed and the pot, beside coming and replies.
 assert.match(await h.textContent("main"), /\$40\s*still owed\s*2 payments\s*\$100\s*in the pot\s*cashed out ✓/);
-const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit')", "href");
+const leeLink = await h.getAttribute("li:has-text('Lee') a:text-is('Edit reply')", "href");
 const lee = await phone();
 await lee.goto(new URL(leeLink + "/remember?to=invite", h.url()).href);
 assert.match(await lee.textContent("body"), /You owe Hudson \$35[\s\S]*You owe Sam \$5/); // no reply needed to see their share
 assert.equal(await lee.locator("text=Mark paid").count(), 0);
 // Deleting a guest with poker on the event warns what goes with them first.
 await h.goto(pokerHost);
-await h.click("li:has-text('Lee') summary:text-is('Delete')");
-await h.waitForSelector("li:has-text('Lee') [role=alert]:has-text('Deleting them also deletes what they paid and what they owe')");
+await h.click("li:has-text('Lee') summary:text-is('Remove')");
+await h.waitForSelector("li:has-text('Lee') [role=alert]:has-text('Removing them also removes what they paid and what they owe')");
 
 // Message your guests: a separate note to one group, with a confirm step.
 await h.goto(kidless.replace(/\/rsvp$/, "/host"));
-await h.click("button.pill:has-text('Everyone')");
+await h.click("button.choice:has-text('Everyone')");
 // B2: the group says who it reaches (replies, and how many have an email), never a bare "· 0".
 const reachLine = await h.textContent("section:has(h2:text-is('Message your guests'))");
 assert.match(reachLine, /1 email( · \d+ needs? a text)?/);
@@ -407,7 +407,7 @@ await ge.waitForURL(/\/r\//);
 await h.goto(pokerHost);
 assert.match(await h.textContent("main"), /Gil & Eve/); // saved as two people
 // Your events and the event page count the same (couples typed together are two people).
-const tile = Number((await h.locator("div.rounded-2xl:has-text('coming') >> div.text-\\[28px\\]").first().textContent()).trim());
+const tile = Number((await h.locator("main div.text-\\[28px\\]").first().textContent()).trim());
 await h.goto(ORIGIN + "/host");
 assert.match(await h.textContent("li:has-text('Poker test')"), new RegExp(`${tile} coming`));
 await h.goto(pokerHost);
@@ -475,7 +475,7 @@ assert.equal(await a.locator("footer").count(), 1); // a device that has replied
 await h.goto(B + "/host");
 await h.click("text=Copy to next year");
 await h.waitForURL(/\/thanksgiving-2027(-\d+)?\/host$/);
-assert.match(await h.textContent("main"), /Draft\./);
+assert.match(await h.textContent("main"), /· Draft[\s\S]*Only hosts can see a draft/);
 assert.match(await h.textContent("main"), /Check A\s*No reply yet/); // last year's guests come along, unanswered
 assert.match(await h.textContent("main"), /0\s*of \d+ replied/); // the host is going, but hosts aren't counted as replies
 const draftUrl = h.url().replace(/\/host$/, "");
@@ -537,7 +537,7 @@ if (process.env.AI_FAKE === "true" && process.env.RESEND_WEBHOOK_SECRET) {
   assert.ok(slug, "a draft was made");
   assert.equal((await (await phone()).goto(`${ORIGIN}/${slug}`)).status(), 404); // a draft: guests can't see it
   await h.goto(`${ORIGIN}/${slug}/host`);
-  assert.match(await h.textContent("main"), /Draft\. Only hosts can see it/);
+  assert.match(await h.textContent("main"), /Only hosts can see a draft/);
   assert.equal(await h.inputValue("input[name=hosted_by]"), "Hostie & Sam");
   const dupId = `em_dup_${Date.now()}`;
   await post("host@example.com", dupId);
@@ -619,7 +619,7 @@ assert.equal(await h.locator("li:has-text('→')").first().isVisible(), false); 
 await openRow(h, "Gift exchange");
 await h.click("summary:has-text('Trouble with the draw?')");
 assert.equal(await h.locator("#gifts li:has-text('→')").count(), 5); // …only tucked into the gift exchange settings
-const annLink = await h.getAttribute("li:has-text('Ann') a:text-is('Edit')", "href");
+const annLink = await h.getAttribute("li:has-text('Ann') a:text-is('Edit reply')", "href");
 const ann = await phone();
 await ann.goto(new URL(annLink + "/remember?to=invite", h.url()).href);
 const match = (await ann.textContent("section:has(h2:has-text('Gift exchange'))")).match(/giving a gift to(.+?)(Their ideas|They haven)/)[1].trim();
@@ -633,7 +633,7 @@ await h.goto(giftHost);
 await h.click("button:text-is('Email everyone their match')");
 await h.waitForSelector("text=Email only sends from the live site.");
 assert.equal(await h.locator("text=giving a gift to").count(), 0); // hosts aren't spoiled
-await h.click("label.pill-check:has-text('Cal')"); // untick Cal
+await h.click("label.choice-check:has-text('Cal')"); // untick Cal
 await h.click('button:has-text("Save who")');
 await h.waitForSelector("text=draw again to include everyone");
 

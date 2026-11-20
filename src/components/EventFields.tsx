@@ -132,7 +132,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
       <FormDraft id={event ? `edit:${event.slug}` : start ? `new:${start.id}` : "new"} />
       {/* New events start with the essentials open (they're required); existing ones show them as a row. */}
       {!event && basics}
-      <div className="divide-y divide-line rounded-2xl border border-line bg-white">
+      <div className="divide-y divide-line border-y border-line">
         {event && (
           <Row id="basics" label="Basics" value={[when(event), event.place].filter(Boolean).join(" · ")}>{basics}</Row>
         )}
@@ -154,7 +154,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
         {advanced.filter((r) => r.on).map((r) => r.row)}
         {advanced.some((r) => !r.on) && (
           <Row id="more" label="More options" value={advanced.filter((r) => !r.on).map((r) => r.label).join(", ")}>
-            <div className="-mx-4 -mb-4 divide-y divide-line border-t border-line">{advanced.filter((r) => !r.on).map((r) => r.row)}</div>
+            <div className="-mb-4 divide-y divide-line border-t border-line pl-4">{advanced.filter((r) => !r.on).map((r) => r.row)}</div>
           </Row>
         )}
       </div>
@@ -165,7 +165,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
 /** One optional part of the event: a single line with its current setting; tap to open. */
 function Row({ id, label, value, children }: { id: string; label: string; value: string; children: React.ReactNode }) {
   return (
-    <details id={id} className="px-4">
+    <details id={id}>
       <summary className="flex min-h-[52px] cursor-pointer list-none items-center justify-between gap-3 py-2 [&::-webkit-details-marker]:hidden">
         <span className="shrink-0 text-[16px] font-semibold">{label}</span>
         <span className="flex min-w-0 items-center gap-2 text-[15px] text-soft">
@@ -178,7 +178,7 @@ function Row({ id, label, value, children }: { id: string; label: string; value:
   );
 }
 
-export function Field({
+function Field({
   label, name, value, type = "text", required, placeholder,
 }: { label: string; name: string; value?: string | null; type?: string; required?: boolean; placeholder?: string }) {
   return (

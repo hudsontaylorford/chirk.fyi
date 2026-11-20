@@ -30,7 +30,7 @@ export default async function YourRsvp({
 
   return (
     <>
-    <main className="guest mx-auto max-w-lg px-5 pt-4 pb-12">
+    <main className="mx-auto max-w-lg px-5 pt-4 pb-12">
 
       {h.going === null ? (
         // A named guest who hasn't answered: say hi, and the reply form is right here with their names in it.

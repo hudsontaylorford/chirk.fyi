@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 
 /** A form's submit button that says "Saving…" while working and "Saved ✓" when done. */
-export function SaveButton({ children, className = "btn" }: { children: React.ReactNode; className?: string }) {
+export function SaveButton({ children, className = "button" }: { children: React.ReactNode; className?: string }) {
   const { pending } = useFormStatus();
   const [saved, setSaved] = useState(false);
   const was = useRef(false);

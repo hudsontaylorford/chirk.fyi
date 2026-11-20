@@ -24,7 +24,7 @@ export function GuestSend({ event, token, names, email, emailInvite, emailRemind
   const url = () => `${location.origin}/${event.slug}/r/${token}/remember?to=invite`;
 
   async function copy(what: string, write: () => Promise<boolean>) {
-    setCopied((await write()) ? `${what} copied ✓` : "Couldn't copy");
+    setCopied((await write()) ? `${what} copied ✓` : "Couldn’t copy");
     setTimeout(() => setCopied(null), 3000);
   }
   const text = (t: string) => navigator.clipboard.writeText(t).then(() => true, () => false);
@@ -32,25 +32,25 @@ export function GuestSend({ event, token, names, email, emailInvite, emailRemind
 
   return (
     <details className="group mt-2">
-      <summary className="inline cursor-pointer list-none text-[15px] font-semibold underline underline-offset-2 [&::-webkit-details-marker]:hidden">
-        Send <span aria-hidden className="inline-block transition-transform group-open:rotate-90">›</span>
+      <summary className="link tap cursor-pointer list-none text-[15px] font-semibold [&::-webkit-details-marker]:hidden">
+        Send invite
       </summary>
-      <div className="mt-2 space-y-3 rounded-2xl bg-wash p-3">
+      <div className="mb-2 space-y-2 border-l-2 border-line pl-3">
         <form className="space-y-2">
           {!email && <input name="email" type="email" className="field" placeholder="Their email" aria-label={`Email for ${names}`} />}
           <div className="flex flex-wrap gap-2">
-            <button formAction={invite} disabled={busy} className="btn px-4 text-[15px]">{inviting ? "Sending…" : "Email invite"}</button>
-            <button formAction={remind} disabled={busy} className="btn btn-quiet border border-line bg-white px-4 text-[15px]">{reminding ? "Sending…" : "Email reminder"}</button>
+            <button formAction={invite} disabled={busy} className="button-quiet text-[15px]">{inviting ? "Sending…" : "Email invite"}</button>
+            <button formAction={remind} disabled={busy} className="button-quiet text-[15px]">{reminding ? "Sending…" : "Email reminder"}</button>
           </div>
           {(invited || reminded) && <p role="status" className="text-[14px] text-soft">{reminded && !invited ? reminded : invited}{invited && reminded ? ` · ${reminded}` : ""}</p>}
         </form>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="pill px-3 py-1.5 text-[15px]" onClick={() => {
+        <div className="flex flex-wrap gap-x-4 text-[15px]">
+          <button type="button" className="link tap" onClick={() => {
             const { html, text: plain } = inviteEmail({ ...event, cover_url: coverOk ? event.cover_url : null }, url(), names);
             copy("Email", () => copyRich(html, plain));
           }}>Copy email</button>
-          <button type="button" className="pill px-3 py-1.5 text-[15px]" onClick={() => copy("Link", () => text(url()))}>Copy link</button>
-          <button type="button" className="pill px-3 py-1.5 text-[15px]" onClick={() => copy("Reminder", () => text(reminderText(event, names, url())))}>Copy reminder</button>
+          <button type="button" className="link tap" onClick={() => copy("Link", () => text(url()))}>Copy link</button>
+          <button type="button" className="link tap" onClick={() => copy("Reminder", () => text(reminderText(event, names, url())))}>Copy reminder</button>
         </div>
         {copied && <p role="status" className="text-[14px] text-soft">{copied}</p>}
       </div>
