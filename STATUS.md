@@ -18,7 +18,7 @@ Everything up to Nov 16's "fixes-3":
 - **One look on every page (Stage 6):** host pages, sign-in, New event, costs, poker and gifts now use the v1 patterns: no black pills or gray boxes, hairlines, 8px corners, one primary per screen (Share invite or Publish; Save on the form), links for everything else, gray Remove / Delete then a red Sure?. + New event is a link beside Your events. The old utilities are gone and the guard test checks every screen.
 - **Newcomer wording:** "No account needed." beside RSVP (page and invite email); "This page is your reply" after replying; "Every invite you get, in one place: chirk.fyi/me" in emails; sign-in is "Sign in to chirk"; /me with only invites says "Your plans".
 - **One vocabulary:** Remove (guests) vs Delete (events), View invite, Edit reply, Send invite, "Hi Sam," in every email, Your plans for invites. Emails share one button (8px, like the site).
-- **Audit, color comparison and Hannah walkthrough:** `docs/UX_COHERENCE_NOV20.md`. Brand color still monochrome; recommendation is chirk blue `#1F4FD8` (one line to switch).
+- **Audit, color comparison and Hannah walkthrough:** `docs/UX_COHERENCE_NOV20.md`. **Brand color: slate blue `#3d5a99`** (Hudson, Nov 20) for links, focus and picked choices; buttons stay black; emails unchanged.
 - No behavior change, no database step. Checks: unit tests, `npm run check`, a11y all pass; guest baselines re-captured.
 
 ## Went live Nov 18 (`me`)

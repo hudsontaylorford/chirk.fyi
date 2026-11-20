@@ -5,7 +5,7 @@
   --color-ink: #1c1917;
   --color-soft: #78716c;
   --color-line: #e7e5e4;
-  --color-accent: #1c1917; /* links, focus, picked choices. Ink for now; the brand color goes here. Never a fill. */
+  --color-accent: #3d5a99; /* slate blue (Nov 20): links, focus, picked choices. Never a fill. 6.7:1 on white. */
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 

@@ -26,7 +26,7 @@ test("every screen uses only the frozen patterns", () => {
 
 test("the accent stays one value, and no surface uses it", () => {
   const css = readFileSync("src/app/globals.css", "utf8");
-  assert.match(css, /--color-accent: #1c1917;/, "accent is ink until a brand color is chosen");
+  assert.match(css, /--color-accent: #3d5a99;/, "the accent is slate blue (changing it needs Hudson's OK)");
   const v2 = css.slice(css.indexOf("chirk v1 patterns"));
   assert.doesNotMatch(v2, /background(-color)?:\s*var\(--color-accent\)/, "accent is never a fill");
 });

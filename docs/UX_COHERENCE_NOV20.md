@@ -50,7 +50,11 @@ Rendered on the real screens (invite, RSVP with a picked item and a focused fiel
 | Emails | ink button, gray links | ink button, blue links | ink button, blue links |
 | Picture | ![](color/color-mono.png) | ![](color/color-chirkblue.png) | ![](color/color-linkblue.png) |
 
-**Recommendation: B.** It keeps the early-web meaning (blue = a link) and reads as deliberate rather than default. Literal `#0000EE` is very saturated next to warm grays and looks like an unstyled page on phones. Monochrome works, but then links and plain bold text look alike on the host page, which is now mostly links. Whichever is picked is one line (`--color-accent`) plus one guard-test line; this change ships monochrome.
+**Decided Nov 20: slate blue `#3d5a99`** (6.7:1 on white), Hudson's call, a quieter cousin of B. Shipped for links, focus and picked choices; the primary stays ink. Emails, the wordmark and the spark are unchanged for now (ink).
+
+![](color/color-slate.png)
+
+The original recommendation was B. It keeps the early-web meaning (blue = a link) and reads as deliberate rather than default. Literal `#0000EE` is very saturated next to warm grays and looks like an unstyled page on phones. Monochrome works, but then links and plain bold text look alike on the host page, which is now mostly links. Whichever is picked is one line (`--color-accent`) plus one guard-test line.
 
 ## 4. Newcomer language: three facts, said once each
 

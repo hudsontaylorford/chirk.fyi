@@ -18,7 +18,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 2. **One primary action per screen**, only when there's a real next step. On host pages: **Share invite** when live, **Publish** when draft. A form's own submit (Save, Create event) is its primary.
 3. **Green means Going**, only. Live is the normal state and gets no badge.
 4. **Photos are never cropped**, on any screen.
-5. **No color but the tokens.** The accent is ink until a brand color is chosen.
+5. **No color but the tokens.** The accent (slate blue) means "you can tap this" or "this is picked".
 
 ## 2. Tokens
 
@@ -27,7 +27,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 | `--color-ink` | #1c1917 | text, the primary button |
 | `--color-soft` | #78716c | secondary text: hints, signatures, dates in lists |
 | `--color-line` | #e7e5e4 | hairlines; outlines of fields, choices, quiet buttons |
-| `--color-accent` | #1c1917 (ink, for now) | links, focus rings, picked choices. **The brand color goes here later. Never a fill or surface.** |
+| `--color-accent` | #3d5a99 (slate blue, Nov 20) | links, focus rings, picked choices. **Never a fill or surface.** |
 | page | white | background |
 | status | green-700 (Going), amber, red-800 on red-50 (alerts) | only where they mean something |
 
