@@ -178,7 +178,7 @@ function Row({ id, label, value, children }: { id: string; label: string; value:
   );
 }
 
-export function Field({
+function Field({
   label, name, value, type = "text", required, placeholder,
 }: { label: string; name: string; value?: string | null; type?: string; required?: boolean; placeholder?: string }) {
   return (

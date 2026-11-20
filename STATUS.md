@@ -19,6 +19,7 @@ Everything up to Nov 16's "fixes-3":
 - **Newcomer wording:** "No account needed." beside RSVP (page and invite email); "This page is your reply" after replying; "Every invite you get, in one place: chirk.fyi/me" in emails; sign-in is "Sign in to chirk"; /me with only invites says "Your plans".
 - **One vocabulary:** Remove (guests) vs Delete (events), View invite, Edit reply, Send invite, "Hi Sam," in every email, Your plans for invites. Emails share one button (8px, like the site).
 - **Audit, color comparison and Hannah walkthrough:** `docs/UX_COHERENCE_NOV20.md`. **Links are slate blue `#3d5a99`** (Hudson, Nov 20); everything else, including focus, picked choices and buttons, stays black. Emails unchanged.
+- Also: a plain "Something went wrong / Try again" page instead of the framework's blank error; a clearer empty guest list; Knip run (two needless exports removed); useful-later tools added to ROADMAP.md.
 - No behavior change, no database step. Checks: unit tests, `npm run check`, a11y all pass; guest baselines re-captured.
 
 ## Went live Nov 18 (`me`)

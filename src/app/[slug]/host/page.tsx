@@ -179,7 +179,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         />
       )}
       <ul className="mt-3 divide-y divide-line border-y border-line">
-        {households.length === 0 && <li className="py-3 text-soft">Nobody yet.</li>}
+        {households.length === 0 && <li className="py-3 text-soft">Nobody yet. Add guests above, or share the invite: replies show up here.</li>}
         {households.map((h) => {
           const bringing = list.claimed.filter((r) => r.households.includes(h.id)).map((r) => r.item.name);
           return (
