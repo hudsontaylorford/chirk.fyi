@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Ready, not live yet (`polls`): needs the SQL below first
+## Went live Nov 21 (`polls`)
 - **Polls:** one question per event, in the event form's new Poll row (under More options until it's set): a question and its choices, one per line (up to 10). Anyone replying, Going or not, can pick any in the RSVP form. The invite shows each choice with its vote count and a Vote link; the host page shows the counts and who picked what (Edit poll opens the row); the guest's own page says what they picked. Copy to next year keeps the poll, not the votes. Clearing the question turns it off.
 - Database: `events.poll_question`, `events.poll_choices`, `households.poll` (in `db/schema.sql`).
 - Not built: votes in the reply email to hosts, voting without replying, single-choice polls.
