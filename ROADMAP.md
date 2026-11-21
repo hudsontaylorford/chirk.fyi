@@ -305,6 +305,13 @@ The Craigslist version's *look* is great, but its table columns are what make it
 - **Lighthouse or axe** on a real deploy when the look changes again (`scripts/a11y.mjs` covers the guest flow today).
 - Skipped on purpose: moving all wording into an i18n file (one language), Storybook (about 30 components), SonarQube, Biome (ESLint already runs), session replay like PostHog or Clarity (it would record guests on private invites).
 
+**From the app comparison (Nov 21: Partiful, Apple Invites, Luma, Paperless Post, Greenvelope, Evite).**
+- **Text invite** (built Nov 21): Send invite on a guest opens Messages with their personal link; chirk keeps no phone numbers and sends no texts itself.
+- **Polls** ("which date works?", "pizza or tacos?"): Hudson's keen. One question, a few choices, guests tap; lives on the invite, ideally before a date is set.
+- **Photo album after the event:** guests add photos to one shared page. Needs storage limits and a way for hosts to remove a photo.
+- **A second theme, later:** default, plus one classier look (a solid color background, a script font for the title). Two choices only, picked in the event form.
+- Skipped from them: reactions and comment feeds, ticketing, approvals and waitlists, envelope animations, design catalogs (the poster you make in Canva is the design).
+
 **Never (on purpose).** Chat or comments, an algorithmic feed, likes or follower counts, ticketing, holding or moving money (shared costs only calculate and hand off to Venmo and the like), push notifications, ads.
 
 ## Migration notes (from the Postup chat, Nov 13)

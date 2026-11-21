@@ -16,6 +16,11 @@ export function parseGuests(text: string) {
 }
 
 /** A short nudge for someone who hasn't answered, for a text or an email. */
+/** A personal invite as a text message, sent from the host's own phone. */
+export function inviteText(e: { title: string; date: string }, names: string, url: string) {
+  return `Hi ${names}! You’re invited to ${e.title} on ${longDate(e.date)}. RSVP here: ${url}`;
+}
+
 export function reminderText(e: { title: string; date: string; rsvp_by: string | null }, names: string, url?: string) {
   const by = e.rsvp_by ? ` by ${longDate(e.rsvp_by)}` : "";
   return `Hi ${names}, can you make ${e.title} on ${longDate(e.date)}? ${url ? `Let us know here${by}: ${url}` : `Let us know${by}.`}`;

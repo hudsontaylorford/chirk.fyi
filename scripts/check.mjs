@@ -214,6 +214,8 @@ await h.waitForSelector("li:has-text('Yan & Xu')");
 assert.match(await h.textContent("main"), /Zed\s*No reply yet/);
 assert.match(await h.textContent("main"), /of \d+ replied/);
 await h.click("li:has-text('Yan & Xu') summary:has-text('Send')");
+// Text invite / Text reminder open Messages (sms:) with their personal link; nothing to check past the buttons here.
+assert.equal(await h.locator("li:has-text('Yan & Xu') button:text-is('Text invite')").count(), 1);
 await h.click("li:has-text('Yan & Xu') button:text-is('Email invite')");
 await h.waitForSelector("li:has-text('Yan & Xu') >> text=Email only sends from the live site.");
 // chirk.fyi/me: a guest signs in with the email on their reply and finds the invite under Your plans, then opens it.

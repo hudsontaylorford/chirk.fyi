@@ -14,7 +14,11 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 20, `unify`)
+## Ready, not live yet (`text-invite`)
+- **Text invite / Text reminder:** in a guest's Send invite, two buttons open Messages on the phone with a personal note and their own link filled in ("Hi Sam! You’re invited to Thanksgiving 2026 on Thursday, November 26. RSVP here: …"); you pick who it goes to. chirk keeps no phone numbers and sends no texts. No database step.
+- Roadmap (ROADMAP.md): polls, a photo album, and a second "classy" theme, from the Nov 21 app comparison.
+
+## Went live Nov 20 (`unify`, merged as PR 1)
 - **One look on every page (Stage 6):** host pages, sign-in, New event, costs, poker and gifts now use the v1 patterns: no black pills or gray boxes, hairlines, 8px corners, one primary per screen (Share invite or Publish; Save on the form), links for everything else, gray Remove / Delete then a red Sure?. + New event is a link beside Your events. The old utilities are gone and the guard test checks every screen.
 - **Newcomer wording:** "No account needed." beside RSVP (page and invite email); "This page is your reply" after replying; "Every invite you get, in one place: chirk.fyi/me" in emails; sign-in is "Sign in to chirk"; /me with only invites says "Your plans".
 - **One vocabulary:** Remove (guests) vs Delete (events), View invite, Edit reply, Send invite, "Hi Sam," in every email, Your plans for invites. Emails share one button (8px, like the site).
