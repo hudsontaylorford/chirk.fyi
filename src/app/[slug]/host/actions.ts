@@ -14,6 +14,7 @@ import { inviteEmail, reminderEmail } from "@/lib/invite-email";
 import { messageEmail } from "@/lib/message-email";
 import { ownerEmail } from "@/lib/jobs";
 import { fromEvent } from "@/lib/templates";
+import { pollChoices } from "@/lib/poll";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -79,6 +80,8 @@ const eventFields = (f: FormData) => ({
   gift_remind_ideas: f.get("gift_remind_ideas") === "on",
   gift_remind_givers: f.get("gift_remind_givers") === "on",
   remind_replies: f.get("remind_replies") === "on",
+  poll_question: val(f, "poll_question").slice(0, 120) || null,
+  poll_choices: pollChoices(val(f, "poll_choices")).join("\n") || null,
 });
 
 
@@ -95,7 +98,7 @@ export async function copyToNextYear(slug: string) {
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
       (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
-      (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies
+      (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies, poll_question, poll_choices
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
+import { pollOf } from "@/lib/poll";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText, mapsUrl, when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
@@ -27,6 +28,8 @@ export default async function YourRsvp({
 
   const { choices, picks, own, bringing } = bringChoices(data, h.id);
   const parts = partsOf(data.event, h);
+  const poll = pollOf(data.event);
+  const voted = poll ? (h.poll ?? []).filter((c) => poll.choices.includes(c)) : [];
 
   return (
     <>
@@ -50,10 +53,11 @@ export default async function YourRsvp({
           notesPublic={data.event.notes_public}
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
+          poll={poll}
           choices={choices}
           prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, parts, poll: h.poll ?? [], note: h.note ?? "",
             picks, own,
           }}
         />
@@ -92,6 +96,14 @@ export default async function YourRsvp({
         </p>
       )}
 
+      {/* Their vote, so it's clear it counted. Not limited to Going: a poll can ask before anyone knows. */}
+      {poll && (
+        <p className="mt-4 text-[17px]">
+          {poll.question}{" "}
+          {voted.length ? <strong>{listText(voted)}</strong> : <a href="?change=1" className="link tap">Vote</a>}
+        </p>
+      )}
+
       <details className="group mt-2" open={changing}>
         <summary className="link tap cursor-pointer list-none text-[17px] group-open:hidden [&::-webkit-details-marker]:hidden">Change my reply</summary>
         <div className="mt-8 border-t border-line pt-6">
@@ -105,10 +117,11 @@ export default async function YourRsvp({
           notesPublic={data.event.notes_public}
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
+          poll={poll}
           choices={choices}
           prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, parts, note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, parts, poll: h.poll ?? [], note: h.note ?? "",
             picks, own,
           }}
         />

@@ -34,6 +34,8 @@ export interface Event {
   gift_remind_ideas: boolean;
   gift_remind_givers: boolean;
   remind_replies: boolean;
+  poll_question: string | null; // the invite's one poll; null = none
+  poll_choices: string | null; // one per line
 }
 
 export interface Household {
@@ -50,6 +52,7 @@ export interface Household {
   venmo: string | null;
   gift_in: boolean;
   gift_wish: string | null;
+  poll: string[] | null; // the poll choices they picked
 }
 
 export interface Item {

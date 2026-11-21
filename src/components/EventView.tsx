@@ -2,6 +2,7 @@ import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
 import { headcount, mapsUrl, shortDate, when } from "@/lib/format";
+import { pollOf, tally } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
@@ -12,6 +13,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
   const people = going.reduce((n, h) => n + headcount(h.names) + h.kids, 0);
   const { claimed, open } = bringList(data);
   const stages = parseSchedule(event.schedule, event.time, event.long_times);
+  const poll = pollOf(event);
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);
 
   return (
@@ -58,6 +60,22 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
           <Details text={event.details} />
           {/* The message is signed by whoever's hosting, so it reads as a note from them. */}
           {event.hosted_by && <p className="text-soft">— {event.hosted_by}</p>}
+        </section>
+      )}
+
+      {/* The poll: counts only (who picked what is on the host page). Voting happens in the reply. */}
+      {poll && (
+        <section className="mt-10 px-5">
+          <h2 className="text-[20px] font-bold">{poll.question}</h2>
+          <ul className="mt-3 divide-y divide-line border-y border-line">
+            {tally(poll.choices, households).map((t) => (
+              <li key={t.choice} className="flex justify-between gap-3 py-3 text-[17px]">
+                <span>{t.choice}</span>
+                <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>
+              </li>
+            ))}
+          </ul>
+          {rsvpHref && <a href={replied ? `${rsvpHref}?change=1` : rsvpHref} className="link tap text-[16px]">Vote</a>}
         </section>
       )}
 

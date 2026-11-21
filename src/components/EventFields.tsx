@@ -5,6 +5,7 @@ import { FormDraft } from "@/components/FormDraft";
 import { PlaceFields } from "@/components/PlaceFields";
 import { placesOn } from "@/lib/places-provider";
 import { shortDate, when } from "@/lib/format";
+import { pollChoices } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { Template } from "@/lib/templates";
 import type { Event } from "@/lib/types";
@@ -51,6 +52,20 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
                   <Check name="ask_arrival" checked={e?.ask_arrival ?? false} label="Ask guests which parts they're coming to" />
                   <Check name="long_times" checked={e?.long_times ?? false} label="Write times as 3:00 PM" />
                 </Row>
+      ),
+    },
+    {
+      label: "Poll",
+      on: !!e?.poll_question,
+      row: (
+        <Row key="poll" id="poll" label="Poll" value={e?.poll_question ? `${pollChoices(e.poll_choices ?? null).length} choices` : "Add one"}>
+          <Field label="Question" name="poll_question" value={e?.poll_question} placeholder="e.g. Which Saturday works?" />
+          <label className="block">
+            <span className="text-[15px] text-soft">Choices</span>
+            <textarea name="poll_choices" defaultValue={e?.poll_choices ?? ""} rows={4} className="field mt-1" aria-label="Poll choices" placeholder={"Option one\nOption two\nOption three"} />
+            <span className="text-[14px] text-soft">One per line. Guests pick any when they reply; everyone sees the counts on the invite.</span>
+          </label>
+        </Row>
       ),
     },
     {

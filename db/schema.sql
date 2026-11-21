@@ -45,6 +45,8 @@ begin
     gift_remind_ideas boolean not null default true,  -- nudge to add ideas 3 days before the draw
     gift_remind_givers boolean not null default true, -- nudge givers a week before the event
     remind_replies boolean not null default false,    -- nudge anyone who hasn't replied, 3 days before reply-by
+    poll_question text,                  -- one poll on the invite: null = none
+    poll_choices text,                   -- its choices, one per line
     created_at timestamptz not null default now()
   );
 
@@ -63,6 +65,7 @@ begin
     venmo text,                          -- their Venmo username, so people can pay them back
     gift_in boolean not null default true,        -- in the gift exchange (when the event has one)
     gift_wish text,                      -- gift ideas for whoever draws them
+    poll text[],                         -- the poll choices they picked
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -238,5 +241,9 @@ begin
     where i.household_id is not null and not exists (select 1 from claims c where c.item_id = i.id)
     on conflict do nothing;
   update items set household_id = null where kind = 'needed' and household_id is not null;
+  -- Nov 21: polls.
+  alter table events add column if not exists poll_question text;
+  alter table events add column if not exists poll_choices text;
+  alter table households add column if not exists poll text[];
 end
 $setup$;

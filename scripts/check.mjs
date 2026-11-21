@@ -185,6 +185,28 @@ await h.reload();
 assert.match(await h.textContent("main"), /Coming to each part\s*Bagels\s*0\s*Snacks & wine\s*1\s*Dinner\s*0\s*Leftovers\s*1\s*Didn't say\s*\d+/);
 assert.match(await h.textContent("main"), /Coming to Snacks & wine · Leftovers/);
 
+// A poll: the host asks one question; anyone replying (even Can't make it) picks any; the invite shows counts, the host sees names.
+await h.reload();
+await openRow(h, "Poll");
+await h.fill("input[name=poll_question]", "Which day works?");
+await h.fill("textarea[name=poll_choices]", "Sat\nSun\nsat");
+await h.click("form:has(input[name=poll_question]) button:text-is('Save')");
+await h.waitForSelector("text=Saved");
+const voter = await phone();
+await voter.goto(kidless);
+await voter.click("button.choice:text-is('Can’t make it')");
+await voter.fill('input[aria-label="Your name"]', "Poll Voter");
+assert.equal(await voter.locator("button.choice:text-is('Sat')").count(), 1); // "sat" was a repeat
+await voter.click("button.choice:text-is('Sun')");
+await voter.click("text=Send RSVP");
+await voter.waitForURL(/\/r\//);
+assert.match(await voter.textContent("main"), /Which day works\? Sun/);
+await voter.goto(kidless.replace(/\/rsvp$/, ""));
+assert.match(await voter.textContent("main"), /Which day works\?\s*Sat\s*0 votes\s*Sun\s*1 vote(?!s)/);
+await voter.context().close();
+await h.reload();
+assert.match(await h.textContent("main"), /Which day works\?\s*Edit poll\s*Sat\s*0\s*Sun\s*1\s*Poll Voter/);
+
 // Half-typed new events survive a reload, and Discard clears them.
 await h.goto(B.replace("/thanksgiving-2026", "/host"));
 await h.goto(B.replace("/thanksgiving-2026", "/host/new"));

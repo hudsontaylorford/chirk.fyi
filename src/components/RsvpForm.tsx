@@ -15,6 +15,7 @@ export interface RsvpFormProps {
   notesPublic: boolean;
   maxGuests: number | null; // extra people per reply; null = no limit
   arrivals: string[]; // parts of the day they can pick; empty = don't ask
+  poll: { question: string; choices: string[] } | null; // the event's poll; anyone replying can pick any
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
   /** From the invite: an item tapped under Still needed (already picked), or "+ Bring something else" (focus that box). */
@@ -26,13 +27,14 @@ export interface RsvpFormProps {
     going: boolean | null; // null = named guest who hasn't answered yet
     kids: number;
     parts: string[];
+    poll: string[];
     note: string;
     picks: string[];
     own: string[];
   };
 }
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, choices, prePick, ownFirst, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, poll, choices, prePick, ownFirst, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
@@ -42,6 +44,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
   const [parts, setParts] = useState<string[]>(initial?.parts ?? []);
+  const [votes, setVotes] = useState<string[]>(initial?.poll ?? []);
   const [picks, setPicks] = useState<string[]>(() => [...new Set([...(initial?.picks ?? []), ...(prePick && choices.some((c) => c.id === prePick) ? [prePick] : [])])]);
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
@@ -67,7 +70,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
     if (going === null) { document.getElementById("going-yes")?.focus(); return setError({ text: "Pick Going or Can’t make it." }); }
     if (!names.some((n) => n.trim())) { document.getElementById("name-0")?.focus(); return setError({ text: "Add your name." }); }
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, parts,
+      slug, token: initial?.token, names, going, kids, note, parts, poll: votes,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
@@ -129,6 +132,16 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
           )}
         </div>
       </Q>
+
+      {poll && (
+        <Q label={poll.question} hint="Pick any.">
+          <div className="flex flex-wrap gap-2">
+            {poll.choices.map((c) => (
+              <button key={c} type="button" className="choice" aria-pressed={votes.includes(c)} onClick={() => setVotes(votes.includes(c) ? votes.filter((v) => v !== c) : [...votes, c])}>{c}</button>
+            ))}
+          </div>
+        </Q>
+      )}
 
       {going && (
         <>
