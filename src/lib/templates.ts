@@ -7,7 +7,7 @@ export type Template = { id: string; label: string; set: Partial<Event>; items?:
 /** What a saved template keeps from an event: settings, wording, times, place and photo. Never the title, dates or guests. */
 export const TEMPLATE_FIELDS = [
   "time", "end_time", "place", "address", "hosted_by", "details", "cover_url", "schedule", "ask_arrival", "long_times",
-  "bring_prompt", "allow_own", "allow_doubles", "remind_replies", "note_prompt", "note_hint", "notes_public", "max_guests",
+  "bring_prompt", "allow_own", "allow_doubles", "remind_replies", "note_prompt", "note_hint", "notes_public", "hide_guests", "max_guests",
   "ask_kids", "notify_host", "costs_on", "poker_on", "gift_on", "gift_budget", "gift_rules", "gift_remind_ideas", "gift_remind_givers",
 ] as const satisfies readonly (keyof Event)[];
 

@@ -9,7 +9,7 @@ import { parseSchedule, partChoices, partsFromArrival } from "./schedule.ts";
  */
 export async function getEvent(slug: string, forGuest = false) {
   const [e] = await sql<Event[]>`
-    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules, gift_never, gift_draw_on::text, gift_remind_ideas, gift_remind_givers, remind_replies, poll_question, poll_choices
+    select id, slug, title, date::text, time::text, end_time::text, place, address, details, rsvp_by::text, cover_url, bring_prompt, status, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, hide_guests, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules, gift_never, gift_draw_on::text, gift_remind_ideas, gift_remind_givers, remind_replies, poll_question, poll_choices
     from events where slug = ${slug}`;
   if (!e || (forGuest && e.status === "draft" && !(await hostRole(slug)))) return null;
   if (forGuest && !e.hosted_by) {
@@ -61,7 +61,7 @@ export function bringChoices(data: EventData, householdId?: string) {
     choices: [
       ...open.map((i) => ({ id: i.id, name: i.name, by: null as string | null })),
       ...mine.filter((r) => !ownAdded(r)).map((r) => ({ id: r.item.id, name: r.item.name, by: null })),
-      ...(data.event.allow_doubles ? others.map((r) => ({ id: r.item.id, name: r.item.name, by: r.who })) : []),
+      ...(data.event.allow_doubles ? others.map((r) => ({ id: r.item.id, name: r.item.name, by: data.event.hide_guests ? null : r.who })) : []),
     ],
     picks: mine.filter((r) => !ownAdded(r)).map((r) => r.item.id),
     own: mine.filter(ownAdded).map((r) => r.item.name),

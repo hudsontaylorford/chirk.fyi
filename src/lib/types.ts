@@ -19,6 +19,7 @@ export interface Event {
   allow_doubles: boolean;
   allow_own: boolean;
   notes_public: boolean;
+  hide_guests: boolean; // guests don't see who's coming
   max_guests: number | null; // extra people per reply; null = no limit
   schedule: string | null; // one stage per line, time first
   ask_arrival: boolean;

@@ -30,6 +30,7 @@ begin
     allow_doubles boolean not null default false, -- several people can bring the same thing
     allow_own boolean not null default true,      -- guests can add things that aren't on the list
     notes_public boolean not null default false,  -- show notes on the invite
+    hide_guests boolean not null default false,   -- guests don't see who's coming (hosts still do)
     max_guests int,                      -- extra people per reply: null = no limit, 0 = just them
     schedule text,                       -- all-day events: one stage per line, time first
     ask_arrival boolean not null default false,   -- ask guests which stage they're coming for
@@ -245,5 +246,7 @@ begin
   alter table events add column if not exists poll_question text;
   alter table events add column if not exists poll_choices text;
   alter table households add column if not exists poll text[];
+  -- Nov 22: hide the guest list.
+  alter table events add column if not exists hide_guests boolean not null default false;
 end
 $setup$;

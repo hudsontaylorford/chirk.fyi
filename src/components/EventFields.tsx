@@ -20,6 +20,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
   const stages = parseSchedule(e?.schedule ?? null, e?.time ?? null).length;
   const extras = [
     e?.notes_public && "notes on invite",
+    e?.hide_guests && "guest list hidden",
     e?.max_guests != null && (e.max_guests === 0 ? "no extra guests" : `up to ${e.max_guests} extra`),
     e?.ask_kids && "kids",
     e?.notify_host && "email me",
@@ -78,6 +79,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
             <Field label="Its example" name="note_hint" value={e?.note_hint} placeholder="Allergies, arriving late…" />
           </div>
           <Check name="notes_public" checked={e?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
+          <Check name="hide_guests" checked={e?.hide_guests ?? false} label="Hide who’s coming (only you see the list)" />
           <label className="block">
             <span className="text-[15px] text-soft">Extra guests per reply</span>
             <select name="max_guests" defaultValue={e?.max_guests ?? ""} className="field mt-1">

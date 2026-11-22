@@ -14,6 +14,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
   const { claimed, open } = bringList(data);
   const stages = parseSchedule(event.schedule, event.time, event.long_times);
   const poll = pollOf(event);
+  const hide = event.hide_guests; // the host keeps the list to themselves: no names or counts
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);
 
   return (
@@ -63,7 +64,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
         </section>
       )}
 
-      {/* The poll: counts only (who picked what is on the host page). Voting happens in the reply. */}
+      {/* The poll: counts only, unless the list is hidden (who picked what is on the host page). Voting happens in the reply. */}
       {poll && (
         <section className="mt-10 px-5">
           <h2 className="text-[20px] font-bold">{poll.question}</h2>
@@ -71,7 +72,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
             {tally(poll.choices, households).map((t) => (
               <li key={t.choice} className="flex justify-between gap-3 py-3 text-[17px]">
                 <span>{t.choice}</span>
-                <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>
+                {!hide && <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>}
               </li>
             ))}
           </ul>
@@ -95,7 +96,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
       )}
 
       {/* Each reply once: who, what they're bringing, and their note. Hidden until someone's going. */}
-      {going.length > 0 && (
+      {!hide && going.length > 0 && (
         <section className="mt-10 px-5">
           <h2 className="text-[20px] font-bold">
             Coming <span className="font-normal text-soft">· {people}</span>

@@ -1,4 +1,4 @@
-# chirk: status (Nov 20, 2026)
+# chirk: status (Nov 22, 2026)
 
 *A snapshot of where everything is. Update it after each round of work.*
 
@@ -13,6 +13,11 @@ Everything up to Nov 16's "fixes-3":
 - Shared costs, poker (missing cash-outs worked out when the math allows), Venmo links, Mark paid
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
+
+## Waiting for review (Nov 22, `hide-guests`)
+- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, poll counts, or who's already bringing an item; hosts still see everything on the host page. Off by default, so existing events don't change. First step for Molly's brand (influencer) events.
+- **Database step before merging:** run `db/schema.sql` again (adds `events.hide_guests`).
+- Known: the phone walkthrough (`npm run check`) stops at "Add guests" (Yan & Xu) locally on main too, so not from this change.
 
 ## Went live Nov 21 (`polls`)
 - **Polls:** one question per event, in the event form's new Poll row (under More options until it's set): a question and its choices, one per line (up to 10). Anyone replying, Going or not, can pick any in the RSVP form. The invite shows each choice with its vote count and a Vote link; the host page shows the counts and who picked what (Edit poll opens the row); the guest's own page says what they picked. Copy to next year keeps the poll, not the votes. Clearing the question turns it off.
