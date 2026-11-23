@@ -45,7 +45,7 @@ ${button(url, "RSVP", 24)}
 ${meUrl ? meHtml(meUrl) : ""}`, 560);
 
   const detailsText = parseDetails(e.details ?? "").map((block) =>
-    block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1 ($2)")).join("\n"),
+    block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\[([^\]\n]+)\] ?\(((?:https?:\/\/|www\.)[^\s)]+)\)/g, "$1 ($2)")).join("\n"),
   ).join("\n\n");
   const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
   const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply, meUrl ? `\n${meLine(meUrl)}` : ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();

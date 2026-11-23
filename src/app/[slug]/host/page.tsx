@@ -245,7 +245,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
             {writeIn(x) && households.filter((h) => picked(x, h).length).map((h) => (
               <li key={h.id} className="py-2 text-[16px]"><span className="font-semibold">{joinNames(h.names)}:</span> {picked(x, h)[0]}</li>
             ))}
-            {tally(x, households).map((t) => (
+            {!writeIn(x) && tally(x, households).map((t) => (
               <li key={t.choice} className="py-2 text-[16px]">
                 <p className="flex justify-between gap-3"><span>{t.choice}</span><span className="font-semibold tabular-nums">{t.by.length}</span></p>
                 {t.by.length > 0 && <p className="text-[15px] text-soft">{t.by.map((h) => joinNames(h.names)).join(" · ")}</p>}

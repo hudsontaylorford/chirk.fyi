@@ -35,10 +35,10 @@ const linkOnly = (t: string) => { const [p, more] = inline(t); return !more && p
 
 export function inline(text: string): { bold?: boolean; href?: string; text: string }[] {
   return text
-    .split(/(\[[^\]\n]+\]\((?:https?:\/\/|www\.)[^\s)]+\)|\*\*[^*]+\*\*|(?:https?:\/\/|www\.)\S*[^\s.,;:!?)\]])/)
+    .split(/(\[[^\]\n]+\] ?\((?:https?:\/\/|www\.)[^\s)]+\)|\*\*[^*]+\*\*|(?:https?:\/\/|www\.)\S*[^\s.,;:!?)\]])/)
     .filter(Boolean)
     .map((p) =>
-      p.startsWith("[") && p.endsWith(")") ? { href: web(p.slice(p.indexOf("](") + 2, -1)), text: p.slice(1, p.indexOf("](")) }
+      p.startsWith("[") && p.endsWith(")") ? { href: web(p.slice(p.lastIndexOf("(") + 1, -1)), text: p.slice(1, p.indexOf("]")) } // "[Name](url)", one space allowed before "("
       : p.startsWith("**") && p.endsWith("**") && p.length > 4 ? { ...linkOnly(p.slice(2, -2)), bold: true }
       : /^(https?:\/\/|www\.)/.test(p) ? { href: web(p), text: p.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "") }
       : { text: p },

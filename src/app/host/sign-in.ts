@@ -99,7 +99,9 @@ export async function acceptTerms() {
   revalidatePath("/host");
 }
 
-export async function signOut() {
+/** With an `email` (a co-host link for another address), lands on sign-in with it filled in. */
+export async function signOut(f?: FormData) {
   await clearSession();
-  redirect("/");
+  const email = clean(f?.get("email") ?? null);
+  redirect(email ? `/host?email=${encodeURIComponent(email)}` : "/");
 }
