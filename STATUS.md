@@ -14,8 +14,11 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `four-questions`)
-- **Up to 4 questions** (was 3), so a brand dinner can ask shoe, size, delivery and main course. Code only, no database step.
+## Waiting for review (Nov 23, `question-boxes`)
+- **Fix: only one question could be added on New event** (Hudson). The next box appeared only after saving, and New event has no Save. Now the next question box shows as soon as you type in the one above, up to 4. Code only, no database step.
+
+## Went live Nov 23 (PR 4: `four-questions`)
+- **Up to 4 questions** (was 3), so a brand dinner can ask shoe, size, delivery and main course.
 
 ## Went live Nov 23 (PR 3: `match-photo-links`)
 - **Fix: "Match the invite's color to the photo" didn't stick for a pasted image link** (Hudson, on Thanksgiving's Pinterest cover). Sites like Pinterest and Google won't let the browser read their pictures, so no color was found and Save cleared the box. Now chirk's server fetches the picture for the color (hosts only, https images only, up to 4 MB). It says "Reading the photo's color…", then "Color matched ✓" or, if a link isn't an image (a pin.it share link), it unticks the box right away with the reason. No database step.

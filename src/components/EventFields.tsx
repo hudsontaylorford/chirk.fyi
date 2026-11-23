@@ -60,9 +60,9 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
       on: !!e?.questions?.length,
       row: (
         <Row key="questions" id="questions" label="Questions" value={e?.questions?.length ? e.questions.map((x) => x.q).join(" · ") : "Add one"}>
-          {/* Filled ones plus one blank, up to 4. */}
-          {[...(e?.questions ?? []), { q: "", choices: [], one: false }].slice(0, MAX_QUESTIONS).map((x, i) => (
-            <div key={i} className={`space-y-3 ${i ? "border-t border-line pt-4" : ""}`}>
+          {/* All 4 slots; an empty one stays hidden until the question above it has text, so the next appears as you type. */}
+          {Array.from({ length: MAX_QUESTIONS }, (_, i) => e?.questions?.[i] ?? { q: "", choices: [], one: false }).map((x, i) => (
+            <div key={i} className={`space-y-3 ${i ? "border-t border-line pt-4 [div:has(input:placeholder-shown)+&:has(input:placeholder-shown)]:hidden" : ""}`}>
               <Field label={i ? "Another question (optional)" : "Question"} name={`question_${i}`} value={x.q} placeholder={i ? "e.g. Which size?" : "e.g. Which day works?"} />
               <label className="block">
                 <span className="text-[15px] text-soft">Choices</span>
