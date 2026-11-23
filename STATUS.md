@@ -1,4 +1,4 @@
-# chirk: status (Nov 22, 2026)
+# chirk: status (Nov 23, 2026)
 
 *A snapshot of where everything is. Update it after each round of work.*
 
@@ -14,7 +14,11 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `question-boxes`)
+## Waiting for review (Nov 23, `required-note`)
+- **The note question can be required** (Hudson, for a shipping address). New tick in Edit event → Guest options, under Note question: "Guests who are going must answer it". When it's on, the RSVP says "Required" and Send RSVP points to the box if it's empty. Guests who can't make it can still skip it. chirk's server checks it too. Off by default.
+- **Database step, before merging:** run `db/schema.sql` in the Neon SQL editor (adds `events.note_required`).
+
+## Went live Nov 23 (PR 5: `question-boxes`)
 - **Fix: only one question could be added on New event** (Hudson). The next box appeared only after saving, and New event has no Save. Now the next question box shows as soon as you type in the one above. Code only, no database step.
 - **Tick-box questions with a write-in** (Hudson): leave a question's Choices empty and guests get a tick box ("Allergies?") that opens a box to write in. Only hosts see what they wrote (host page, Copy answers, and the guest's own reply page). Up to 5 questions now, so a brand dinner can ask pair, size, delivery, main and allergies.
 

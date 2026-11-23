@@ -28,6 +28,7 @@ begin
     notify_host boolean not null default false,   -- email the host about replies
     note_prompt text,                    -- null = "Anything we should know?"
     note_hint text,                      -- the faded example in that box
+    note_required boolean not null default false, -- guests who are going must answer the note question
     allow_doubles boolean not null default false, -- several people can bring the same thing
     allow_own boolean not null default true,      -- guests can add things that aren't on the list
     notes_public boolean not null default false,  -- show notes on the invite
@@ -251,6 +252,8 @@ begin
   alter table households add column if not exists poll text[];
   -- Nov 22: hide the guest list.
   alter table events add column if not exists hide_guests boolean not null default false;
+  -- Nov 23: a required note question (e.g. a shipping address).
+  alter table events add column if not exists note_required boolean not null default false;
   -- Nov 22: the one poll becomes up to 3 questions. Once only: the site always saves questions, so it's never null again.
   alter table events add column if not exists questions jsonb;
   alter table households add column if not exists answers jsonb;

@@ -24,7 +24,7 @@ export default async function RsvpPage({ params, searchParams }: { params: Promi
       <p className="-mt-2 text-[15px] text-soft">{when(data.event)}</p>
       <h1 className="mt-6 mb-6 text-[28px] font-bold">Your RSVP</h1>
       <RsvpForm
-        slug={slug} bringPrompt={data.event.bring_prompt} askKids={data.event.ask_kids} notePrompt={data.event.note_prompt} noteHint={data.event.note_hint}
+        slug={slug} bringPrompt={data.event.bring_prompt} askKids={data.event.ask_kids} notePrompt={data.event.note_prompt} noteHint={data.event.note_hint} noteRequired={data.event.note_required}
         allowOwn={data.event.allow_own} notesPublic={data.event.notes_public && !data.event.hide_guests} maxGuests={data.event.max_guests} arrivals={arrivals(data.event)} questions={questionsOf(data.event)} choices={choices}
         prePick={q.pick} ownFirst={q.own === "1"}
       />

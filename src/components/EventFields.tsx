@@ -19,6 +19,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
   const e: Partial<Event> | undefined = event ?? start?.set; // a new event can start from a template's settings
   const stages = parseSchedule(e?.schedule ?? null, e?.time ?? null).length;
   const extras = [
+    e?.note_required && "note required",
     e?.notes_public && "notes on invite",
     e?.hide_guests && "guest list hidden",
     e?.max_guests != null && (e.max_guests === 0 ? "no extra guests" : `up to ${e.max_guests} extra`),
@@ -84,6 +85,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
             <Field label="Note question" name="note_prompt" value={e?.note_prompt} placeholder="Anything we should know?" />
             <Field label="Its example" name="note_hint" value={e?.note_hint} placeholder="Allergies, arriving late…" />
           </div>
+          <Check name="note_required" checked={e?.note_required ?? false} label="Guests who are going must answer it" />
           <Check name="notes_public" checked={e?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
           <Check name="hide_guests" checked={e?.hide_guests ?? false} label="Hide who’s coming (only you see the list)" />
           <label className="block">
