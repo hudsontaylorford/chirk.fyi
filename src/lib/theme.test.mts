@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { accentColor, contrast, hslLuminance, mainColor, themeTokens } from "./theme.ts";
+import { accentColor, contrast, hslLuminance, keepSaved, mainColor, themeTokens } from "./theme.ts";
 
 const pixels = (...colors: [number, number, number, number][]) => colors.flatMap(([r, g, b, n]) => Array.from({ length: n }, () => [r, g, b, 255]).flat());
 
@@ -43,4 +43,11 @@ test("the RSVP button's text reads on its deep shade (4.5:1) for every hue", () 
     const ratio = contrast(hslLuminance(h, s / 100, l / 100), on);
     assert.ok(ratio >= 4.5, `${hex}: ${ratio.toFixed(2)}`);
   }
+});
+
+test("a saved color read a shade off on another device keeps both choices, with the saved one in its place", () => {
+  assert.deepEqual(keepSaved(["#556b2f", "#b22222"], "#576c30"), ["#576c30", "#b22222"]);
+  assert.deepEqual(keepSaved(["#556b2f", "#b22222"], "#b02424"), ["#556b2f", "#b02424"]);
+  assert.deepEqual(keepSaved(["#556b2f", "#b22222"], "#b22222"), ["#556b2f", "#b22222"]);
+  assert.deepEqual(keepSaved([], "#b22222"), ["#b22222"]);
 });

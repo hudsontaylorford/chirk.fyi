@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { photoForColor, uploadPhoto } from "@/app/[slug]/host/actions";
 import { shrinkPhoto } from "@/lib/shrink-photo";
 import { Cover } from "./Cover";
-import { accentColor, mainColor } from "@/lib/theme";
+import { accentColor, keepSaved, mainColor } from "@/lib/theme";
 
 /** Cover photo: pick from the camera roll (shrunk on the phone, then uploaded), or paste a link. */
 export function CoverInput({ value, theme, canUpload }: { value: string | null; theme: string | null; canUpload: boolean }) {
@@ -28,7 +28,7 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
       .catch(async () => { const copy = await photoForColor(url); if (!copy) throw new Error(); return photoColors(copy); })
       .then((c) => {
         if (!live) return;
-        setRead({ url, colors: quiet && !c.includes(theme) ? [theme] : c }); // a saved color the photo no longer gives stays as it was
+        setRead({ url, colors: quiet ? keepSaved(c, theme) : c });
         if (!quiet) { setChosen(c[0] ?? ""); setStatus(c.length ? "Color matched ✓ Tap Save to keep it." : "This photo has no clear color, so the invite stays plain."); }
       }, () => {
         if (!live || quiet) return;

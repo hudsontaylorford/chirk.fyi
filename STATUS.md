@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `contrast-color`)
+## Waiting for review (Nov 23, `saved-photo-colors`)
+- **Both colors for photos saved earlier** (Hudson: worked on desktop, not on mobile). Phones and computers shrink a photo a little differently, so re-reading a saved photo on another device gave a color a shade off the saved one, and chirk then showed only the saved dot. Now the saved color takes the place of the nearer of the two (`keepSaved` in `src/lib/theme.ts`), so Main color and Contrast color both show, with the saved one picked.
+
+## Went live Nov 23 (PR 10: `contrast-color`)
 - **Two photo colors** (Hudson: the match looked "military" on a green-brown photo). Under "Match the invite's color to the photo", the Photo row now offers **Main color** (as before) and **Contrast color**: the photo's colorful hue farthest from the main one with real area (the Bills blue in Jets vs Bills, a soft blue on Thanksgiving, sky blue on the Weejuns pink). Photos with one hue show only the main dot. The saved color is still one hex in `events.theme`, so no database step. A saved photo is read again quietly to offer the other choice; its saved color stays picked.
 
 ## Went live Nov 23 (PR 9: `required-questions`)
