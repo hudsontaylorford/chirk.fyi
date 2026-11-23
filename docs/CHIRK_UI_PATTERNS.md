@@ -18,7 +18,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 2. **One primary action per screen**, only when there's a real next step. On host pages: **Share invite** when live, **Publish** when draft. A form's own submit (Save, Create event) is its primary.
 3. **Green means Going**, only. Live is the normal state and gets no badge.
 4. **Photos are never cropped**, on any screen.
-5. **No color but the tokens.** The accent (slate blue) is for links only: "you can tap this".
+5. **No color but the tokens.** The accent (slate blue) is for links only: "you can tap this". The one exception: an event's opt-in invite color (§2), which only retints the paper, soft text and hairlines.
 
 ## 2. Tokens
 
@@ -29,6 +29,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 | `--color-line` | #e7e5e4 | hairlines; outlines of fields, choices, quiet buttons |
 | `--color-accent` | #3d5a99 (slate blue, Nov 20) | links only. Focus rings and picked choices are ink. **Never a fill or surface.** |
 | page | white | background |
+| invite color (opt-in, Nov 23, Hudson's OK) | from the cover: paper `hsl(h s≤60% 94%)`, soft `hsl(h s/3 34%)`, line `hsl(h s/2 82%)` | only on the invite, RSVP and reply pages of an event with "Match the invite's color to the photo" ticked (`src/lib/theme.ts`, `Theme.tsx`). Ink text, ink buttons and slate links stay. Soft text keeps 4.5:1 on the paper (tested). |
 | status | green-700 (Going), amber, red-800 on red-50 (alerts) | only where they mean something |
 
 Font: the phone's system font (provisional, §12).
