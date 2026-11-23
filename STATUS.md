@@ -15,7 +15,7 @@ Everything up to Nov 16's "fixes-3":
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
 ## Waiting for review (Nov 23, `text-links`)
-- **Named links in the Message** (Hudson): `[Diana](https://…)` shows "Diana" as the link, on the invite and in the emailed invite (plain-text email shows "Diana (https://…)"). Works inside bold too. Plain pasted links still work. The formatting help under the Message box now shows it. Code only, no database step.
+- **Named links in the Message** (Hudson): `[Diana](https://…)` shows "Diana" as the link, on the invite and in the emailed invite (plain-text email shows "Diana (https://…)"). Works inside bold too, and in question labels (invite, RSVP, host and reply pages). Plain pasted links still work, and links starting with `www.` now work too (with or without https://). The formatting help under the Message box now shows it. Code only, no database step.
 
 ## Went live Nov 23 (PR 6: `required-note`)
 - **The note question can be required** (Hudson, for a shipping address). New tick in Edit event → Guest options, under Note question: "Guests who are going must answer it". When it's on, the RSVP says "Required" and Send RSVP points to the box if it's empty. Guests who can't make it can still skip it. chirk's server checks it too. Off by default.

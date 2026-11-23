@@ -5,6 +5,7 @@ import { several } from "@/lib/format";
 import { useState, useTransition } from "react";
 import { saveRsvp, type RsvpInput } from "@/app/actions";
 import { writeIn, type Answers, type Question } from "@/lib/poll";
+import { Rich } from "@/components/Details";
 
 export interface RsvpFormProps {
   slug: string;
@@ -144,14 +145,14 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
           <div key={x.q} className="space-y-2">
             <label className="flex items-center gap-3 text-[17px] font-semibold">
               <input type="checkbox" className="h-5 w-5" checked={x.q in answers} onChange={(ev) => { const a = { ...answers }; if (ev.target.checked) a[x.q] = [""]; else delete a[x.q]; setAnswers(a); }} />
-              {x.q}
+              <span><Rich text={x.q} /></span>
             </label>
             {x.q in answers && <textarea className="field" rows={2} aria-label={x.q} value={mine[0] ?? ""} onChange={(ev) => setAnswers({ ...answers, [x.q]: [ev.target.value] })} autoFocus={!mine[0]} />}
           </div>
         );
         const tap = (c: string) => setAnswers({ ...answers, [x.q]: mine.includes(c) ? mine.filter((v) => v !== c) : x.one ? [c] : [...mine, c] });
         return (
-          <Q key={x.q} label={x.q} hint={x.one ? "Pick one." : "Pick any."}>
+          <Q key={x.q} label={<Rich text={x.q} />} hint={x.one ? "Pick one." : "Pick any."}>
             <div className="flex flex-wrap gap-2">
               {x.choices.map((c) => (
                 <button key={c} type="button" className="choice" aria-pressed={mine.includes(c)} onClick={() => tap(c)}>{c}</button>
@@ -243,7 +244,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
   );
 }
 
-function Q({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Q({ label, hint, children }: { label: React.ReactNode; hint?: string; children: React.ReactNode }) {
   return (
     <div>
       <h2 className="text-[17px] font-semibold">{label}</h2>

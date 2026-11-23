@@ -36,7 +36,8 @@ function group(lines: Line[]) {
   return out;
 }
 
-function Rich({ text }: { text: string }) {
+/** One line with **bold** and links: also used for question labels. */
+export function Rich({ text }: { text: string }) {
   return (
     <>
       {inline(text).map((p, i) =>

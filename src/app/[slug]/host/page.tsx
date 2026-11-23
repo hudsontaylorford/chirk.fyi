@@ -1,3 +1,4 @@
+import { Rich } from "@/components/Details";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { EventFields } from "@/components/EventFields";
@@ -236,7 +237,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       {questionsOf(event).map((x, i) => (
         <section key={x.q}>
           <div className="mt-8 flex items-baseline justify-between">
-            <h2 className="text-[20px] font-bold">{x.q}</h2>
+            <h2 className="text-[20px] font-bold"><Rich text={x.q} /></h2>
             {i === 0 && <OpenRow id="questions">Edit questions</OpenRow>}
           </div>
           {/* Who picked what, for the hosts; guests see only the counts. */}

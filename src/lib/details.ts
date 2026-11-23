@@ -27,17 +27,20 @@ export function parseDetails(text: string): Line[][] {
 }
 
 /** Splits a line into plain, **bold** and link pieces. */
+/** "www.x.com" → "https://www.x.com". */
+const web = (u: string) => (u.startsWith("www.") ? `https://${u}` : u);
+
 /** "[Diana](url)" alone (inside **bold**) stays a link. */
 const linkOnly = (t: string) => { const [p, more] = inline(t); return !more && p?.href ? p : { text: t }; };
 
 export function inline(text: string): { bold?: boolean; href?: string; text: string }[] {
   return text
-    .split(/(\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|\*\*[^*]+\*\*|https?:\/\/\S+)/)
+    .split(/(\[[^\]\n]+\]\((?:https?:\/\/|www\.)[^\s)]+\)|\*\*[^*]+\*\*|(?:https?:\/\/|www\.)\S*[^\s.,;:!?)\]])/)
     .filter(Boolean)
     .map((p) =>
-      p.startsWith("[") && p.endsWith(")") ? { href: p.slice(p.indexOf("](") + 2, -1), text: p.slice(1, p.indexOf("](")) }
+      p.startsWith("[") && p.endsWith(")") ? { href: web(p.slice(p.indexOf("](") + 2, -1)), text: p.slice(1, p.indexOf("](")) }
       : p.startsWith("**") && p.endsWith("**") && p.length > 4 ? { ...linkOnly(p.slice(2, -2)), bold: true }
-      : /^https?:\/\//.test(p) ? { href: p, text: p.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") }
+      : /^(https?:\/\/|www\.)/.test(p) ? { href: web(p), text: p.replace(/^https?:\/\//, "").replace(/^www\./, "").replace(/\/$/, "") }
       : { text: p },
     );
 }
