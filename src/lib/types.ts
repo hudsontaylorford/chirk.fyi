@@ -38,7 +38,7 @@ export interface Event {
   gift_remind_ideas: boolean;
   gift_remind_givers: boolean;
   remind_replies: boolean;
-  questions: Question[] | null; // up to 4, picked from chips when replying
+  questions: Question[] | null; // up to 5, picked from chips (or written in) when replying
 }
 
 export interface Household {

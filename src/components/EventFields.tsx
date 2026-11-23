@@ -67,7 +67,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
               <label className="block">
                 <span className="text-[15px] text-soft">Choices</span>
                 <textarea name={`choices_${i}`} defaultValue={x.choices.join("\n")} rows={4} className="field mt-1" aria-label={`Choices for question ${i + 1}`} placeholder={"Option one\nOption two\nOption three"} />
-                <span className="text-[14px] text-soft">One per line, up to 20. Guests pick when they reply; the invite shows the counts.</span>
+                <span className="text-[14px] text-soft">One per line, up to 20. Guests pick when they reply; the invite shows the counts. Leave empty for a tick box that opens a box to write in (only you see those).</span>
               </label>
               <Check name={`one_${i}`} checked={x.one} label="Guests pick just one" />
             </div>

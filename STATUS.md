@@ -15,7 +15,8 @@ Everything up to Nov 16's "fixes-3":
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
 ## Waiting for review (Nov 23, `question-boxes`)
-- **Fix: only one question could be added on New event** (Hudson). The next box appeared only after saving, and New event has no Save. Now the next question box shows as soon as you type in the one above, up to 4. Code only, no database step.
+- **Fix: only one question could be added on New event** (Hudson). The next box appeared only after saving, and New event has no Save. Now the next question box shows as soon as you type in the one above. Code only, no database step.
+- **Tick-box questions with a write-in** (Hudson): leave a question's Choices empty and guests get a tick box ("Allergies?") that opens a box to write in. Only hosts see what they wrote (host page, Copy answers, and the guest's own reply page). Up to 5 questions now, so a brand dinner can ask pair, size, delivery, main and allergies.
 
 ## Went live Nov 23 (PR 4: `four-questions`)
 - **Up to 4 questions** (was 3), so a brand dinner can ask shoe, size, delivery and main course.
