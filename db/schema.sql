@@ -21,6 +21,7 @@ begin
     details text,
     rsvp_by date,
     cover_url text,
+    theme text,                          -- the invite's color, matched to the cover ("#rrggbb"): null = plain
     bring_prompt text,                   -- null = no bring list
     status text not null default 'live' check (status in ('draft', 'live', 'archived')),
     ask_kids boolean not null default false,
@@ -30,6 +31,7 @@ begin
     allow_doubles boolean not null default false, -- several people can bring the same thing
     allow_own boolean not null default true,      -- guests can add things that aren't on the list
     notes_public boolean not null default false,  -- show notes on the invite
+    hide_guests boolean not null default false,   -- guests don't see who's coming (hosts still do)
     max_guests int,                      -- extra people per reply: null = no limit, 0 = just them
     schedule text,                       -- all-day events: one stage per line, time first
     ask_arrival boolean not null default false,   -- ask guests which stage they're coming for
@@ -46,7 +48,8 @@ begin
     gift_remind_givers boolean not null default true, -- nudge givers a week before the event
     remind_replies boolean not null default false,    -- nudge anyone who hasn't replied, 3 days before reply-by
     poll_question text,                  -- one poll on the invite: null = none
-    poll_choices text,                   -- its choices, one per line
+    poll_choices text,                   -- its choices, one per line (old: moved into questions Nov 22)
+    questions jsonb,                     -- up to 3: [{q, choices: [...], one: pick one?}]
     created_at timestamptz not null default now()
   );
 
@@ -65,7 +68,8 @@ begin
     venmo text,                          -- their Venmo username, so people can pay them back
     gift_in boolean not null default true,        -- in the gift exchange (when the event has one)
     gift_wish text,                      -- gift ideas for whoever draws them
-    poll text[],                         -- the poll choices they picked
+    poll text[],                         -- the poll choices they picked (old: moved into answers Nov 22)
+    answers jsonb,                       -- {question: [what they picked]}
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now()
   );
@@ -245,5 +249,17 @@ begin
   alter table events add column if not exists poll_question text;
   alter table events add column if not exists poll_choices text;
   alter table households add column if not exists poll text[];
+  -- Nov 22: hide the guest list.
+  alter table events add column if not exists hide_guests boolean not null default false;
+  -- Nov 22: the one poll becomes up to 3 questions. Once only: the site always saves questions, so it's never null again.
+  alter table events add column if not exists questions jsonb;
+  alter table households add column if not exists answers jsonb;
+  update households h set answers = jsonb_build_object(e.poll_question, to_jsonb(h.poll))
+    from events e where e.id = h.event_id and e.questions is null and e.poll_question is not null and h.poll is not null and h.answers is null;
+  update events set questions = case when poll_question is null then '[]'::jsonb
+    else jsonb_build_array(jsonb_build_object('q', poll_question, 'choices', to_jsonb(string_to_array(coalesce(poll_choices, ''), E'\n')), 'one', false)) end
+    where questions is null;
+  -- Nov 22: invite color from the cover.
+  alter table events add column if not exists theme text;
 end
 $setup$;

@@ -1,14 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { uploadPhoto } from "@/app/[slug]/host/actions";
 import { shrinkPhoto } from "@/lib/shrink-photo";
 import { Cover } from "./Cover";
+import { mainColor } from "@/lib/theme";
 
 /** Cover photo: pick from the camera roll (shrunk on the phone, then uploaded), or paste a link. */
-export function CoverInput({ value, canUpload }: { value: string | null; canUpload: boolean }) {
+export function CoverInput({ value, theme, canUpload }: { value: string | null; theme: string | null; canUpload: boolean }) {
   const [url, setUrl] = useState(value ?? "");
+  const [match, setMatch] = useState(!!theme);
   const [status, setStatus] = useState<string | null>(null);
+  // The color read for a photo (null = it has none). A new photo is read again; an uploaded one is read on the phone before upload.
+  const [read, setRead] = useState<{ url: string; color: string | null }>({ url: value ?? "", color: theme });
+  const color = read.url === url ? read.color ?? "" : "";
+  useEffect(() => {
+    if (!match || !url || read.url === url) return;
+    let live = true;
+    photoColor(url).then((c) => {
+      if (!live) return;
+      setRead({ url, color: c });
+      if (!c) setStatus("This photo has no clear color, so the invite stays plain.");
+    }, () => live && setStatus("Couldn’t read this photo’s color from its link. Upload the photo instead to match it."));
+    return () => { live = false; };
+  }, [match, url, read.url]);
   const [busy, setBusy] = useState(false);
 
   async function pick(file: File | undefined) {
@@ -17,12 +32,15 @@ export function CoverInput({ value, canUpload }: { value: string | null; canUplo
     try {
       setStatus("Shrinking…");
       const jpeg = await shrinkPhoto(file);
+      const local = URL.createObjectURL(jpeg);
+      const c = await photoColor(local).catch(() => null);
+      URL.revokeObjectURL(local);
       setStatus("Uploading…");
       const f = new FormData();
       f.append("photo", new File([jpeg], "photo.jpg", { type: "image/jpeg" }));
       const res = await uploadPhoto(f);
       if ("error" in res) setStatus(res.error);
-      else { setUrl(res.url); setStatus("Uploaded ✓ Tap Save to keep it."); }
+      else { setRead({ url: res.url, color: c }); setUrl(res.url); setStatus("Uploaded ✓ Tap Save to keep it."); }
     } catch (e) {
       setStatus(e instanceof Error ? e.message : "That didn't work. Try again.");
     } finally {
@@ -48,6 +66,14 @@ export function CoverInput({ value, canUpload }: { value: string | null; canUplo
           )}
         </div>
       )}
+      {url && (
+        <label className="mt-2 flex items-center gap-3 py-1 text-[16px]">
+          <input type="checkbox" checked={match} onChange={(e) => setMatch(e.target.checked)} className="h-5 w-5 shrink-0" />
+          Match the invite’s color to the photo
+          {match && color && <span aria-hidden className="h-5 w-5 shrink-0 rounded-full border border-line" style={{ background: color }} />}
+        </label>
+      )}
+      <input type="hidden" name="theme" value={match ? color : ""} />
       {status && <p role="status" className="mt-1 text-[14px] text-soft">{status}</p>}
       <details className="mt-2" open={!canUpload}>
         <summary className="text-[14px] text-soft">{canUpload ? "Or use an image link" : "Image link"}</summary>
@@ -55,4 +81,17 @@ export function CoverInput({ value, canUpload }: { value: string | null; canUplo
       </details>
     </div>
   );
+}
+
+/** The photo's main color, read from a 24×24 copy. A link works only if its site allows it (many, like Pinterest, don't). */
+async function photoColor(src: string) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = src;
+  await img.decode();
+  const c = document.createElement("canvas");
+  c.width = c.height = 24;
+  const ctx = c.getContext("2d")!;
+  ctx.drawImage(img, 0, 0, 24, 24);
+  return mainColor(ctx.getImageData(0, 0, 24, 24).data);
 }

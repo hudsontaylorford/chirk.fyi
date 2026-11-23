@@ -5,7 +5,7 @@ import { FormDraft } from "@/components/FormDraft";
 import { PlaceFields } from "@/components/PlaceFields";
 import { placesOn } from "@/lib/places-provider";
 import { shortDate, when } from "@/lib/format";
-import { pollChoices } from "@/lib/poll";
+import { MAX_QUESTIONS } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { Template } from "@/lib/templates";
 import type { Event } from "@/lib/types";
@@ -20,6 +20,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
   const stages = parseSchedule(e?.schedule ?? null, e?.time ?? null).length;
   const extras = [
     e?.notes_public && "notes on invite",
+    e?.hide_guests && "guest list hidden",
     e?.max_guests != null && (e.max_guests === 0 ? "no extra guests" : `up to ${e.max_guests} extra`),
     e?.ask_kids && "kids",
     e?.notify_host && "email me",
@@ -55,16 +56,22 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
       ),
     },
     {
-      label: "Poll",
-      on: !!e?.poll_question,
+      label: "Questions",
+      on: !!e?.questions?.length,
       row: (
-        <Row key="poll" id="poll" label="Poll" value={e?.poll_question ? `${pollChoices(e.poll_choices ?? null).length} choices` : "Add one"}>
-          <Field label="Question" name="poll_question" value={e?.poll_question} placeholder="e.g. Which Saturday works?" />
-          <label className="block">
-            <span className="text-[15px] text-soft">Choices</span>
-            <textarea name="poll_choices" defaultValue={e?.poll_choices ?? ""} rows={4} className="field mt-1" aria-label="Poll choices" placeholder={"Option one\nOption two\nOption three"} />
-            <span className="text-[14px] text-soft">One per line. Guests pick any when they reply; everyone sees the counts on the invite.</span>
-          </label>
+        <Row key="questions" id="questions" label="Questions" value={e?.questions?.length ? e.questions.map((x) => x.q).join(" · ") : "Add one"}>
+          {/* Filled ones plus one blank, up to 3. */}
+          {[...(e?.questions ?? []), { q: "", choices: [], one: false }].slice(0, MAX_QUESTIONS).map((x, i) => (
+            <div key={i} className={`space-y-3 ${i ? "border-t border-line pt-4" : ""}`}>
+              <Field label={i ? "Another question (optional)" : "Question"} name={`question_${i}`} value={x.q} placeholder={i ? "e.g. Which size?" : "e.g. Which day works?"} />
+              <label className="block">
+                <span className="text-[15px] text-soft">Choices</span>
+                <textarea name={`choices_${i}`} defaultValue={x.choices.join("\n")} rows={4} className="field mt-1" aria-label={`Choices for question ${i + 1}`} placeholder={"Option one\nOption two\nOption three"} />
+                <span className="text-[14px] text-soft">One per line, up to 20. Guests pick when they reply; the invite shows the counts.</span>
+              </label>
+              <Check name={`one_${i}`} checked={x.one} label="Guests pick just one" />
+            </div>
+          ))}
         </Row>
       ),
     },
@@ -78,6 +85,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
             <Field label="Its example" name="note_hint" value={e?.note_hint} placeholder="Allergies, arriving late…" />
           </div>
           <Check name="notes_public" checked={e?.notes_public ?? false} label="Show notes on the invite (otherwise only you see them)" />
+          <Check name="hide_guests" checked={e?.hide_guests ?? false} label="Hide who’s coming (only you see the list)" />
           <label className="block">
             <span className="text-[15px] text-soft">Extra guests per reply</span>
             <select name="max_guests" defaultValue={e?.max_guests ?? ""} className="field mt-1">
@@ -154,9 +162,9 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
         <Row id="details" label="Message" value={e?.details ? e.details.replace(/[#*\-]/g, "").trim().slice(0, 40) + "…" : "Add one"}>
           <DetailsInput value={e?.details ?? ""} />
         </Row>
-        <Row id="photo" label="Photo" value={e?.cover_url ? "Added" : "Add one"}>
+        <Row id="photo" label="Photo" value={e?.cover_url ? (e.theme ? "Added · color matched" : "Added") : "Add one"}>
           {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
-          <CoverInput value={e?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
+          <CoverInput value={e?.cover_url ?? null} theme={e?.theme ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
         </Row>
         <Row id="bring" label="What to bring" value={e?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
           <BringFields prompt={e?.bring_prompt ?? null} allowOwn={e?.allow_own ?? true} allowDoubles={e?.allow_doubles ?? false} items={needed} />

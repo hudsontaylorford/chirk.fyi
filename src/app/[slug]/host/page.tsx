@@ -20,7 +20,7 @@ import { arrivals, bringList, getCosts, getDraws, getEventData, getSentJobs, joi
 import { money, settleUp } from "@/lib/costs";
 import { daysBefore } from "@/lib/due";
 import { headcount, listText, shortDate } from "@/lib/format";
-import { pollOf, tally } from "@/lib/poll";
+import { answersTable, questionsOf, tally } from "@/lib/poll";
 import * as act from "./actions";
 import { Footer } from "@/components/Footer";
 
@@ -149,7 +149,11 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
       {event.status !== "draft" && <div className="mt-6"><CopyInvite event={{ ...event, hosted_by: event.hosted_by || joinNames(hosts.filter((h) => h.name).map((h) => h.name!)) || null }} /></div>}
 
       {/* Everyone you've named and everyone who replied, in one list. */}
-      <h2 className="mt-8 text-[20px] font-bold">Guests</h2>
+      <div className="mt-8 flex items-baseline justify-between">
+        <h2 className="text-[20px] font-bold">Guests</h2>
+        {/* For handing replies on (a brand shipping to each guest): pastes into a spreadsheet. */}
+        {answered.length > 0 && <CopyLink text={answersTable(event, guests)} label="Copy answers" />}
+      </div>
       <form action={act.addGuests.bind(null, slug)} className="mt-2">
         <div className="flex flex-wrap gap-2">
           <input name="guests" className="field min-w-0 flex-[1_1_10rem]" placeholder="Sam, Graham & Ellen" aria-label="Add guests" />
@@ -229,15 +233,15 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
         />
       )}
 
-      {pollOf(event) && (
-        <section>
+      {questionsOf(event).map((x, i) => (
+        <section key={x.q}>
           <div className="mt-8 flex items-baseline justify-between">
-            <h2 className="text-[20px] font-bold">{event.poll_question}</h2>
-            <OpenRow id="poll">Edit poll</OpenRow>
+            <h2 className="text-[20px] font-bold">{x.q}</h2>
+            {i === 0 && <OpenRow id="questions">Edit questions</OpenRow>}
           </div>
           {/* Who picked what, for the hosts; guests see only the counts. */}
           <ul className="mt-2 divide-y divide-line border-y border-line">
-            {tally(pollOf(event)!.choices, households).map((t) => (
+            {tally(x, households).map((t) => (
               <li key={t.choice} className="py-2 text-[16px]">
                 <p className="flex justify-between gap-3"><span>{t.choice}</span><span className="font-semibold tabular-nums">{t.by.length}</span></p>
                 {t.by.length > 0 && <p className="text-[15px] text-soft">{t.by.map((h) => joinNames(h.names)).join(" · ")}</p>}
@@ -245,7 +249,7 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
             ))}
           </ul>
         </section>
-      )}
+      ))}
 
       {event.bring_prompt && (
         <section>

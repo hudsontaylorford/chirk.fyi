@@ -1,4 +1,4 @@
-# chirk: status (Nov 20, 2026)
+# chirk: status (Nov 22, 2026)
 
 *A snapshot of where everything is. Update it after each round of work.*
 
@@ -13,6 +13,16 @@ Everything up to Nov 16's "fixes-3":
 - Shared costs, poker (missing cash-outs worked out when the math allows), Venmo links, Mark paid
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
+
+## Waiting for review (Nov 22, PR 2: brand events)
+For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe they pick before the event.
+- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, the questions' counts (questions are asked only in the reply), or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
+- **Poll → Questions:** up to 3 questions in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.
+- **Copy answers** beside Guests on the host page: every reply as rows (name, email, reply, each question, the note) that paste into a spreadsheet, for handing to a brand.
+- **Shipping address, no code:** rename the note question ("Shipping address", example "Street, apt, city, ZIP"). Product links go in the Message (already tappable).
+- **Invite color from the cover (look OK'd by Hudson Nov 22):** "Match the invite's color to the photo" in the Photo row, off by default. A pale shade of the photo's main color behind the invite, RSVP and reply pages, and a deep shade on the RSVP button and picked choices (white or black text, whichever reads better; Hudson, Nov 23). Body text stays black, links slate blue; contrast tested for every hue. Read on the phone before upload; pasted links from sites that block it (Pinterest) get "upload the photo instead". Recorded in `docs/CHIRK_UI_PATTERNS.md` (§1 rule 5, §2).
+- **Database step before merging:** run `db/schema.sql` again (adds `events.hide_guests`, `events.questions`, `households.answers`, `events.theme`, and moves any poll over; safe to re-run).
+- Known: the phone walkthrough (`npm run check`) stops at "Add guests" (Yan & Xu) locally on main too, so not from this change. Not built: required questions, answers in the reply email to hosts.
 
 ## Went live Nov 21 (`polls`)
 - **Polls:** one question per event, in the event form's new Poll row (under More options until it's set): a question and its choices, one per line (up to 10). Anyone replying, Going or not, can pick any in the RSVP form. The invite shows each choice with its vote count and a Vote link; the host page shows the counts and who picked what (Edit poll opens the row); the guest's own page says what they picked. Copy to next year keeps the poll, not the votes. Clearing the question turns it off.

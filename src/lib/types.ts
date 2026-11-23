@@ -1,3 +1,5 @@
+import type { Answers, Question } from "./poll";
+
 export interface Event {
   id: string;
   slug: string;
@@ -10,6 +12,7 @@ export interface Event {
   details: string | null;
   rsvp_by: string | null;
   cover_url: string | null;
+  theme: string | null; // "#rrggbb" from the cover photo; null = plain
   bring_prompt: string | null;
   status: "draft" | "live" | "archived";
   ask_kids: boolean;
@@ -19,6 +22,7 @@ export interface Event {
   allow_doubles: boolean;
   allow_own: boolean;
   notes_public: boolean;
+  hide_guests: boolean; // guests don't see who's coming
   max_guests: number | null; // extra people per reply; null = no limit
   schedule: string | null; // one stage per line, time first
   ask_arrival: boolean;
@@ -34,8 +38,7 @@ export interface Event {
   gift_remind_ideas: boolean;
   gift_remind_givers: boolean;
   remind_replies: boolean;
-  poll_question: string | null; // the invite's one poll; null = none
-  poll_choices: string | null; // one per line
+  questions: Question[] | null; // up to 3, picked from chips when replying
 }
 
 export interface Household {
@@ -52,7 +55,7 @@ export interface Household {
   venmo: string | null;
   gift_in: boolean;
   gift_wish: string | null;
-  poll: string[] | null; // the poll choices they picked
+  answers: Answers | null; // question → what they picked
 }
 
 export interface Item {

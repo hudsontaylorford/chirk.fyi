@@ -41,14 +41,14 @@ export function KeepLink({ slug, token, email }: { slug: string; token: string; 
   );
 }
 
-/** Host view: copy someone's private link to send them. */
-export function CopyLink({ path, label = "Copy link" }: { path: string; label?: string }) {
+/** Host view: copy someone's private link to send them (or, with `text`, that text). */
+export function CopyLink({ path, text, label = "Copy link" }: { path?: string; text?: string; label?: string }) {
   const [done, setDone] = useState(false);
   return (
     <button
       type="button" className="link tap"
       onClick={async () => {
-        await navigator.clipboard.writeText(location.origin + path).catch(() => {});
+        await navigator.clipboard.writeText(text ?? location.origin + path).catch(() => {});
         setDone(true);
         setTimeout(() => setDone(false), 2000);
       }}

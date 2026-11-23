@@ -14,7 +14,8 @@ import { inviteEmail, reminderEmail } from "@/lib/invite-email";
 import { messageEmail } from "@/lib/message-email";
 import { ownerEmail } from "@/lib/jobs";
 import { fromEvent } from "@/lib/templates";
-import { pollChoices } from "@/lib/poll";
+import { questionsFromForm } from "@/lib/poll";
+import { isHex } from "@/lib/theme";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -57,10 +58,12 @@ const eventFields = (f: FormData) => ({
   details: val(f, "details") || null,
   rsvp_by: val(f, "rsvp_by") || null,
   cover_url: val(f, "cover_url") || null,
+  theme: val(f, "cover_url") && isHex(val(f, "theme")) ? val(f, "theme") : null,
   // The bring list is switched on or off; on with a blank question uses the default question.
   bring_prompt: f.get("bring_on") === "on" ? val(f, "bring_prompt") || "What are you bringing?" : null,
   allow_own: f.get("allow_own") === "on",
   notes_public: f.get("notes_public") === "on",
+  hide_guests: f.get("hide_guests") === "on",
   max_guests: val(f, "max_guests") === "" ? null : Math.max(0, Math.min(10, Number(val(f, "max_guests")) || 0)),
   ask_kids: f.get("ask_kids") === "on",
   notify_host: f.get("notify_host") === "on",
@@ -80,8 +83,7 @@ const eventFields = (f: FormData) => ({
   gift_remind_ideas: f.get("gift_remind_ideas") === "on",
   gift_remind_givers: f.get("gift_remind_givers") === "on",
   remind_replies: f.get("remind_replies") === "on",
-  poll_question: val(f, "poll_question").slice(0, 120) || null,
-  poll_choices: pollChoices(val(f, "poll_choices")).join("\n") || null,
+  questions: sql.json(questionsFromForm((k) => val(f, k), (k) => f.get(k) === "on")),
 });
 
 
@@ -97,14 +99,14 @@ export async function copyToNextYear(slug: string) {
   const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
-      (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies, poll_question, poll_choices
+      (rsvp_by + 364)::text as rsvp_by, cover_url, theme, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, hide_guests, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
+      (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies, questions
     from events where slug = ${slug}`;
   if (!e) return;
   const title = String(e.title).replace(/\b(19|20)\d\d\b/g, (y) => String(Number(y) + 1));
   const newSlug = await freeSlug(title);
   const { id: oldId, ...fields } = e;
-  const [copy] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, title, slug: newSlug, status: "draft" })} returning id`;
+  const [copy] = await sql<{ id: string }[]>`insert into events ${sql({ ...fields, questions: sql.json(fields.questions ?? []), title, slug: newSlug, status: "draft" })} returning id`;
   await sql`insert into items (event_id, kind, name, sort)
     select ${copy.id}, 'needed', name, sort from items where event_id = ${oldId} and kind = 'needed'`;
   await sql`insert into households (event_id, names, going, email)

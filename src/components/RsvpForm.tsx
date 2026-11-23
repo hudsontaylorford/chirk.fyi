@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { several } from "@/lib/format";
 import { useState, useTransition } from "react";
 import { saveRsvp, type RsvpInput } from "@/app/actions";
+import type { Answers, Question } from "@/lib/poll";
 
 export interface RsvpFormProps {
   slug: string;
@@ -15,7 +16,7 @@ export interface RsvpFormProps {
   notesPublic: boolean;
   maxGuests: number | null; // extra people per reply; null = no limit
   arrivals: string[]; // parts of the day they can pick; empty = don't ask
-  poll: { question: string; choices: string[] } | null; // the event's poll; anyone replying can pick any
+  questions: Question[]; // the event's questions; anyone replying can answer
   // Chips to pick from: still needed, already mine, and (when doubling up is on) others' with who's bringing them.
   choices: { id: string; name: string; by: string | null }[];
   /** From the invite: an item tapped under Still needed (already picked), or "+ Bring something else" (focus that box). */
@@ -27,14 +28,14 @@ export interface RsvpFormProps {
     going: boolean | null; // null = named guest who hasn't answered yet
     kids: number;
     parts: string[];
-    poll: string[];
+    answers: Answers;
     note: string;
     picks: string[];
     own: string[];
   };
 }
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, poll, choices, prePick, ownFirst, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, questions, choices, prePick, ownFirst, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
@@ -44,7 +45,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const [names, setNames] = useState<string[]>(initial?.names ?? [""]);
   const [kids, setKids] = useState(initial?.kids ?? 0);
   const [parts, setParts] = useState<string[]>(initial?.parts ?? []);
-  const [votes, setVotes] = useState<string[]>(initial?.poll ?? []);
+  const [answers, setAnswers] = useState<Answers>(initial?.answers ?? {});
   const [picks, setPicks] = useState<string[]>(() => [...new Set([...(initial?.picks ?? []), ...(prePick && choices.some((c) => c.id === prePick) ? [prePick] : [])])]);
   const [own, setOwn] = useState<string[]>(initial?.own ?? []);
   const [typing, setTyping] = useState("");
@@ -70,7 +71,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
     if (going === null) { document.getElementById("going-yes")?.focus(); return setError({ text: "Pick Going or Can’t make it." }); }
     if (!names.some((n) => n.trim())) { document.getElementById("name-0")?.focus(); return setError({ text: "Add your name." }); }
     const input: RsvpInput = {
-      slug, token: initial?.token, names, going, kids, note, parts, poll: votes,
+      slug, token: initial?.token, names, going, kids, note, parts, answers,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
       answeringAs: me ?? undefined, sameNameOk,
     };
@@ -133,15 +134,20 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
         </div>
       </Q>
 
-      {poll && (
-        <Q label={poll.question} hint="Pick any.">
-          <div className="flex flex-wrap gap-2">
-            {poll.choices.map((c) => (
-              <button key={c} type="button" className="choice" aria-pressed={votes.includes(c)} onClick={() => setVotes(votes.includes(c) ? votes.filter((v) => v !== c) : [...votes, c])}>{c}</button>
-            ))}
-          </div>
-        </Q>
-      )}
+      {questions.map((x) => {
+        const mine = answers[x.q] ?? [];
+        // Pick one: tapping another choice moves the pick; tapping the picked one clears it.
+        const tap = (c: string) => setAnswers({ ...answers, [x.q]: mine.includes(c) ? mine.filter((v) => v !== c) : x.one ? [c] : [...mine, c] });
+        return (
+          <Q key={x.q} label={x.q} hint={x.one ? "Pick one." : "Pick any."}>
+            <div className="flex flex-wrap gap-2">
+              {x.choices.map((c) => (
+                <button key={c} type="button" className="choice" aria-pressed={mine.includes(c)} onClick={() => tap(c)}>{c}</button>
+              ))}
+            </div>
+          </Q>
+        );
+      })}
 
       {going && (
         <>

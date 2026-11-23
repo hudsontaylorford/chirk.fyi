@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
-import { pollOf } from "@/lib/poll";
+import { picked, questionsOf } from "@/lib/poll";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText, mapsUrl, when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
+import { Theme } from "@/components/Theme";
 import { Costs } from "@/components/Costs";
 import { Gifts } from "@/components/Gifts";
 
@@ -28,8 +29,7 @@ export default async function YourRsvp({
 
   const { choices, picks, own, bringing } = bringChoices(data, h.id);
   const parts = partsOf(data.event, h);
-  const poll = pollOf(data.event);
-  const voted = poll ? (h.poll ?? []).filter((c) => poll.choices.includes(c)) : [];
+  const questions = questionsOf(data.event);
 
   return (
     <>
@@ -50,14 +50,14 @@ export default async function YourRsvp({
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
           allowOwn={data.event.allow_own}
-          notesPublic={data.event.notes_public}
+          notesPublic={data.event.notes_public && !data.event.hide_guests}
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
-          poll={poll}
+          questions={questions}
           choices={choices}
           prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, parts, poll: h.poll ?? [], note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, parts, answers: h.answers ?? {}, note: h.note ?? "",
             picks, own,
           }}
         />
@@ -96,13 +96,13 @@ export default async function YourRsvp({
         </p>
       )}
 
-      {/* Their vote, so it's clear it counted. Not limited to Going: a poll can ask before anyone knows. */}
-      {poll && (
-        <p className="mt-4 text-[17px]">
-          {poll.question}{" "}
-          {voted.length ? <strong>{listText(voted)}</strong> : <a href="?change=1" className="link tap">Vote</a>}
+      {/* Their answers, so it's clear they counted. Not limited to Going: a question can ask before anyone knows. */}
+      {questions.map((x) => (
+        <p key={x.q} className="mt-4 text-[17px]">
+          {x.q}{" "}
+          {picked(x, h).length ? <strong>{listText(picked(x, h))}</strong> : <a href="?change=1" className="link tap">Answer</a>}
         </p>
-      )}
+      ))}
 
       <details className="group mt-2" open={changing}>
         <summary className="link tap cursor-pointer list-none text-[17px] group-open:hidden [&::-webkit-details-marker]:hidden">Change my reply</summary>
@@ -114,14 +114,14 @@ export default async function YourRsvp({
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
           allowOwn={data.event.allow_own}
-          notesPublic={data.event.notes_public}
+          notesPublic={data.event.notes_public && !data.event.hide_guests}
           maxGuests={data.event.max_guests}
           arrivals={arrivals(data.event)}
-          poll={poll}
+          questions={questions}
           choices={choices}
           prePick={q.pick} ownFirst={q.own === "1"}
           initial={{
-            token, names: h.names, going: h.going, kids: h.kids, parts, poll: h.poll ?? [], note: h.note ?? "",
+            token, names: h.names, going: h.going, kids: h.kids, parts, answers: h.answers ?? {}, note: h.note ?? "",
             picks, own,
           }}
         />
@@ -137,6 +137,7 @@ export default async function YourRsvp({
     {(data.event.costs_on || data.event.poker_on) && h.going !== false && <Costs data={data} token={token} host={false} />}
     {data.event.gift_on && <Gifts data={data} token={token} host={false} />}
     <Footer />
+    <Theme color={data.event.theme} />
     </>
   );
 }
