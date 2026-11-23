@@ -11,7 +11,7 @@ import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
 import { replyEmail } from "@/lib/reply-email";
 import { parseSchedule, partChoices } from "@/lib/schedule";
-import { cleanAnswers, questionsOf, type Answers, type Question } from "@/lib/poll";
+import { cleanAnswers, questionsOf, unanswered, type Answers, type Question } from "@/lib/poll";
 
 export interface RsvpInput {
   slug: string;
@@ -46,6 +46,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
     select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival, questions, note_required, note_prompt from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
   if (event.note_required && input.going && !tidy(input.note ?? "")) return { ok: false, error: `Please answer “${event.note_prompt || "Anything we should know?"}”.` };
+  const missing = input.going && unanswered(questionsOf(event), cleanAnswers(questionsOf(event), input.answers));
+  if (missing) return { ok: false, error: missing };
   if (event.max_guests !== null && names.length > 1 + event.max_guests) {
     return { ok: false, error: event.max_guests === 0 ? "This invite is just for you, so one name please." : `This invite allows up to ${event.max_guests} extra ${event.max_guests === 1 ? "guest" : "guests"}.` };
   }

@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `cohost-wrong-account`)
+## Waiting for review (Nov 23, `required-questions`)
+- **Required questions** (Hudson): each question has "Guests who are going must answer it", like the note question. The RSVP shows "Required." and Send RSVP says "Please answer …" until it's answered; chirk's server checks it too. Guests who can't make it can skip. Off by default; saved inside the questions, so no database step.
+
+## Went live Nov 23 (PR 8: `cohost-wrong-account`)
 - **Text-box questions** (Hudson): a question with empty Choices is now a plain text box (no tick needed), e.g. "Your shoe size". Type one choice (like "Yes") to get the tick box that opens a text box, e.g. "Any food allergies?" (ticked with nothing written records "Yes"). Answers stay hosts-only.
 - **Named links forgive a space:** `[Shoe choices] (www.…)` now works like `[Shoe choices](www.…)`.
 - **Fix: a co-host link could look broken** (Hudson, added by Hannah). The email's link opens Your events. If you were already signed in with a different email than the one you were added under, it quietly showed your own events and not the shared one. Now it says "This link was for …" with **Sign out and switch**, which lands on sign-in with that address filled in. Code only, no database step.
