@@ -22,7 +22,7 @@ export function inviteEmail(e: InviteEvent, url: string, greeting?: string, meUr
 
   const rich = (t: string) =>
     inline(t).map((p) =>
-      p.href ? `<a href="${esc(p.href)}" style="color:inherit;">${esc(p.text)}</a>` : p.bold ? `<strong>${esc(p.text)}</strong>` : esc(p.text),
+      p.href ? `<a href="${esc(p.href)}" style="color:inherit;${p.bold ? "font-weight:700;" : ""}">${esc(p.text)}</a>` : p.bold ? `<strong>${esc(p.text)}</strong>` : esc(p.text),
     ).join("");
   const details = parseDetails(e.details ?? "").map((block) =>
     block.map((l) =>
@@ -45,7 +45,7 @@ ${button(url, "RSVP", 24)}
 ${meUrl ? meHtml(meUrl) : ""}`, 560);
 
   const detailsText = parseDetails(e.details ?? "").map((block) =>
-    block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1")).join("\n"),
+    block.map((l) => (l.kind === "bullet" ? `- ${l.text}` : l.text).replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, "$1 ($2)")).join("\n"),
   ).join("\n\n");
   const scheduleText = stages.map((s) => `${s.when}  ${s.what}`).join("\n");
   const text = [greeting ? `Hi ${greeting}, you're invited!\n` : "", e.title, when, where, scheduleText, "", detailsText, sign ?? "", "", `RSVP: ${url}`, reply, meUrl ? `\n${meLine(meUrl)}` : ""].filter((l, i, a) => l || a[i - 1]).join("\n").trim();

@@ -27,12 +27,16 @@ export function parseDetails(text: string): Line[][] {
 }
 
 /** Splits a line into plain, **bold** and link pieces. */
+/** "[Diana](url)" alone (inside **bold**) stays a link. */
+const linkOnly = (t: string) => { const [p, more] = inline(t); return !more && p?.href ? p : { text: t }; };
+
 export function inline(text: string): { bold?: boolean; href?: string; text: string }[] {
   return text
-    .split(/(\*\*[^*]+\*\*|https?:\/\/\S+)/)
+    .split(/(\[[^\]\n]+\]\(https?:\/\/[^\s)]+\)|\*\*[^*]+\*\*|https?:\/\/\S+)/)
     .filter(Boolean)
     .map((p) =>
-      p.startsWith("**") && p.endsWith("**") && p.length > 4 ? { bold: true, text: p.slice(2, -2) }
+      p.startsWith("[") && p.endsWith(")") ? { href: p.slice(p.indexOf("](") + 2, -1), text: p.slice(1, p.indexOf("](")) }
+      : p.startsWith("**") && p.endsWith("**") && p.length > 4 ? { ...linkOnly(p.slice(2, -2)), bold: true }
       : /^https?:\/\//.test(p) ? { href: p, text: p.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "") }
       : { text: p },
     );

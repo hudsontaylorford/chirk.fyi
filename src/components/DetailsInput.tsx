@@ -16,7 +16,7 @@ export function DetailsInput({ value }: { value: string }) {
         <textarea name="details" rows={8} value={text} onChange={(e) => setText(e.target.value)} className="field mt-1" />
       </label>
       <p className="mt-1 text-[13px] text-soft">
-        <code># Title</code> · <code>- bullet</code> · <code>**bold**</code> · blank line = new paragraph · links work on their own
+        <code># Title</code> · <code>- bullet</code> · <code>**bold**</code> · blank line = new paragraph · <code>[Diana](link)</code> for a named link
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         <button type="button" className="button-quiet text-[15px]" disabled={empty} onClick={() => setText(autoFormat(text))}>Auto-format</button>

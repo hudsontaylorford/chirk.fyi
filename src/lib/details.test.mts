@@ -19,6 +19,9 @@ test("bold and links", () => {
   assert.deepEqual(inline("**Tickets:** $163, see https://example.com/x/"), [
     { bold: true, text: "Tickets:" }, { text: " $163, see " }, { href: "https://example.com/x/", text: "example.com/x" },
   ]);
+  assert.deepEqual(inline("- **[Diana](https://ghbass.com/p?id=1)** or [Jax](http://x.co/j)."), [
+    { text: "- " }, { href: "https://ghbass.com/p?id=1", text: "Diana", bold: true }, { text: " or " }, { href: "http://x.co/j", text: "Jax" }, { text: "." },
+  ]);
 });
 
 test("auto-format writes explicit marks and is stable when run twice", async () => {
