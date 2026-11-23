@@ -2,7 +2,7 @@ import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
 import { headcount, mapsUrl, shortDate, when } from "@/lib/format";
-import { pollOf, tally } from "@/lib/poll";
+import { questionsOf, tally } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
@@ -13,7 +13,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
   const people = going.reduce((n, h) => n + headcount(h.names) + h.kids, 0);
   const { claimed, open } = bringList(data);
   const stages = parseSchedule(event.schedule, event.time, event.long_times);
-  const poll = pollOf(event);
+  const questions = questionsOf(event);
   const hide = event.hide_guests; // the host keeps the list to themselves: no names or counts
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);
 
@@ -64,21 +64,21 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
         </section>
       )}
 
-      {/* The poll: counts only, unless the list is hidden (who picked what is on the host page). Voting happens in the reply. */}
-      {poll && (
-        <section className="mt-10 px-5">
-          <h2 className="text-[20px] font-bold">{poll.question}</h2>
+      {/* Each question: counts only, none when the list is hidden (who picked what is on the host page). Answering happens in the reply. */}
+      {questions.map((x) => (
+        <section key={x.q} className="mt-10 px-5">
+          <h2 className="text-[20px] font-bold">{x.q}</h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
-            {tally(poll.choices, households).map((t) => (
+            {tally(x, households).map((t) => (
               <li key={t.choice} className="flex justify-between gap-3 py-3 text-[17px]">
                 <span>{t.choice}</span>
                 {!hide && <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>}
               </li>
             ))}
           </ul>
-          {rsvpHref && <a href={replied ? `${rsvpHref}?change=1` : rsvpHref} className="link tap text-[16px]">Vote</a>}
+          {rsvpHref && <a href={replied ? `${rsvpHref}?change=1` : rsvpHref} className="link tap text-[16px]">{replied ? "Change your answer" : "Answer"}</a>}
         </section>
-      )}
+      ))}
 
       {/* Still needed: each item is a way in. Tapping one opens the reply with it already picked. */}
       {event.bring_prompt && open.length > 0 && (

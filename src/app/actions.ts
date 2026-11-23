@@ -11,7 +11,7 @@ import { sendEmail, siteUrl } from "@/lib/email";
 import { linkEmail } from "@/lib/link-email";
 import { replyEmail } from "@/lib/reply-email";
 import { parseSchedule, partChoices } from "@/lib/schedule";
-import { pollChoices, pollOn } from "@/lib/poll";
+import { cleanAnswers, questionsOf, type Answers, type Question } from "@/lib/poll";
 
 export interface RsvpInput {
   slug: string;
@@ -24,7 +24,7 @@ export interface RsvpInput {
   picks: string[]; // items they tapped (from the list, or doubling up on someone else's)
   own: string[]; // things they typed in themselves
   parts?: string[]; // the parts of the day they're coming to
-  poll?: string[]; // the poll choices they picked
+  answers?: Answers; // question → what they picked
   answeringAs?: string;
   sameNameOk?: boolean;
 }
@@ -42,8 +42,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const email = input.email === undefined ? undefined : input.email.trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null; schedule: string | null; time: string | null; ask_arrival: boolean; poll_question: string | null; poll_choices: string | null }[]>`
-    select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival, poll_question, poll_choices from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null; schedule: string | null; time: string | null; ask_arrival: boolean; questions: Question[] | null }[]>`
+    select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival, questions from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
   if (event.max_guests !== null && names.length > 1 + event.max_guests) {
     return { ok: false, error: event.max_guests === 0 ? "This invite is just for you, so one name please." : `This invite allows up to ${event.max_guests} extra ${event.max_guests === 1 ? "guest" : "guests"}.` };
@@ -80,8 +80,8 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
         // Only parts that are on this event's schedule; saving parts replaces the old one-time answer.
         parts: input.going && event.ask_arrival ? partChoices(parseSchedule(event.schedule, event.time)).filter((p) => input.parts?.includes(p)) : null,
         arrival: null,
-        // Only choices on this event's poll; voting doesn't depend on Going (a date poll asks before anyone knows).
-        poll: pollOn(event) ? pollChoices(event.poll_choices).filter((c) => input.poll?.includes(c)) : null,
+        // Only real choices; answering doesn't depend on Going (a date question asks before anyone knows).
+        answers: sql.json(cleanAnswers(questionsOf(event), input.answers)),
       };
       const [before] = input.token ? await tx<{ email: string | null; going: boolean | null }[]>`select email, going from households where token = ${input.token}` : [];
       answeredBefore = before?.going != null;

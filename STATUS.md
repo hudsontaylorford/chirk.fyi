@@ -14,10 +14,14 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 22, `hide-guests`)
-- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, poll counts, or who's already bringing an item; hosts still see everything on the host page. Off by default, so existing events don't change. First step for Molly's brand (influencer) events.
-- **Database step before merging:** run `db/schema.sql` again (adds `events.hide_guests`).
-- Known: the phone walkthrough (`npm run check`) stops at "Add guests" (Yan & Xu) locally on main too, so not from this change.
+## Waiting for review (Nov 22, PR 2: brand events)
+For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe they pick before the event.
+- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, question counts, or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
+- **Poll → Questions:** up to 3 questions in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.
+- **Copy answers** beside Guests on the host page: every reply as rows (name, email, reply, each question, the note) that paste into a spreadsheet, for handing to a brand.
+- **Shipping address, no code:** rename the note question ("Shipping address", example "Street, apt, city, ZIP"). Product links go in the Message (already tappable).
+- **Database step before merging:** run `db/schema.sql` again (adds `events.hide_guests`, `events.questions`, `households.answers`, and moves any poll over; safe to re-run).
+- Known: the phone walkthrough (`npm run check`) stops at "Add guests" (Yan & Xu) locally on main too, so not from this change. Not built: required questions, answers in the reply email to hosts.
 
 ## Went live Nov 21 (`polls`)
 - **Polls:** one question per event, in the event form's new Poll row (under More options until it's set): a question and its choices, one per line (up to 10). Anyone replying, Going or not, can pick any in the RSVP form. The invite shows each choice with its vote count and a Vote link; the host page shows the counts and who picked what (Edit poll opens the row); the guest's own page says what they picked. Copy to next year keeps the poll, not the votes. Clearing the question turns it off.

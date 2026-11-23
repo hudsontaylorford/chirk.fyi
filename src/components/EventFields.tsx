@@ -5,7 +5,7 @@ import { FormDraft } from "@/components/FormDraft";
 import { PlaceFields } from "@/components/PlaceFields";
 import { placesOn } from "@/lib/places-provider";
 import { shortDate, when } from "@/lib/format";
-import { pollChoices } from "@/lib/poll";
+import { MAX_QUESTIONS } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { Template } from "@/lib/templates";
 import type { Event } from "@/lib/types";
@@ -56,16 +56,22 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
       ),
     },
     {
-      label: "Poll",
-      on: !!e?.poll_question,
+      label: "Questions",
+      on: !!e?.questions?.length,
       row: (
-        <Row key="poll" id="poll" label="Poll" value={e?.poll_question ? `${pollChoices(e.poll_choices ?? null).length} choices` : "Add one"}>
-          <Field label="Question" name="poll_question" value={e?.poll_question} placeholder="e.g. Which Saturday works?" />
-          <label className="block">
-            <span className="text-[15px] text-soft">Choices</span>
-            <textarea name="poll_choices" defaultValue={e?.poll_choices ?? ""} rows={4} className="field mt-1" aria-label="Poll choices" placeholder={"Option one\nOption two\nOption three"} />
-            <span className="text-[14px] text-soft">One per line. Guests pick any when they reply; everyone sees the counts on the invite.</span>
-          </label>
+        <Row key="questions" id="questions" label="Questions" value={e?.questions?.length ? e.questions.map((x) => x.q).join(" · ") : "Add one"}>
+          {/* Filled ones plus one blank, up to 3. */}
+          {[...(e?.questions ?? []), { q: "", choices: [], one: false }].slice(0, MAX_QUESTIONS).map((x, i) => (
+            <div key={i} className={`space-y-3 ${i ? "border-t border-line pt-4" : ""}`}>
+              <Field label={i ? "Another question (optional)" : "Question"} name={`question_${i}`} value={x.q} placeholder={i ? "e.g. Which size?" : "e.g. Which day works?"} />
+              <label className="block">
+                <span className="text-[15px] text-soft">Choices</span>
+                <textarea name={`choices_${i}`} defaultValue={x.choices.join("\n")} rows={4} className="field mt-1" aria-label={`Choices for question ${i + 1}`} placeholder={"Option one\nOption two\nOption three"} />
+                <span className="text-[14px] text-soft">One per line, up to 20. Guests pick when they reply; the invite shows the counts.</span>
+              </label>
+              <Check name={`one_${i}`} checked={x.one} label="Guests pick just one" />
+            </div>
+          ))}
         </Row>
       ),
     },
