@@ -19,8 +19,8 @@ type Row = { id: string; slug: string; title: string; date: string; status: stri
 /** The host's home: upcoming events (soonest first), then past and archived ones tucked away. */
 export default async function HostHome({ searchParams }: { searchParams: Promise<{ wrong?: string; email?: string }> }) {
   const me = await currentUser();
+  const q = await searchParams;
   if (!me) {
-    const q = await searchParams;
     return <HostSignIn claiming={await hasLegacyCookie()} legacy={(await unclaimedEvents()) > 0} wrong={!!q.wrong} email={q.email} />;
   }
 
@@ -83,6 +83,14 @@ export default async function HostHome({ searchParams }: { searchParams: Promise
         {events.length > 0 && <Link href="/host/new" className="link tap shrink-0 text-[17px] font-semibold">+ New event</Link>}
       </div>
       <p className="text-[15px] text-soft">Signed in as {me.email}</p>
+      {/* A co-host link names the address it was sent to; signed in as another, that event isn't listed here. */}
+      {q.email && q.email.trim().toLowerCase() !== me.email && (
+        <form action={signOut} className="mt-4 border-y border-line py-4 text-[15px]">
+          <p>This link was for <strong>{q.email.trim().toLowerCase()}</strong>, so events shared with that address aren&apos;t listed here. Sign out, then sign in with that address to see them.</p>
+          <input type="hidden" name="email" value={q.email} />
+          <button className="link tap mt-1 font-semibold">Sign out and switch</button>
+        </form>
+      )}
       {me.terms_version !== TERMS_VERSION && (
         <form action={acceptTerms} className="mt-4 flex items-center justify-between gap-3 border-y border-line py-4 text-[15px]">
           <span>chirk now has <Link href="/terms" className="link">Terms</Link>. Using chirk means you agree to them and the <Link href="/privacy" className="link">Privacy</Link> policy.</span>

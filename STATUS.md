@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `text-links`)
+## Waiting for review (Nov 23, `cohost-wrong-account`)
+- **Fix: a co-host link could look broken** (Hudson, added by Hannah). The email's link opens Your events. If you were already signed in with a different email than the one you were added under, it quietly showed your own events and not the shared one. Now it says "This link was for …" with **Sign out and switch**, which lands on sign-in with that address filled in. Code only, no database step.
+
+## Went live Nov 23 (PR 7: `text-links`)
 - **Named links in the Message** (Hudson): `[Diana](https://…)` shows "Diana" as the link, on the invite and in the emailed invite (plain-text email shows "Diana (https://…)"). Works inside bold too, and in question labels (invite, RSVP, host and reply pages). Plain pasted links still work, and links starting with `www.` now work too (with or without https://). The formatting help under the Message box now shows it. Code only, no database step.
 
 ## Went live Nov 23 (PR 6: `required-note`)
