@@ -340,3 +340,24 @@ export async function uploadPhoto(f: FormData): Promise<{ url: string } | { erro
     return { error: "The upload didn't work. Try again in a moment." };
   }
 }
+
+/**
+ * "Match the photo" for a pasted image link whose site won't let the browser read it (Pinterest, Google):
+ * the server fetches the picture and hands it back, so the phone can read its color. Hosts only; images only.
+ */
+export async function photoForColor(link: string): Promise<string | null> {
+  await requireUser();
+  let url: URL;
+  try { url = new URL(link); } catch { return null; }
+  // Public https images only: no local or bare-IP addresses.
+  if (url.protocol !== "https:" || /^(localhost|\d+\.\d+\.\d+\.\d+|\[.*\])$/i.test(url.hostname) || url.hostname.endsWith(".local")) return null;
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const type = res.headers.get("content-type") ?? "";
+    if (!res.ok || !type.startsWith("image/") || Number(res.headers.get("content-length") ?? 0) > 4_000_000) return null;
+    const bytes = Buffer.from(await res.arrayBuffer());
+    return bytes.length > 4_000_000 ? null : `data:${type.split(";")[0]};base64,${bytes.toString("base64")}`;
+  } catch {
+    return null;
+  }
+}
