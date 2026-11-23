@@ -1,11 +1,19 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { contrast, hslLuminance, mainColor, themeTokens } from "./theme.ts";
+import { accentColor, contrast, hslLuminance, mainColor, themeTokens } from "./theme.ts";
 
 const pixels = (...colors: [number, number, number, number][]) => colors.flatMap(([r, g, b, n]) => Array.from({ length: n }, () => [r, g, b, 255]).flat());
 
 test("main color: the strongest hue wins over gray, white and a little of another hue", () => {
   assert.equal(mainColor(pixels([128, 30, 40, 50], [250, 250, 250, 300], [120, 120, 120, 100], [30, 90, 200, 10])), "#801e28");
+});
+
+test("contrast color: a far hue beats a near one; none when the photo has one hue", () => {
+  // green main, a lot of olive (near), some blue (far), a few red (far but stray)
+  const px = pixels([60, 140, 60, 300], [130, 140, 40, 200], [40, 70, 190, 60], [200, 30, 30, 2]);
+  assert.equal(accentColor(px, mainColor(px)!), "#2846be");
+  const one = pixels([60, 140, 60, 300], [250, 250, 250, 100]);
+  assert.equal(accentColor(one, mainColor(one)!), null);
 });
 
 test("a gray photo has no color", () => {

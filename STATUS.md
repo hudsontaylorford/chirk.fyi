@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `required-questions`)
+## Waiting for review (Nov 23, `contrast-color`)
+- **Two photo colors** (Hudson: the match looked "military" on a green-brown photo). Under "Match the invite's color to the photo", the Photo row now offers **Main color** (as before) and **Contrast color**: the photo's colorful hue farthest from the main one with real area (the Bills blue in Jets vs Bills, a soft blue on Thanksgiving, sky blue on the Weejuns pink). Photos with one hue show only the main dot. The saved color is still one hex in `events.theme`, so no database step. A saved photo is read again quietly to offer the other choice; its saved color stays picked.
+
+## Went live Nov 23 (PR 9: `required-questions`)
 - **Required questions** (Hudson): each question has "Guests who are going must answer it", like the note question. The RSVP shows "Required." and Send RSVP says "Please answer …" until it's answered; chirk's server checks it too. Guests who can't make it can skip. Off by default; saved inside the questions, so no database step.
 
 ## Went live Nov 23 (PR 8: `cohost-wrong-account`)
