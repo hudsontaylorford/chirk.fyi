@@ -1,9 +1,9 @@
-// The event's questions ("Which shoe?", "Your size?"): up to 3, each with chips guests pick one or any of. Pure.
+// The event's questions ("Which shoe?", "Your size?"): up to 4, each with chips guests pick one or any of. Pure.
 
 export type Question = { q: string; choices: string[]; one: boolean };
 export type Answers = Record<string, string[]>; // question → what they picked
 
-export const MAX_QUESTIONS = 3;
+export const MAX_QUESTIONS = 4;
 
 /** The choices as the host typed them: trimmed, no blanks or repeats, at most 20 (half sizes fit). */
 export function pollChoices(text: string | null) {
