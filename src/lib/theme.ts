@@ -34,6 +34,15 @@ export function accentColor(px: ArrayLike<number>, main: string): string | null 
   return "#" + [top.r, top.g, top.b].map((c) => Math.round(c / top.w).toString(16).padStart(2, "0")).join("");
 }
 
+/** A saved photo read again: phones and computers shrink a photo a little differently, so its colors come out a shade off.
+ *  The saved color takes the place of the nearer of the two, so both choices still show and the saved one stays picked. */
+export function keepSaved(colors: string[], saved: string): string[] {
+  if (!colors.length || colors.includes(saved)) return colors.length ? colors : [saved];
+  const far = (c: string) => [1, 3, 5].reduce((sum, i) => sum + Math.abs(parseInt(c.slice(i, i + 2), 16) - parseInt(saved.slice(i, i + 2), 16)), 0);
+  const i = colors.length > 1 && far(colors[1]) < far(colors[0]) ? 1 : 0;
+  return colors.map((c, j) => (j === i ? saved : c));
+}
+
 /** The page tokens for that color: pale paper, a darker gray in the same hue, matching hairlines,
  *  and a deep shade for the RSVP button and picked choices, with black or white text, whichever reads better. */
 export function themeTokens(hex: string) {
