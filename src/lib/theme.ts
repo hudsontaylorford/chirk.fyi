@@ -15,6 +15,25 @@ export function mainColor(px: ArrayLike<number>): string | null {
   return "#" + [top.r, top.g, top.b].map((c) => Math.round(c / top.w).toString(16).padStart(2, "0")).join("");
 }
 
+/** A second choice that stands apart: among the photo's clearly colorful hues at least 60° from the main one,
+ *  the one with the most pixels × distance² (so a red or blue in a green-brown photo). "#rrggbb", or null when there's none. */
+export function accentColor(px: ArrayLike<number>, main: string): string | null {
+  const [mh] = hsl(parseInt(main.slice(1, 3), 16), parseInt(main.slice(3, 5), 16), parseInt(main.slice(5, 7), 16));
+  const bins = Array.from({ length: 12 }, () => ({ n: 0, w: 0, r: 0, g: 0, b: 0, d: 0 }));
+  for (let i = 0; i + 3 < px.length; i += 4) {
+    const [h, s, l] = hsl(px[i], px[i + 1], px[i + 2]);
+    if (px[i + 3] < 128 || s < 0.3 || l < 0.2 || l > 0.85) continue; // only clearly colorful pixels
+    const d = Math.min(Math.abs(h - mh), 360 - Math.abs(h - mh));
+    if (d < 60) continue;
+    const bin = bins[Math.floor(h / 30) % 12];
+    bin.n++; bin.d += d; bin.w += s; bin.r += px[i] * s; bin.g += px[i + 1] * s; bin.b += px[i + 2] * s;
+  }
+  const score = (b: { n: number; d: number }) => (b.n ? b.n * (b.d / b.n) ** 2 : 0);
+  const top = bins.reduce((a, b) => (score(b) > score(a) ? b : a));
+  if (top.n < px.length / 4 / 200) return null; // under 0.5% of the photo: stray pixels, not a color of it
+  return "#" + [top.r, top.g, top.b].map((c) => Math.round(c / top.w).toString(16).padStart(2, "0")).join("");
+}
+
 /** The page tokens for that color: pale paper, a darker gray in the same hue, matching hairlines,
  *  and a deep shade for the RSVP button and picked choices, with black or white text, whichever reads better. */
 export function themeTokens(hex: string) {

@@ -29,7 +29,7 @@ A very well-typeset web document that happens to be interactive: ink on white, w
 | `--color-line` | #e7e5e4 | hairlines; outlines of fields, choices, quiet buttons |
 | `--color-accent` | #3d5a99 (slate blue, Nov 20) | links only. Focus rings and picked choices are ink. **Never a fill or surface.** |
 | page | white | background |
-| invite color (opt-in, Nov 23, Hudson's OK) | from the cover: paper `hsl(h s≤60% 94%)`, soft `hsl(h s/3 34%)`, line `hsl(h s/2 82%)` | only on the invite, RSVP and reply pages of an event with "Match the invite's color to the photo" ticked (`src/lib/theme.ts`, `Theme.tsx`). Also accent `hsl(h s≤65% 36%)` fills the primary button and picked choices, with white or ink text by contrast (Nov 23). Body text stays ink and links slate. Soft text and button text keep 4.5:1 (tested). |
+| invite color (opt-in, Nov 23, Hudson's OK) | from the cover: paper `hsl(h s≤60% 94%)`, soft `hsl(h s/3 34%)`, line `hsl(h s/2 82%)` | only on the invite, RSVP and reply pages of an event with "Match the invite's color to the photo" ticked (`src/lib/theme.ts`, `Theme.tsx`). Also accent `hsl(h s≤65% 36%)` fills the primary button and picked choices, with white or ink text by contrast (Nov 23). Body text stays ink and links slate. Soft text and button text keep 4.5:1 (tested). The hue is the photo's main color or, picked under the box, its contrast color (the far hue with the most pixels; Nov 23). |
 | status | green-700 (Going), amber, red-800 on red-50 (alerts) | only where they mean something |
 
 Font: the phone's system font (provisional, §12).
