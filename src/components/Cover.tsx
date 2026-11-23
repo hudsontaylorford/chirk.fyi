@@ -8,9 +8,10 @@ import { useEffect, useRef, useState } from "react";
  * and on the host's form a warning explains why.
  * Full column width at its natural shape, on every screen: never cropped (the photo is the host's, edges and all).
  */
-export function Cover({ src, host = false, title }: { src: string; host?: boolean; title?: string }) {
+export function Cover({ src, host = false, title, onBroken }: { src: string; host?: boolean; title?: string; onBroken?: (broken: boolean) => void }) {
   const ref = useRef<HTMLImageElement>(null);
   const [broken, setBroken] = useState(false);
+  useEffect(() => onBroken?.(broken), [broken, onBroken]);
   useEffect(() => {
     setBroken(false);
     const img = ref.current;
@@ -20,7 +21,7 @@ export function Cover({ src, host = false, title }: { src: string; host?: boolea
   if (broken) {
     return host ? (
       <p className="rounded-lg bg-red-50 p-3 text-[15px] text-red-800">
-        This image link doesn&apos;t load, so guests won&apos;t see a photo. Try a different link (one that ends in .jpg or .png works best).
+        This link isn&apos;t a picture, so guests won&apos;t see a photo. Share links (like pin.it) open a page, not the image. Save the image and upload it, or paste the image&apos;s own address (press and hold the picture, then Copy Image Address).
       </p>
     ) : null;
   }

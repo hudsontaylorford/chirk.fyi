@@ -10,6 +10,7 @@ import { mainColor } from "@/lib/theme";
 export function CoverInput({ value, theme, canUpload }: { value: string | null; theme: string | null; canUpload: boolean }) {
   const [url, setUrl] = useState(value ?? "");
   const [match, setMatch] = useState(!!theme);
+  const [broken, setBroken] = useState(false); // a link that isn't a picture: nothing to match
   const [status, setStatus] = useState<string | null>(null);
   // The color read for a photo (null = it has none). A new photo is read again; an uploaded one is read on the phone before upload.
   const [read, setRead] = useState<{ url: string; color: string | null }>({ url: value ?? "", color: theme });
@@ -25,7 +26,11 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
         if (!live) return;
         setRead({ url, color: c });
         setStatus(c ? "Color matched ✓ Tap Save to keep it." : "This photo has no clear color, so the invite stays plain.");
-      }, () => live && setStatus("Couldn’t read this photo’s color. Save the image and upload it instead to match it."));
+      }, () => {
+        if (!live) return;
+        setMatch(false); // untick now, with the reason beside it, so Save doesn't look like it lost the setting
+        setStatus("Couldn’t read this photo’s color, so the box is unticked. Save the image and upload it instead to match it.");
+      });
     return () => { live = false; };
   }, [match, url, read.url]);
   const [busy, setBusy] = useState(false);
@@ -56,7 +61,7 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
     <div>
       <span className="sr-only">Cover photo</span>
       <input type="hidden" name="cover_url" value={url} />
-      {url && <div className="mt-2"><Cover src={url} host /></div>}
+      {url && <div className="mt-2"><Cover src={url} host onBroken={setBroken} /></div>}
       {canUpload && (
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <label className={`button-quiet text-[15px] ${busy ? "pointer-events-none opacity-50" : "cursor-pointer"}`}>
@@ -70,7 +75,7 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
           )}
         </div>
       )}
-      {url && (
+      {url && !broken && (
         <label className="mt-2 flex items-center gap-3 py-1 text-[16px]">
           <input type="checkbox" checked={match} onChange={(e) => setMatch(e.target.checked)} className="h-5 w-5 shrink-0" />
           Match the invite’s color to the photo
@@ -82,6 +87,7 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
       <details className="mt-2" open={!canUpload}>
         <summary className="text-[14px] text-soft">{canUpload ? "Or use an image link" : "Image link"}</summary>
         <input className="field mt-1" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+        <span className="text-[14px] text-soft">The picture&apos;s own address: press and hold it, then Copy Image Address.</span>
       </details>
     </div>
   );
