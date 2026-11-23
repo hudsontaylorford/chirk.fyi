@@ -21,6 +21,7 @@ begin
     details text,
     rsvp_by date,
     cover_url text,
+    theme text,                          -- the invite's color, matched to the cover ("#rrggbb"): null = plain
     bring_prompt text,                   -- null = no bring list
     status text not null default 'live' check (status in ('draft', 'live', 'archived')),
     ask_kids boolean not null default false,
@@ -258,5 +259,7 @@ begin
   update events set questions = case when poll_question is null then '[]'::jsonb
     else jsonb_build_array(jsonb_build_object('q', poll_question, 'choices', to_jsonb(string_to_array(coalesce(poll_choices, ''), E'\n')), 'one', false)) end
     where questions is null;
+  -- Nov 22: invite color from the cover.
+  alter table events add column if not exists theme text;
 end
 $setup$;

@@ -5,6 +5,7 @@ import { bringChoices, getEventData, arrivals } from "@/lib/data";
 import { when } from "@/lib/format";
 import { questionsOf } from "@/lib/poll";
 import { Footer } from "@/components/Footer";
+import { Theme } from "@/components/Theme";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "RSVP", robots: { index: false, follow: false } };
@@ -30,6 +31,7 @@ export default async function RsvpPage({ params, searchParams }: { params: Promi
       <div className="mt-8"><EmailMyLink slug={slug} /></div>
     </main>
     <Footer />
+    <Theme color={data.event.theme} />
     </>
   );
 }

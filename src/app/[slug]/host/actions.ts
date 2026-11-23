@@ -15,6 +15,7 @@ import { messageEmail } from "@/lib/message-email";
 import { ownerEmail } from "@/lib/jobs";
 import { fromEvent } from "@/lib/templates";
 import { questionsFromForm } from "@/lib/poll";
+import { isHex } from "@/lib/theme";
 
 const val = (f: FormData, k: string) => String(f.get(k) ?? "").trim();
 
@@ -57,6 +58,7 @@ const eventFields = (f: FormData) => ({
   details: val(f, "details") || null,
   rsvp_by: val(f, "rsvp_by") || null,
   cover_url: val(f, "cover_url") || null,
+  theme: val(f, "cover_url") && isHex(val(f, "theme")) ? val(f, "theme") : null,
   // The bring list is switched on or off; on with a blank question uses the default question.
   bring_prompt: f.get("bring_on") === "on" ? val(f, "bring_prompt") || "What are you bringing?" : null,
   allow_own: f.get("allow_own") === "on",
@@ -97,7 +99,7 @@ export async function copyToNextYear(slug: string) {
   const me = await requireUser();
   const [e] = await sql`
     select id, title, (date + 364)::text as date, time, end_time, place, address, details,
-      (rsvp_by + 364)::text as rsvp_by, cover_url, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, hide_guests, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
+      (rsvp_by + 364)::text as rsvp_by, cover_url, theme, bring_prompt, ask_kids, notify_host, note_prompt, note_hint, allow_doubles, allow_own, notes_public, hide_guests, max_guests, schedule, ask_arrival, hosted_by, long_times, costs_on, poker_on, gift_on, gift_budget, gift_rules,
       (gift_draw_on + 364)::text as gift_draw_on, gift_remind_ideas, gift_remind_givers, remind_replies, questions
     from events where slug = ${slug}`;
   if (!e) return;

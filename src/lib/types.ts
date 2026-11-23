@@ -12,6 +12,7 @@ export interface Event {
   details: string | null;
   rsvp_by: string | null;
   cover_url: string | null;
+  theme: string | null; // "#rrggbb" from the cover photo; null = plain
   bring_prompt: string | null;
   status: "draft" | "live" | "archived";
   ask_kids: boolean;

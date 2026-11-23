@@ -5,6 +5,7 @@ import { picked, questionsOf } from "@/lib/poll";
 import { arrivals, bringChoices, getEventData, joinNames, partsOf } from "@/lib/data";
 import { listText, mapsUrl, when } from "@/lib/format";
 import { Footer } from "@/components/Footer";
+import { Theme } from "@/components/Theme";
 import { Costs } from "@/components/Costs";
 import { Gifts } from "@/components/Gifts";
 
@@ -136,6 +137,7 @@ export default async function YourRsvp({
     {(data.event.costs_on || data.event.poker_on) && h.going !== false && <Costs data={data} token={token} host={false} />}
     {data.event.gift_on && <Gifts data={data} token={token} host={false} />}
     <Footer />
+    <Theme color={data.event.theme} />
     </>
   );
 }

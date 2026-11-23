@@ -162,9 +162,9 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
         <Row id="details" label="Message" value={e?.details ? e.details.replace(/[#*\-]/g, "").trim().slice(0, 40) + "…" : "Add one"}>
           <DetailsInput value={e?.details ?? ""} />
         </Row>
-        <Row id="photo" label="Photo" value={e?.cover_url ? "Added" : "Add one"}>
+        <Row id="photo" label="Photo" value={e?.cover_url ? (e.theme ? "Added · color matched" : "Added") : "Add one"}>
           {/* Upload shows once Vercel Blob storage is connected (BLOB_READ_WRITE_TOKEN). */}
-          <CoverInput value={e?.cover_url ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
+          <CoverInput value={e?.cover_url ?? null} theme={e?.theme ?? null} canUpload={!!process.env.BLOB_READ_WRITE_TOKEN || process.env.PHOTOS_FAKE === "true"} />
         </Row>
         <Row id="bring" label="What to bring" value={e?.bring_prompt ? `On · ${needed.length} on the list` : "Off"}>
           <BringFields prompt={e?.bring_prompt ?? null} allowOwn={e?.allow_own ?? true} allowDoubles={e?.allow_doubles ?? false} items={needed} />
