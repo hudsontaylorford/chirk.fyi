@@ -12,6 +12,7 @@ export interface RsvpFormProps {
   askKids: boolean;
   notePrompt: string | null;
   noteHint: string | null;
+  noteRequired?: boolean; // guests who are going must answer the note question
   allowOwn: boolean;
   notesPublic: boolean;
   maxGuests: number | null; // extra people per reply; null = no limit
@@ -35,7 +36,7 @@ export interface RsvpFormProps {
   };
 }
 
-export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, allowOwn, notesPublic, maxGuests, arrivals, questions, choices, prePick, ownFirst, initial }: RsvpFormProps) {
+export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, noteRequired, allowOwn, notesPublic, maxGuests, arrivals, questions, choices, prePick, ownFirst, initial }: RsvpFormProps) {
   const maxNames = 1 + (maxGuests ?? 5);
   const router = useRouter();
   const [busy, start] = useTransition();
@@ -51,6 +52,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
   const [typing, setTyping] = useState("");
   const [note, setNote] = useState(initial?.note ?? "");
   const [me, setMe] = useState<string | null>(null);
+  const needNote = !!noteRequired && going === true;
 
   // Something they picked that got taken in the meantime drops out of their picks.
   const livePicks = picks.filter((id) => choices.some((c) => c.id === id));
@@ -70,6 +72,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
     setError(null);
     if (going === null) { document.getElementById("going-yes")?.focus(); return setError({ text: "Pick Going or Can’t make it." }); }
     if (!names.some((n) => n.trim())) { document.getElementById("name-0")?.focus(); return setError({ text: "Add your name." }); }
+    if (needNote && !note.trim()) { document.getElementById("note")?.focus(); return setError({ text: `Please answer “${notePrompt || "Anything we should know?"}”.` }); }
     const input: RsvpInput = {
       slug, token: initial?.token, names, going, kids, note, parts, answers,
       picks: livePicks, own: !allowOwn ? [] : typing.trim() ? [...own, ...typing.split(",")] : own,
@@ -212,8 +215,9 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
       )}
 
       {going !== null && (
-        <Q label={notePrompt || "Anything we should know?"} hint={notesPublic ? "Optional. Shows on the invite." : "Optional. Only the hosts see this."}>
+        <Q label={notePrompt || "Anything we should know?"} hint={`${needNote ? "Required" : "Optional"}. ${notesPublic ? "Shows on the invite." : "Only the hosts see this."}`}>
           <textarea
+            id="note" aria-required={needNote}
             className="field" rows={2} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder={going ? noteHint || "Allergies, arriving late…" : "A note for the hosts"}
           />

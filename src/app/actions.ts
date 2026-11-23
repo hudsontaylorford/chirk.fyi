@@ -42,9 +42,10 @@ export async function saveRsvp(input: RsvpInput): Promise<RsvpResult> {
   const email = input.email === undefined ? undefined : input.email.trim().toLowerCase().slice(0, 200) || null;
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { ok: false, error: "That email doesn't look right." };
 
-  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null; schedule: string | null; time: string | null; ask_arrival: boolean; questions: Question[] | null }[]>`
-    select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival, questions from events where slug = ${input.slug} and status <> 'draft'`;
+  const [event] = await sql<{ id: string; notify_host: boolean; allow_doubles: boolean; allow_own: boolean; max_guests: number | null; schedule: string | null; time: string | null; ask_arrival: boolean; questions: Question[] | null; note_required: boolean; note_prompt: string | null }[]>`
+    select id, notify_host, allow_doubles, allow_own, max_guests, schedule, time::text, ask_arrival, questions, note_required, note_prompt from events where slug = ${input.slug} and status <> 'draft'`;
   if (!event) return { ok: false, error: "This event isn't open for replies." };
+  if (event.note_required && input.going && !tidy(input.note ?? "")) return { ok: false, error: `Please answer “${event.note_prompt || "Anything we should know?"}”.` };
   if (event.max_guests !== null && names.length > 1 + event.max_guests) {
     return { ok: false, error: event.max_guests === 0 ? "This invite is just for you, so one name please." : `This invite allows up to ${event.max_guests} extra ${event.max_guests === 1 ? "guest" : "guests"}.` };
   }

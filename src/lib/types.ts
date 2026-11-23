@@ -19,6 +19,7 @@ export interface Event {
   notify_host: boolean;
   note_prompt: string | null;
   note_hint: string | null;
+  note_required: boolean; // going guests must answer the note question
   allow_doubles: boolean;
   allow_own: boolean;
   notes_public: boolean;

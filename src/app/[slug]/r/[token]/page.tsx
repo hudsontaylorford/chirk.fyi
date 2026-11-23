@@ -49,6 +49,7 @@ export default async function YourRsvp({
           askKids={data.event.ask_kids}
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
+          noteRequired={data.event.note_required}
           allowOwn={data.event.allow_own}
           notesPublic={data.event.notes_public && !data.event.hide_guests}
           maxGuests={data.event.max_guests}
@@ -113,6 +114,7 @@ export default async function YourRsvp({
           askKids={data.event.ask_kids}
           notePrompt={data.event.note_prompt}
           noteHint={data.event.note_hint}
+          noteRequired={data.event.note_required}
           allowOwn={data.event.allow_own}
           notesPublic={data.event.notes_public && !data.event.hide_guests}
           maxGuests={data.event.max_guests}
