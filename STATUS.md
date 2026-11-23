@@ -14,14 +14,17 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `match-photo-links`)
+## Waiting for review (Nov 23, `four-questions`)
+- **Up to 4 questions** (was 3), so a brand dinner can ask shoe, size, delivery and main course. Code only, no database step.
+
+## Went live Nov 23 (PR 3: `match-photo-links`)
 - **Fix: "Match the invite's color to the photo" didn't stick for a pasted image link** (Hudson, on Thanksgiving's Pinterest cover). Sites like Pinterest and Google won't let the browser read their pictures, so no color was found and Save cleared the box. Now chirk's server fetches the picture for the color (hosts only, https images only, up to 4 MB). It says "Reading the photo's color…", then "Color matched ✓" or, if a link isn't an image (a pin.it share link), it unticks the box right away with the reason. No database step.
 - **Plain warnings so a cover never looks broken:** a link that isn't a picture now says why ("Share links (like pin.it) open a page, not the image. Save the image and upload it, or paste the image's own address") and hides the Match box; the Image link box explains "press and hold it, then Copy Image Address".
 
 ## Went live Nov 23 (PR 2: brand events)
 For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe they pick before the event.
 - **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, the questions' counts (questions are asked only in the reply), or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
-- **Poll → Questions:** up to 3 questions in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.
+- **Poll → Questions:** up to 3 questions (4 since Nov 23) in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.
 - **Copy answers** beside Guests on the host page: every reply as rows (name, email, reply, each question, the note) that paste into a spreadsheet, for handing to a brand.
 - **Shipping address, no code:** rename the note question ("Shipping address", example "Street, apt, city, ZIP"). Product links go in the Message (already tappable).
 - **Invite color from the cover (look OK'd by Hudson Nov 22):** "Match the invite's color to the photo" in the Photo row, off by default. A pale shade of the photo's main color behind the invite, RSVP and reply pages, and a deep shade on the RSVP button and picked choices (white or black text, whichever reads better; Hudson, Nov 23). Body text stays black, links slate blue; contrast tested for every hue. Read on the phone before upload; pasted links from sites that block it (Pinterest) get "upload the photo instead". Recorded in `docs/CHIRK_UI_PATTERNS.md` (§1 rule 5, §2).

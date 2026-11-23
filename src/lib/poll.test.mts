@@ -8,7 +8,7 @@ test("choices: one per line, trimmed, no blanks or repeats, up to 20", () => {
   assert.equal(pollChoices(Array.from({ length: 30 }, (_, i) => String(5 + i / 2)).join("\n")).length, 20);
 });
 
-test("form: up to 3 questions, blanks and repeats dropped", () => {
+test("form: up to 4 questions, blanks and repeats dropped", () => {
   const f: Record<string, string> = { question_0: "Which shoe?", choices_0: "Diana\nJax", one_0: "on", question_1: "", question_2: "Which shoe?" };
   assert.deepEqual(questionsFromForm((k) => f[k] ?? "", (k) => f[k] === "on"), [{ q: "Which shoe?", choices: ["Diana", "Jax"], one: true }]);
 });
