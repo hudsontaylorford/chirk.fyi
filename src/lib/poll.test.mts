@@ -13,8 +13,8 @@ test("form: up to 5 questions, blanks and repeats dropped", () => {
   assert.deepEqual(questionsFromForm((k) => f[k] ?? "", (k) => f[k] === "on"), [{ q: "Which shoe?", choices: ["Diana", "Jax"], one: true }]);
 });
 
-test("guests see write-ins and questions with two or more choices", () => {
-  assert.deepEqual(questionsOf({ questions: [{ q: "A?", choices: ["x"], one: false }, { q: "B?", choices: ["x", "y"], one: false }, { q: "C?", choices: [], one: false }] }).map((x) => x.q), ["B?", "C?"]);
+test("guests see every typed question", () => {
+  assert.deepEqual(questionsOf({ questions: [{ q: "A?", choices: ["x"], one: false }, { q: "", choices: ["x", "y"], one: false }, { q: "C?", choices: [], one: false }] }).map((x) => x.q), ["A?", "C?"]);
   assert.deepEqual(questionsOf({ questions: null }), []);
 });
 
@@ -40,5 +40,9 @@ test("write-in: keeps trimmed text, drops an empty tick", () => {
   const qs = [{ q: "Allergies?", choices: [], one: false }];
   assert.deepEqual(cleanAnswers(qs, { "Allergies?": ["  nuts  ", "x"] }), { "Allergies?": ["nuts"] });
   assert.deepEqual(cleanAnswers(qs, { "Allergies?": [""] }), {});
+  const tick = [{ q: "Allergies?", choices: ["Yes"], one: false }];
+  assert.deepEqual(cleanAnswers(tick, { "Allergies?": [""] }), { "Allergies?": ["Yes"] }); // ticked, nothing written
+  assert.deepEqual(cleanAnswers(tick, { "Allergies?": ["nuts"] }), { "Allergies?": ["nuts"] });
+  assert.deepEqual(cleanAnswers(tick, {}), {});
   assert.deepEqual(picked(qs[0], { answers: { "Allergies?": ["nuts"] } }), ["nuts"]);
 });

@@ -141,14 +141,20 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
       {questions.map((x) => {
         const mine = answers[x.q] ?? [];
         // Pick one: tapping another choice moves the pick; tapping the picked one clears it.
+        const box = (focus: boolean) => (
+          <textarea className="field" rows={2} aria-label={x.q} value={mine[0] === x.choices[0] ? "" : (mine[0] ?? "")} onChange={(ev) => setAnswers({ ...answers, [x.q]: [ev.target.value] })} autoFocus={focus} />
+        );
+        if (writeIn(x) && !x.choices.length) return <Q key={x.q} label={<Rich text={x.q} />} hint="Optional.">{box(false)}</Q>;
         if (writeIn(x)) return (
-          <div key={x.q} className="space-y-2">
-            <label className="flex items-center gap-3 text-[17px] font-semibold">
-              <input type="checkbox" className="h-5 w-5" checked={x.q in answers} onChange={(ev) => { const a = { ...answers }; if (ev.target.checked) a[x.q] = [""]; else delete a[x.q]; setAnswers(a); }} />
-              <span><Rich text={x.q} /></span>
-            </label>
-            {x.q in answers && <textarea className="field" rows={2} aria-label={x.q} value={mine[0] ?? ""} onChange={(ev) => setAnswers({ ...answers, [x.q]: [ev.target.value] })} autoFocus={!mine[0]} />}
-          </div>
+          <Q key={x.q} label={<Rich text={x.q} />}>
+            <div className="space-y-2">
+              <label className="flex items-center gap-3 text-[17px]">
+                <input type="checkbox" className="h-5 w-5" checked={x.q in answers} onChange={(ev) => { const a = { ...answers }; if (ev.target.checked) a[x.q] = [""]; else delete a[x.q]; setAnswers(a); }} />
+                {x.choices[0]}
+              </label>
+              {x.q in answers && box(!mine[0])}
+            </div>
+          </Q>
         );
         const tap = (c: string) => setAnswers({ ...answers, [x.q]: mine.includes(c) ? mine.filter((v) => v !== c) : x.one ? [c] : [...mine, c] });
         return (

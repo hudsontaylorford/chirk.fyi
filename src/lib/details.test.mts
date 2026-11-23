@@ -22,6 +22,7 @@ test("bold and links", () => {
   assert.deepEqual(inline("- **[Diana](https://ghbass.com/p?id=1)** or [Jax](http://x.co/j)."), [
     { text: "- " }, { href: "https://ghbass.com/p?id=1", text: "Diana", bold: true }, { text: " or " }, { href: "http://x.co/j", text: "Jax" }, { text: "." },
   ]);
+  assert.deepEqual(inline("[Shoe choices] (www.ghbass.com/women)"), [{ href: "https://www.ghbass.com/women", text: "Shoe choices" }]);
   assert.deepEqual(inline("Style [pick here](www.ghbass.com/women) (www.ghbass.com/men)."), [
     { text: "Style " }, { href: "https://www.ghbass.com/women", text: "pick here" }, { text: " (" }, { href: "https://www.ghbass.com/men", text: "ghbass.com/men" }, { text: ")." },
   ]);

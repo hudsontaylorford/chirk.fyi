@@ -1,5 +1,5 @@
 // The event's questions ("Which shoe?", "Your size?"): up to 5, each with chips guests pick one or any of,
-// or with no choices: a tick box ("Allergies?") that opens a box to write in. Pure.
+// or a write-in: no choices = a text box; one choice ("Yes") = a tick box with that label that opens a text box. Pure.
 
 export type Question = { q: string; choices: string[]; one: boolean };
 export type Answers = Record<string, string[]>; // question → what they picked
@@ -17,11 +17,11 @@ export function pollChoices(text: string | null) {
   }).slice(0, 20);
 }
 
-/** No choices: a tick box with a write-in. */
-export const writeIn = (x: Question) => !x.choices.length;
+/** No choices: a text box. One choice: a tick box that opens one. */
+export const writeIn = (x: Question) => x.choices.length < 2;
 
-/** The questions guests see: write-ins, and ones with at least two choices to pick from. */
-export const questionsOf = (e: { questions: Question[] | null }) => (e.questions ?? []).filter((x) => x.q && (writeIn(x) || x.choices.length > 1));
+/** The questions guests see: every one with a question typed. */
+export const questionsOf = (e: { questions: Question[] | null }) => (e.questions ?? []).filter((x) => x.q);
 
 /** From the event form's question_0, choices_0, one_0 … fields. A question without choices is kept so it isn't lost mid-edit. */
 export function questionsFromForm(get: (name: string) => string, on: (name: string) => boolean): Question[] {
@@ -37,8 +37,9 @@ export function questionsFromForm(get: (name: string) => string, on: (name: stri
 export function cleanAnswers(qs: Question[], input: Answers | undefined): Answers {
   const out: Answers = {};
   for (const x of qs) {
-    const text = writeIn(x) ? String(input?.[x.q]?.[0] ?? "").trim().slice(0, 500) : "";
-    if (text) out[x.q] = [text];
+    // A ticked box with nothing written still counts, as its label ("Yes").
+    const text = writeIn(x) && input?.[x.q] ? String(input[x.q][0] ?? "").trim().slice(0, 500) || (x.choices[0] ?? "") : "";
+    if (text) { out[x.q] = [text]; continue; }
     const picks = x.choices.filter((c) => input?.[x.q]?.includes(c));
     if (picks.length) out[x.q] = x.one ? picks.slice(0, 1) : picks;
   }
