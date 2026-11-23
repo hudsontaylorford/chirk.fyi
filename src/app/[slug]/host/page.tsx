@@ -20,7 +20,7 @@ import { arrivals, bringList, getCosts, getDraws, getEventData, getSentJobs, joi
 import { money, settleUp } from "@/lib/costs";
 import { daysBefore } from "@/lib/due";
 import { headcount, listText, shortDate } from "@/lib/format";
-import { answersTable, questionsOf, tally } from "@/lib/poll";
+import { answersTable, picked, questionsOf, tally, writeIn } from "@/lib/poll";
 import * as act from "./actions";
 import { Footer } from "@/components/Footer";
 
@@ -241,6 +241,9 @@ export default async function HostPage({ params }: { params: Promise<{ slug: str
           </div>
           {/* Who picked what, for the hosts; guests see only the counts. */}
           <ul className="mt-2 divide-y divide-line border-y border-line">
+            {writeIn(x) && households.filter((h) => picked(x, h).length).map((h) => (
+              <li key={h.id} className="py-2 text-[16px]"><span className="font-semibold">{joinNames(h.names)}:</span> {picked(x, h)[0]}</li>
+            ))}
             {tally(x, households).map((t) => (
               <li key={t.choice} className="py-2 text-[16px]">
                 <p className="flex justify-between gap-3"><span>{t.choice}</span><span className="font-semibold tabular-nums">{t.by.length}</span></p>

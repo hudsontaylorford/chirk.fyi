@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { several } from "@/lib/format";
 import { useState, useTransition } from "react";
 import { saveRsvp, type RsvpInput } from "@/app/actions";
-import type { Answers, Question } from "@/lib/poll";
+import { writeIn, type Answers, type Question } from "@/lib/poll";
 
 export interface RsvpFormProps {
   slug: string;
@@ -137,6 +137,15 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, all
       {questions.map((x) => {
         const mine = answers[x.q] ?? [];
         // Pick one: tapping another choice moves the pick; tapping the picked one clears it.
+        if (writeIn(x)) return (
+          <div key={x.q} className="space-y-2">
+            <label className="flex items-center gap-3 text-[17px] font-semibold">
+              <input type="checkbox" className="h-5 w-5" checked={x.q in answers} onChange={(ev) => { const a = { ...answers }; if (ev.target.checked) a[x.q] = [""]; else delete a[x.q]; setAnswers(a); }} />
+              {x.q}
+            </label>
+            {x.q in answers && <textarea className="field" rows={2} aria-label={x.q} value={mine[0] ?? ""} onChange={(ev) => setAnswers({ ...answers, [x.q]: [ev.target.value] })} autoFocus={!mine[0]} />}
+          </div>
+        );
         const tap = (c: string) => setAnswers({ ...answers, [x.q]: mine.includes(c) ? mine.filter((v) => v !== c) : x.one ? [c] : [...mine, c] });
         return (
           <Q key={x.q} label={x.q} hint={x.one ? "Pick one." : "Pick any."}>

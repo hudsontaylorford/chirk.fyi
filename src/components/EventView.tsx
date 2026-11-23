@@ -2,7 +2,7 @@ import { Cover } from "@/components/Cover";
 import { Details } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
 import { headcount, mapsUrl, shortDate, when } from "@/lib/format";
-import { questionsOf, tally } from "@/lib/poll";
+import { questionsOf, tally, writeIn } from "@/lib/poll";
 import { parseSchedule } from "@/lib/schedule";
 import type { EventData } from "@/lib/types";
 
@@ -13,7 +13,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
   const people = going.reduce((n, h) => n + headcount(h.names) + h.kids, 0);
   const { claimed, open } = bringList(data);
   const stages = parseSchedule(event.schedule, event.time, event.long_times);
-  const questions = questionsOf(event);
+  const questions = questionsOf(event).filter((x) => !writeIn(x)); // write-ins are private, like notes
   const hide = event.hide_guests; // the host keeps the list to themselves: no names or counts
   const bringing = (id: string) => claimed.filter((r) => r.households.includes(id)).map((r) => r.item.name);
 

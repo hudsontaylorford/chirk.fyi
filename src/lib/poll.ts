@@ -1,9 +1,10 @@
-// The event's questions ("Which shoe?", "Your size?"): up to 4, each with chips guests pick one or any of. Pure.
+// The event's questions ("Which shoe?", "Your size?"): up to 5, each with chips guests pick one or any of,
+// or with no choices: a tick box ("Allergies?") that opens a box to write in. Pure.
 
 export type Question = { q: string; choices: string[]; one: boolean };
 export type Answers = Record<string, string[]>; // question → what they picked
 
-export const MAX_QUESTIONS = 4;
+export const MAX_QUESTIONS = 5;
 
 /** The choices as the host typed them: trimmed, no blanks or repeats, at most 20 (half sizes fit). */
 export function pollChoices(text: string | null) {
@@ -16,8 +17,11 @@ export function pollChoices(text: string | null) {
   }).slice(0, 20);
 }
 
-/** The questions guests see: ones with at least two choices to pick from. */
-export const questionsOf = (e: { questions: Question[] | null }) => (e.questions ?? []).filter((x) => x.q && x.choices.length > 1);
+/** No choices: a tick box with a write-in. */
+export const writeIn = (x: Question) => !x.choices.length;
+
+/** The questions guests see: write-ins, and ones with at least two choices to pick from. */
+export const questionsOf = (e: { questions: Question[] | null }) => (e.questions ?? []).filter((x) => x.q && (writeIn(x) || x.choices.length > 1));
 
 /** From the event form's question_0, choices_0, one_0 … fields. A question without choices is kept so it isn't lost mid-edit. */
 export function questionsFromForm(get: (name: string) => string, on: (name: string) => boolean): Question[] {
@@ -29,10 +33,12 @@ export function questionsFromForm(get: (name: string) => string, on: (name: stri
   return out;
 }
 
-/** Only real choices of real questions; a pick-one question keeps its first pick. */
+/** Only real choices of real questions; a pick-one question keeps its first pick; a write-in keeps its text. */
 export function cleanAnswers(qs: Question[], input: Answers | undefined): Answers {
   const out: Answers = {};
   for (const x of qs) {
+    const text = writeIn(x) ? String(input?.[x.q]?.[0] ?? "").trim().slice(0, 500) : "";
+    if (text) out[x.q] = [text];
     const picks = x.choices.filter((c) => input?.[x.q]?.includes(c));
     if (picks.length) out[x.q] = x.one ? picks.slice(0, 1) : picks;
   }
@@ -40,7 +46,7 @@ export function cleanAnswers(qs: Question[], input: Answers | undefined): Answer
 }
 
 /** What one reply picked for a question, ignoring choices the host has since removed. */
-export const picked = (x: Question, h: { answers: Answers | null }) => x.choices.filter((c) => h.answers?.[x.q]?.includes(c));
+export const picked = (x: Question, h: { answers: Answers | null }) => writeIn(x) ? (h.answers?.[x.q] ?? []).slice(0, 1) : x.choices.filter((c) => h.answers?.[x.q]?.includes(c));
 
 /** Each choice with the replies that picked it. */
 export const tally = <H extends { answers: Answers | null }>(x: Question, households: H[]) =>

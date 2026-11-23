@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { answersTable, cleanAnswers, pollChoices, questionsFromForm, questionsOf, tally } from "./poll.ts";
+import { answersTable, cleanAnswers, picked, pollChoices, questionsFromForm, questionsOf, tally } from "./poll.ts";
 
 test("choices: one per line, trimmed, no blanks or repeats, up to 20", () => {
   assert.deepEqual(pollChoices(" Dec 5 \n\nDec 12\ndec 5\nDec 19"), ["Dec 5", "Dec 12", "Dec 19"]);
@@ -8,13 +8,13 @@ test("choices: one per line, trimmed, no blanks or repeats, up to 20", () => {
   assert.equal(pollChoices(Array.from({ length: 30 }, (_, i) => String(5 + i / 2)).join("\n")).length, 20);
 });
 
-test("form: up to 4 questions, blanks and repeats dropped", () => {
+test("form: up to 5 questions, blanks and repeats dropped", () => {
   const f: Record<string, string> = { question_0: "Which shoe?", choices_0: "Diana\nJax", one_0: "on", question_1: "", question_2: "Which shoe?" };
   assert.deepEqual(questionsFromForm((k) => f[k] ?? "", (k) => f[k] === "on"), [{ q: "Which shoe?", choices: ["Diana", "Jax"], one: true }]);
 });
 
-test("guests see only questions with two or more choices", () => {
-  assert.deepEqual(questionsOf({ questions: [{ q: "A?", choices: ["x"], one: false }, { q: "B?", choices: ["x", "y"], one: false }] }).map((x) => x.q), ["B?"]);
+test("guests see write-ins and questions with two or more choices", () => {
+  assert.deepEqual(questionsOf({ questions: [{ q: "A?", choices: ["x"], one: false }, { q: "B?", choices: ["x", "y"], one: false }, { q: "C?", choices: [], one: false }] }).map((x) => x.q), ["B?", "C?"]);
   assert.deepEqual(questionsOf({ questions: null }), []);
 });
 
@@ -34,4 +34,11 @@ test("answers table: one row per reply, one line per cell", () => {
   const e = { questions: [{ q: "Shoe?", choices: ["Diana", "Jax"], one: true }], note_prompt: "Shipping address" };
   const t = answersTable(e, [{ names: ["Sam", "Lee"], email: "s@x.co", going: true, note: "1 Main St\nApt 2", answers: { "Shoe?": ["Jax"] } }]);
   assert.equal(t, "Name\tEmail\tReply\tShoe?\tShipping address\nSam & Lee\ts@x.co\tGoing\tJax\t1 Main St, Apt 2");
+});
+
+test("write-in: keeps trimmed text, drops an empty tick", () => {
+  const qs = [{ q: "Allergies?", choices: [], one: false }];
+  assert.deepEqual(cleanAnswers(qs, { "Allergies?": ["  nuts  ", "x"] }), { "Allergies?": ["nuts"] });
+  assert.deepEqual(cleanAnswers(qs, { "Allergies?": [""] }), {});
+  assert.deepEqual(picked(qs[0], { answers: { "Allergies?": ["nuts"] } }), ["nuts"]);
 });
