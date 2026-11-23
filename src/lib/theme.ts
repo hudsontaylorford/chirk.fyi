@@ -15,11 +15,17 @@ export function mainColor(px: ArrayLike<number>): string | null {
   return "#" + [top.r, top.g, top.b].map((c) => Math.round(c / top.w).toString(16).padStart(2, "0")).join("");
 }
 
-/** The page tokens for that color: pale paper, a darker gray in the same hue, matching hairlines. */
+/** The page tokens for that color: pale paper, a darker gray in the same hue, matching hairlines,
+ *  and a deep shade for the RSVP button and picked choices, with black or white text, whichever reads better. */
 export function themeTokens(hex: string) {
   const [h, s] = hsl(parseInt(hex.slice(1, 3), 16), parseInt(hex.slice(3, 5), 16), parseInt(hex.slice(5, 7), 16));
   const sat = Math.round(Math.min(s, 0.6) * 100);
+  const deep: [number, number, number] = [h, Math.min(s, 0.65), 0.36];
+  const ink = luminance(28, 25, 23); // --color-ink
+  const onWhite = contrast(luminance(...rgb(...deep)), 1), onInk = contrast(luminance(...rgb(...deep)), ink);
   return {
+    accent: `hsl(${Math.round(h)} ${Math.round(deep[1] * 100)}% 36%)`,
+    onAccent: onWhite >= onInk ? "#ffffff" : "#1c1917",
     paper: `hsl(${Math.round(h)} ${sat}% 94%)`,
     soft: `hsl(${Math.round(h)} ${Math.round(sat / 3)}% 34%)`, // ≥ 4.5:1 on the paper
     line: `hsl(${Math.round(h)} ${Math.round(sat / 2)}% 82%)`,
@@ -36,3 +42,14 @@ function hsl(r: number, g: number, b: number): [number, number, number] {
   const h = max === r ? ((g - b) / d + 6) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
   return [h * 60, s, l];
 }
+
+function rgb(h: number, s: number, l: number): [number, number, number] {
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => { const k = (n + h / 30) % 12; return Math.round(255 * (l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1)))); };
+  return [f(0), f(8), f(4)];
+}
+const luminance = (r: number, g: number, b: number) =>
+  [r, g, b].map((c) => { c /= 255; return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; }).reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+/** WCAG contrast between two luminances. */
+export const contrast = (a: number, b: number) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+export const hslLuminance = (h: number, s: number, l: number) => luminance(...rgb(h, s, l));

@@ -4,5 +4,8 @@ import { isHex, themeTokens } from "@/lib/theme";
 export function Theme({ color }: { color: string | null }) {
   if (!color || !isHex(color)) return null;
   const t = themeTokens(color);
-  return <style>{`:root{--color-soft:${t.soft};--color-line:${t.line}}body{background:${t.paper}}`}</style>;
+  // The RSVP button and picked choices take the deep shade; body text stays ink and links stay slate.
+  return <style>{`:root{--color-soft:${t.soft};--color-line:${t.line}}body{background:${t.paper}}`
+    + `.button{background:${t.accent};color:${t.onAccent}}`
+    + `.choice[aria-pressed="true"]{background:${t.accent};border-color:${t.accent};box-shadow:none;color:${t.onAccent}}`}</style>;
 }
