@@ -65,14 +65,15 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
       )}
 
       {/* Each question: counts only, none when the list is hidden (who picked what is on the host page). Answering happens in the reply. */}
-      {questions.map((x) => (
+      {/* A hidden list has no counts to show, so the questions are asked only in the reply. */}
+      {!hide && questions.map((x) => (
         <section key={x.q} className="mt-10 px-5">
           <h2 className="text-[20px] font-bold">{x.q}</h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
             {tally(x, households).map((t) => (
               <li key={t.choice} className="flex justify-between gap-3 py-3 text-[17px]">
                 <span>{t.choice}</span>
-                {!hide && <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>}
+                <span className="shrink-0 text-soft tabular-nums">{t.by.length} {t.by.length === 1 ? "vote" : "votes"}</span>
               </li>
             ))}
           </ul>

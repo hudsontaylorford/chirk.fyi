@@ -16,7 +16,7 @@ Everything up to Nov 16's "fixes-3":
 
 ## Waiting for review (Nov 22, PR 2: brand events)
 For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe they pick before the event.
-- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, question counts, or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
+- **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, the questions' counts (questions are asked only in the reply), or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
 - **Poll → Questions:** up to 3 questions in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.
 - **Copy answers** beside Guests on the host page: every reply as rows (name, email, reply, each question, the note) that paste into a spreadsheet, for handing to a brand.
 - **Shipping address, no code:** rename the note question ("Shipping address", example "Street, apt, city, ZIP"). Product links go in the Message (already tappable).
