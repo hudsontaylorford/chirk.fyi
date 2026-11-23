@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 22, PR 2: brand events)
+## Waiting for review (Nov 23, `match-photo-links`)
+- **Fix: "Match the invite's color to the photo" didn't stick for a pasted image link** (Hudson, on Thanksgiving's Pinterest cover). Sites like Pinterest and Google won't let the browser read their pictures, so no color was found and Save cleared the box. Now chirk's server fetches the picture for the color (hosts only, https images only, up to 4 MB). It says "Reading the photo's color…", then "Color matched ✓" or, if a link isn't an image (a pin.it share link), "Couldn't read this photo's color. Save the image and upload it instead." No database step.
+
+## Went live Nov 23 (PR 2: brand events)
 For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe they pick before the event.
 - **Hide who's coming:** a checkbox in Guest options. Guests no longer see the Coming list, notes, the questions' counts (questions are asked only in the reply), or who's already bringing an item; hosts still see everything. Off by default, so existing events don't change.
 - **Poll → Questions:** up to 3 questions in the Questions row, each with up to 20 choices (half sizes fit) and a "Guests pick just one" box. Guests tap chips; the invite shows counts (unless hidden); the host page shows who picked what; the guest's page shows their answers. An existing poll moves over with its votes.

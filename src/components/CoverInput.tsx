@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { uploadPhoto } from "@/app/[slug]/host/actions";
+import { photoForColor, uploadPhoto } from "@/app/[slug]/host/actions";
 import { shrinkPhoto } from "@/lib/shrink-photo";
 import { Cover } from "./Cover";
 import { mainColor } from "@/lib/theme";
@@ -17,11 +17,15 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
   useEffect(() => {
     if (!match || !url || read.url === url) return;
     let live = true;
-    photoColor(url).then((c) => {
-      if (!live) return;
-      setRead({ url, color: c });
-      if (!c) setStatus("This photo has no clear color, so the invite stays plain.");
-    }, () => live && setStatus("Couldn’t read this photo’s color from its link. Upload the photo instead to match it."));
+    setStatus("Reading the photo’s color…");
+    // Straight from the link when its site allows it; otherwise through chirk's server (Pinterest, Google).
+    photoColor(url)
+      .catch(async () => { const copy = await photoForColor(url); if (!copy) throw new Error(); return photoColor(copy); })
+      .then((c) => {
+        if (!live) return;
+        setRead({ url, color: c });
+        setStatus(c ? "Color matched ✓ Tap Save to keep it." : "This photo has no clear color, so the invite stays plain.");
+      }, () => live && setStatus("Couldn’t read this photo’s color. Save the image and upload it instead to match it."));
     return () => { live = false; };
   }, [match, url, read.url]);
   const [busy, setBusy] = useState(false);
