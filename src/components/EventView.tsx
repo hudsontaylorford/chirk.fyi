@@ -1,5 +1,5 @@
 import { Cover } from "@/components/Cover";
-import { Details } from "@/components/Details";
+import { Details, Rich } from "@/components/Details";
 import { bringList, joinNames } from "@/lib/data";
 import { headcount, mapsUrl, shortDate, when } from "@/lib/format";
 import { questionsOf, tally, writeIn } from "@/lib/poll";
@@ -68,7 +68,7 @@ export function EventView({ data, rsvp, rsvpHref, greeting, replied }: { data: E
       {/* A hidden list has no counts to show, so the questions are asked only in the reply. */}
       {!hide && questions.map((x) => (
         <section key={x.q} className="mt-10 px-5">
-          <h2 className="text-[20px] font-bold">{x.q}</h2>
+          <h2 className="text-[20px] font-bold"><Rich text={x.q} /></h2>
           <ul className="mt-3 divide-y divide-line border-y border-line">
             {tally(x, households).map((t) => (
               <li key={t.choice} className="flex justify-between gap-3 py-3 text-[17px]">

@@ -36,12 +36,13 @@ function group(lines: Line[]) {
   return out;
 }
 
-function Rich({ text }: { text: string }) {
+/** One line with **bold** and links: also used for question labels. */
+export function Rich({ text }: { text: string }) {
   return (
     <>
       {inline(text).map((p, i) =>
         p.href ? (
-          <a key={i} href={p.href} target="_blank" rel="noreferrer" className="break-all underline underline-offset-2">
+          <a key={i} href={p.href} target="_blank" rel="noreferrer" className={`break-all underline underline-offset-2${p.bold ? " font-bold" : ""}`}>
             {p.text.length > 42 ? `${p.text.slice(0, 40)}…` : p.text}
           </a>
         ) : p.bold ? (

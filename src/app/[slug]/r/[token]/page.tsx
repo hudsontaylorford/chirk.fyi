@@ -1,3 +1,4 @@
+import { Rich } from "@/components/Details";
 import { notFound } from "next/navigation";
 import { RsvpForm } from "@/components/RsvpForm";
 import { KeepLink } from "@/components/YourLink";
@@ -100,7 +101,7 @@ export default async function YourRsvp({
       {/* Their answers, so it's clear they counted. Not limited to Going: a question can ask before anyone knows. */}
       {questions.map((x) => (
         <p key={x.q} className="mt-4 text-[17px]">
-          {x.q}{" "}
+          <Rich text={x.q} />{" "}
           {picked(x, h).length ? <strong>{listText(picked(x, h))}</strong> : <a href="?change=1" className="link tap">Answer</a>}
         </p>
       ))}
