@@ -1,7 +1,7 @@
 // The event's questions ("Which shoe?", "Your size?"): up to 5, each with chips guests pick one or any of,
 // or a write-in: no choices = a text box; one choice ("Yes") = a tick box with that label that opens a text box. Pure.
 
-export type Question = { q: string; choices: string[]; one: boolean };
+export type Question = { q: string; choices: string[]; one: boolean; req?: boolean }; // req: guests who are going must answer
 export type Answers = Record<string, string[]>; // question → what they picked
 
 export const MAX_QUESTIONS = 5;
@@ -28,7 +28,7 @@ export function questionsFromForm(get: (name: string) => string, on: (name: stri
   const out: Question[] = [];
   for (let i = 0; i < MAX_QUESTIONS; i++) {
     const q = get(`question_${i}`).trim().slice(0, 120);
-    if (q && !out.some((x) => x.q === q)) out.push({ q, choices: pollChoices(get(`choices_${i}`)), one: on(`one_${i}`) });
+    if (q && !out.some((x) => x.q === q)) out.push({ q, choices: pollChoices(get(`choices_${i}`)), one: on(`one_${i}`), ...(on(`req_${i}`) && { req: true }) });
   }
   return out;
 }
@@ -44,6 +44,12 @@ export function cleanAnswers(qs: Question[], input: Answers | undefined): Answer
     if (picks.length) out[x.q] = x.one ? picks.slice(0, 1) : picks;
   }
   return out;
+}
+
+/** For someone going: "Please answer …" for the first required question left unanswered (`answers` already cleaned), else null. */
+export function unanswered(qs: Question[], answers: Answers) {
+  const x = qs.find((x) => x.req && !answers[x.q]?.length);
+  return x ? `Please answer “${x.q.replace(/\[([^\]\n]+)\] ?\([^)\s]*\)/g, "$1")}”.` : null;
 }
 
 /** What one reply picked for a question, ignoring choices the host has since removed. */

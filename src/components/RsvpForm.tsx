@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { several } from "@/lib/format";
 import { useState, useTransition } from "react";
 import { saveRsvp, type RsvpInput } from "@/app/actions";
-import { writeIn, type Answers, type Question } from "@/lib/poll";
+import { cleanAnswers, unanswered, writeIn, type Answers, type Question } from "@/lib/poll";
 import { Rich } from "@/components/Details";
 
 export interface RsvpFormProps {
@@ -73,6 +73,8 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
     setError(null);
     if (going === null) { document.getElementById("going-yes")?.focus(); return setError({ text: "Pick Going or Can’t make it." }); }
     if (!names.some((n) => n.trim())) { document.getElementById("name-0")?.focus(); return setError({ text: "Add your name." }); }
+    const missing = going && unanswered(questions, cleanAnswers(questions, answers));
+    if (missing) return setError({ text: missing });
     if (needNote && !note.trim()) { document.getElementById("note")?.focus(); return setError({ text: `Please answer “${notePrompt || "Anything we should know?"}”.` }); }
     const input: RsvpInput = {
       slug, token: initial?.token, names, going, kids, note, parts, answers,
@@ -144,9 +146,10 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
         const box = (focus: boolean) => (
           <textarea className="field" rows={2} aria-label={x.q} value={mine[0] === x.choices[0] ? "" : (mine[0] ?? "")} onChange={(ev) => setAnswers({ ...answers, [x.q]: [ev.target.value] })} autoFocus={focus} />
         );
-        if (writeIn(x) && !x.choices.length) return <Q key={x.q} label={<Rich text={x.q} />} hint="Optional.">{box(false)}</Q>;
+        const req = x.req && going === true;
+        if (writeIn(x) && !x.choices.length) return <Q key={x.q} label={<Rich text={x.q} />} hint={req ? "Required." : "Optional."}>{box(false)}</Q>;
         if (writeIn(x)) return (
-          <Q key={x.q} label={<Rich text={x.q} />}>
+          <Q key={x.q} label={<Rich text={x.q} />} hint={req ? "Required." : undefined}>
             <div className="space-y-2">
               <label className="flex items-center gap-3 text-[17px]">
                 <input type="checkbox" className="h-5 w-5" checked={x.q in answers} onChange={(ev) => { const a = { ...answers }; if (ev.target.checked) a[x.q] = [""]; else delete a[x.q]; setAnswers(a); }} />
@@ -158,7 +161,7 @@ export function RsvpForm({ slug, bringPrompt, askKids, notePrompt, noteHint, not
         );
         const tap = (c: string) => setAnswers({ ...answers, [x.q]: mine.includes(c) ? mine.filter((v) => v !== c) : x.one ? [c] : [...mine, c] });
         return (
-          <Q key={x.q} label={<Rich text={x.q} />} hint={x.one ? "Pick one." : "Pick any."}>
+          <Q key={x.q} label={<Rich text={x.q} />} hint={`${x.one ? "Pick one." : "Pick any."}${req ? " Required." : ""}`}>
             <div className="flex flex-wrap gap-2">
               {x.choices.map((c) => (
                 <button key={c} type="button" className="choice" aria-pressed={mine.includes(c)} onClick={() => tap(c)}>{c}</button>

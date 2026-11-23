@@ -71,6 +71,7 @@ export function EventFields({ event, start, needed = [], matches = [] }: { event
                 <span className="text-[14px] text-soft">One per line, up to 20. Guests pick when they reply; the invite shows the counts. Leave empty for a text box, or type one choice (like &ldquo;Yes&rdquo;) for a tick box that opens one. Only you see what they write.</span>
               </label>
               <Check name={`one_${i}`} checked={x.one} label="Guests pick just one" />
+              <Check name={`req_${i}`} checked={!!x.req} label="Guests who are going must answer it" />
             </div>
           ))}
         </Row>

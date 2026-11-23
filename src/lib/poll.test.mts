@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { answersTable, cleanAnswers, picked, pollChoices, questionsFromForm, questionsOf, tally } from "./poll.ts";
+import { answersTable, cleanAnswers, picked, unanswered, pollChoices, questionsFromForm, questionsOf, tally } from "./poll.ts";
 
 test("choices: one per line, trimmed, no blanks or repeats, up to 20", () => {
   assert.deepEqual(pollChoices(" Dec 5 \n\nDec 12\ndec 5\nDec 19"), ["Dec 5", "Dec 12", "Dec 19"]);
@@ -45,4 +45,13 @@ test("write-in: keeps trimmed text, drops an empty tick", () => {
   assert.deepEqual(cleanAnswers(tick, { "Allergies?": ["nuts"] }), { "Allergies?": ["nuts"] });
   assert.deepEqual(cleanAnswers(tick, {}), {});
   assert.deepEqual(picked(qs[0], { answers: { "Allergies?": ["nuts"] } }), ["nuts"]);
+});
+
+test("required questions: first unanswered one, link text kept", () => {
+  const qs = [{ q: "Shoe? [See them](www.x.com)", choices: ["A", "B"], one: true, req: true }, { q: "Size?", choices: [], one: false, req: true }, { q: "Note?", choices: [], one: false }];
+  assert.equal(unanswered(qs, {}), "Please answer “Shoe? See them”.");
+  assert.equal(unanswered(qs, { "Shoe? [See them](www.x.com)": ["A"] }), "Please answer “Size?”.");
+  assert.equal(unanswered(qs, { "Shoe? [See them](www.x.com)": ["A"], "Size?": ["8"] }), null);
+  const f: Record<string, string> = { question_0: "Size?", req_0: "on" };
+  assert.deepEqual(questionsFromForm((k) => f[k] ?? "", (k) => f[k] === "on"), [{ q: "Size?", choices: [], one: false, req: true }]);
 });
