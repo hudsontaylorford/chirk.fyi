@@ -1,6 +1,6 @@
-# chirk: design notes (as of Nov 18, 2026)
+# chirk: design notes (as of Nov 24, 2026)
 
-> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **Since Nov 20 every page, host tools included, follows `docs/CHIRK_UI_PATTERNS.md`** (slate blue `#3d5a99` links via `--color-accent`, everything else ink; ink 8px buttons; hairlines, no boxes or pills; covers never cropped). Where the sections below describe pills or gray boxes, they're history. Audit: `docs/UI_AUDIT_V2.md`.
+> **UI patterns v1 are frozen** in `docs/CHIRK_UI_PATTERNS.md` (Nov 18): that doc wins where this one differs. **Since Nov 20 every page, host tools included, follows `docs/CHIRK_UI_PATTERNS.md`** (slate blue `#3d5a99` links via `--color-accent`, everything else ink; ink 8px buttons; hairlines, no boxes or pills; covers never cropped). Where the sections below describe pills or gray boxes, they're history. Audit: `docs/UI_AUDIT_V2.md`. **Nov 23: Hudson kept this baseline look** (system font, no display typeface, no spark motion); how to propose a visual change is in the patterns doc.
 
 *What chirk is and how we talk about it: LANGUAGE.md. This file is how it looks.*
 
@@ -20,7 +20,7 @@ chirk is a tiny, phone-first invite and RSVP site, a DIY Partiful. A host makes 
 5. **Every action shows it worked.** "Saving…" then "Saved ✓", or the page visibly changes.
 6. **Information over decoration.** Lists, plain type, clear labels; closer to a good transit schedule than a social app. No image feeds, badges or likes.
 7. **Plain words, one set of terms.** "Going" / "Can't make it", "Still needed" / "Covered", "Coming". No emoji in the interface; no jokes in errors or confirmations.
-8. **The look isn't decided yet.** It lives in a handful of tokens so a new direction is a contained change.
+8. **The look is the baseline (Nov 23).** It lives in a handful of tokens so a new direction stays a contained change.
 
 ## Brand (so far)
 - **Name:** lowercase "chirk" (an old word for "to cheer up", and a small chirp).
@@ -74,7 +74,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - **Form rows (host):** one line per optional part (label left, current setting right in soft, a › that turns when open). Tapping opens just that row; closed rows keep their values. Rows most chirks don't need (Schedule, Guest options, Shared costs, Gift exchange, Web address) sit inside a **More options** row that lists them; one that's switched on always shows on its own.
 - **List editor:** the host's list as removable chips (who's bringing it shown in soft; removing a covered item asks first) plus an "Add things (commas for several)" box.
 - **Stat tiles (host):** wash tiles that follow what the event uses: coming, replies, still needed (bring list), still owed (costs or poker), in the pot (poker), giving gifts (gift exchange), each with an optional tiny sub-line. Three to a row; four make two rows of two.
-- **Formatting in the message:** `# Title`, `- bullet`, `**bold**`, auto-links; tools: Auto-format, Clear formatting, Preview.
+- **Formatting in the message:** `# Title`, `- bullet`, `**bold**`, `[text](url)` named links, auto-links (also `www.`), opening in a new tab; tools: Auto-format, Clear formatting, Preview.
 - **Two-step delete:** a quiet gray "Delete" link, then a red "Sure?" (no pop-ups). When more goes with it (a guest with costs or poker), an amber box says what, before "Sure?".
 - **Toggle pills (`pill-check`):** a checkbox or radio inside a pill; ticked inverts to ink. Used for Split between, Buy-in / Cash-out, Who's in. Choices stay as picked after each Add.
 - **Selects (`field`):** same shape as fields, with a chevron.
@@ -116,7 +116,7 @@ Times follow a per-event setting: "3 pm" (default) or "3:00 PM".
 - Plain white everywhere for now, so design can be decided once, deliberately.
 
 ## Open for design
-- **Color and type:** a real palette and typeface pairing; dark mode for the app.
+- **Color and type:** decided for now (slate-blue links Nov 20, system font Nov 23); dark mode for the app is still open.
 - **Desktop:** today it's the phone column centered; a wider layout (e.g. photo beside the details) is open.
 - **Three directions from the original Post Up brief, all still open:** Bulletin board (paper notes, pegboard, vintage Apple warmth); Cash App / BRAT (big confident type, one bold color, huge actions); "Craigslist is beautiful" (HTML-1.0 plainness, blue links, dense lists stacked for phones).
 - **Wrappers (an idea):** optional per-event dressing for the invite only (background color, font pairing, texture) from a short curated set; the RSVP form and host tools stay plain.

@@ -3,6 +3,14 @@
 *Written Nov 13, 2026. Thinking, not commitments. Revisit after Thanksgiving.*
 *Language and positioning: LANGUAGE.md. Where things stand today: STATUS.md. The numbered items further down are the detailed notes; this section is the order.*
 
+## Now (Nov 24)
+
+**Built Nov 17–23:** paste or forward an email to make a draft, templates, place lookup, the v1 look on every page, and brand events (hide who's coming, questions, Copy answers, invite color from the photo). Details: STATUS.md.
+
+**Order:** Thanksgiving (Nov 26) with no new features → hardening from the Nov 23 audit (`AUTH_SECRET`, safe photo fetch, undated forwarded emails, a small GitHub check, email health: DMARC and Resend plan limits) → Hannah's first company event as the real host test → Your people (12, 24) → tighten who can sign in → light chirks and circles (Phases 4–5).
+
+**Later, not started:** email and invite tracking (opened, bounced, viewed but no reply); a welcome email to Hudson, Hannah and Molly. **Decided:** keep the current look (Nov 23); RSVP stays one page.
+
 ## Phases (Nov 15)
 
 **Built so far (Nov 13–15):** the invite and RSVP, bring list (Still needed / Covered, doubling up), photo upload, end times, all-day schedule with "which parts are you coming to", named invitations with personal links, email invites, reminders and "Message your guests", fuller reply and RSVP emails, guest notes, copy to next year (with the guest list), privacy and terms, and host accounts with co-hosts (items 4, 8, 10, 11, 13, 18, 19, 20 and the photo upload).
