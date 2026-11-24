@@ -188,7 +188,7 @@ For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe th
 
 ## Next moves (suggested, Nov 24)
 1. Thanksgiving (Nov 26): no new features; watch what guests do, then a short retro.
-2. Hardening from the Nov 23 audit (Drive: "Chirk — AI Handoff Notes"): confirm `AUTH_SECRET` is set on its own in Vercel; make the server photo fetch safe (block private addresses and redirects) or remove it; stop a forwarded email with no date from becoming "today"; a small GitHub check that runs `npm test`, lint and build.
+2. Hardening from the Nov 23 audit (Drive: "Chirk — AI Handoff Notes"): confirm `AUTH_SECRET` is set on its own in Vercel; make the server photo fetch safe (block private addresses and redirects) or remove it; stop a forwarded email with no date from becoming "today"; a small GitHub check that runs `npm test`, lint and build; email health (DMARC, Resend plan limits).
 3. Use Hannah's first company event as the real host test; note confusion before building.
 4. Your people (12, 24) as the next real feature; tighten who can sign in before going beyond friends.
 5. Later, not started: email and invite tracking (opened, bounced, viewed but no reply); a welcome email to Hudson, Hannah and Molly.

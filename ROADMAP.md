@@ -7,7 +7,7 @@
 
 **Built Nov 17–23:** paste or forward an email to make a draft, templates, place lookup, the v1 look on every page, and brand events (hide who's coming, questions, Copy answers, invite color from the photo). Details: STATUS.md.
 
-**Order:** Thanksgiving (Nov 26) with no new features → hardening from the Nov 23 audit (`AUTH_SECRET`, safe photo fetch, undated forwarded emails, a small GitHub check) → Hannah's first company event as the real host test → Your people (12, 24) → tighten who can sign in → light chirks and circles (Phases 4–5).
+**Order:** Thanksgiving (Nov 26) with no new features → hardening from the Nov 23 audit (`AUTH_SECRET`, safe photo fetch, undated forwarded emails, a small GitHub check, email health: DMARC and Resend plan limits) → Hannah's first company event as the real host test → Your people (12, 24) → tighten who can sign in → light chirks and circles (Phases 4–5).
 
 **Later, not started:** email and invite tracking (opened, bounced, viewed but no reply); a welcome email to Hudson, Hannah and Molly. **Decided:** keep the current look (Nov 23); RSVP stays one page.
 
