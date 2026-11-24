@@ -14,7 +14,10 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `saved-photo-colors`)
+## Waiting for review (Nov 23, `photo-color-iphone`)
+- **Photo colors on iPhone for saved photos** (Hudson: still no Contrast color on his phone as a co-host). An iPhone reuses the copy of the photo the page already shows, and that copy can't be read for color, so a saved photo (one you didn't just upload yourself, as on a co-host's phone) read as nothing. Photo colors are now read from chirk's own copy of the photo first, and straight from the link only if that fails. A photo that never loads stops waiting after 8 seconds.
+
+## Went live Nov 23 (PR 11: `saved-photo-colors`)
 - **Both colors for photos saved earlier** (Hudson: worked on desktop, not on mobile). Phones and computers shrink a photo a little differently, so re-reading a saved photo on another device gave a color a shade off the saved one, and chirk then showed only the saved dot. Now the saved color takes the place of the nearer of the two (`keepSaved` in `src/lib/theme.ts`), so Main color and Contrast color both show, with the saved one picked.
 
 ## Went live Nov 23 (PR 10: `contrast-color`)

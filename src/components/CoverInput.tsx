@@ -23,9 +23,10 @@ export function CoverInput({ value, theme, canUpload }: { value: string | null; 
     let live = true;
     const quiet = url === value && !!theme;
     if (!quiet) setStatus("Reading the photo’s color…");
-    // Straight from the link when its site allows it; otherwise through chirk's server (Pinterest, Google).
-    photoColors(url)
-      .catch(async () => { const copy = await photoForColor(url); if (!copy) throw new Error(); return photoColors(copy); })
+    // Through chirk's server first: iPhones reuse the copy the page already showed, which can't be read for color. Straight from the link if that fails (over 4 MB).
+    photoForColor(url)
+      .then((copy) => { if (!copy) throw new Error(); return photoColors(copy); })
+      .catch(() => photoColors(url))
       .then((c) => {
         if (!live) return;
         setRead({ url, colors: quiet ? keepSaved(c, theme) : c });
@@ -113,7 +114,7 @@ async function photoColors(src: string) {
   const img = new Image();
   img.crossOrigin = "anonymous";
   img.src = src;
-  await img.decode();
+  await Promise.race([img.decode(), new Promise((_, fail) => setTimeout(fail, 8000))]); // never wait forever on a photo that won't load
   const px = (n: number) => {
     const c = document.createElement("canvas");
     c.width = c.height = n;
