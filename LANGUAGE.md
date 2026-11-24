@@ -22,7 +22,7 @@ Philosophy: **Make the plan. Send the link. Go do the thing.**
 |---|---|---|
 | **chirk** | the product | Always lowercase, even at the start of a sentence. Not "the chirk app" or "Chirk". |
 | **chirk\*** | the wordmark | The name with the spark. Used as the logo, the home page and the footer. |
-| **the spark** | the asterisk | A small signal: something's happening. Later it can softly blink when there's something new (like a message-waiting light), never a red badge or a count. |
+| **the spark** | the asterisk | A small signal: something's happening. It doesn't move (Hudson, Nov 23); if motion ever comes back it plays once, never a red badge or a count. |
 | **a chirk** | one plan, with its own link | "Send a chirk", "I sent you a chirk." Let the noun catch on naturally; don't force verbs ("chirk up") into the interface. |
 | **your people** | the people you make plans with | Past guests and, later, friends and circles. |
 | **friends** | two-way: both people agree | Later. |

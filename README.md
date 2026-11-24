@@ -11,7 +11,7 @@ A simple way to make plans with your people: one page per plan, one link to send
 **Guests** open `chirk.fyi/<event>`, tap **RSVP**: Going / Can't make it, their names (one reply for a couple or family), kids if asked, which parts of the day, what they're bringing, a note. No account. Named guests get a personal link that opens a reply already addressed to them, and every reply gets a private link to change it later (emailed if they leave an email).
 
 **Hosts** sign in at `chirk.fyi/host` with their email and a 6-digit code. Anyone on a chirk guest list can sign in and make their own. Per event:
-- the invite: photo, message, schedule, reply-by, what to bring, guest options, drafts until published
+- the invite: photo (with an optional invite color from it), message with links, schedule, reply-by, what to bring, up to 5 questions (any can be required), hide who's coming, drafts until published
 - guests: add names (and emails), send invites and reminders by text or email, Message your guests, Select for bulk actions
 - co-hosts (one owner, any number of co-hosts); hosts are on their own guest list as going, marked Host
 - shared costs (who paid, who owes whom, Pay with Venmo, Mark paid) and poker (buy-ins, cash-outs, payouts)

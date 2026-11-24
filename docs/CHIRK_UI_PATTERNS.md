@@ -2,7 +2,7 @@
 
 **Frozen Nov 18, 2026 (Stage 5). v1.1 Nov 20: on every page, host tools included (Stage 6, `docs/UX_COHERENCE_NOV20.md`).** Proven on the guest flow (invite → RSVP → confirmation), live, reviewed (`docs/DESIGN_REVIEWS_V2.md`) and checked (`docs/A11Y_CHECKS.md`). This is the reference for the host tools in Stage 6.
 
-**Changing a frozen pattern** needs: a reason (a usability problem, not taste alone), Hudson's OK, this doc updated, and the visual baselines re-captured (`node scripts/visual.mjs --update`). A unit test (`src/lib/patterns.test.mts`) fails if a guest screen uses an old class or an off-token color.
+**Changing a frozen pattern** needs: a reason (a usability problem, not taste alone), Hudson's OK, this doc updated, and the visual baselines re-captured (`node scripts/visual.mjs --update`). Before asking (Nov 23): show phone-width mockups beside the current look, on one casual and one professional invite. Vet any third-party design tool before using it; Anthropic's frontend-design guidance is the one worth referencing. A unit test (`src/lib/patterns.test.mts`) fails if a guest screen uses an old class or an off-token color.
 
 Background: the brief and constitution (`docs/UI_UX_V2_BRIEF.md`), the audit (`docs/UI_AUDIT_V2.md`).
 
@@ -70,7 +70,7 @@ Every page (since Nov 20): 8px fields with an ink focus border, the focus ring, 
 - **Press:** links, choices and quiet buttons dim to 70%; the primary to 85%.
 - **Hover (mouse only):** links thicken their underline to 2px; outlines darken to soft gray; the primary dims to 90%.
 - **Every action shows it worked:** "Sending…/Saving…" on the button while busy, then the page changes ("You're in!") or a status line ("Sent to 2 ✓"). Send buttons stay tappable; a missing answer is named ("Pick Going or Can't make it.") and focused.
-- No motion. If any is ever added, it respects reduced motion.
+- No motion (the spark included; Hudson, Nov 23). If any is ever added, it plays once, respects reduced motion and stays away from the RSVP.
 
 ## 8. Type and rhythm
 
@@ -119,7 +119,7 @@ Done Nov 20 (it was about 100 uses across ~20 host files: `btn` 43, `btn-quiet` 
 ## 12. Provisional (Hudson's open calls, Nov 18)
 
 These are deliberately **not** frozen:
-1. **Typeface:** system font for now; the biggest remaining lever, decided with the brand color.
+1. **Typeface:** decided Nov 23: the system font stays, no display typeface. The explored directions (Letterpress, Signal) are in the project's `design-exploration/` folder.
 2. **Middle dots** as separators (date line, place · address, "Coming · 5", "2 emails · 3 need a text").
 3. **"Please reply by"** centered under the button (the only centered text).
 4. **Reserving the photo's space** (store dimensions at upload).

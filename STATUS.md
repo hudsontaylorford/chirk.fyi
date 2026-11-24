@@ -1,9 +1,9 @@
-# chirk: status (Nov 23, 2026)
+# chirk: status (Nov 24, 2026)
 
 *A snapshot of where everything is. Update it after each round of work.*
 
 ## In one paragraph
-chirk is live at chirk.fyi and ready for Thanksgiving (Thu Nov 26, 3 pm, replies by Nov 19). Guests reply without accounts; hosts (Hudson and Molly) sign in with an emailed code. Beyond the invite and bring list, it now handles named invitations, email invites and reminders, co-hosts, shared costs, poker nights and gift exchanges, with a 9 am morning job for scheduled emails. A full audit (stress tests, bugs, security, counts, wording) ran on Nov 16; its fixes are waiting on a branch.
+chirk is live at chirk.fyi and ready for Thanksgiving (Thu Nov 26, 3 pm, replies by Nov 19). Guests reply without accounts; hosts (Hudson and Molly) sign in with an emailed code. Beyond the invite and bring list, it now handles named invitations, email invites and reminders, co-hosts, shared costs, poker nights and gift exchanges, with a 9 am morning job for scheduled emails. Since Nov 22 it also covers brand (influencer) events: hide who's coming, up to 5 questions (pick, text box or tick box, any of them required), Copy answers, and an invite color from the cover photo (Main or Contrast). Everything through PR 12 is merged and live; nothing is waiting for review. The look stays as it is (Hudson, Nov 23). Next: Thanksgiving with no new features, then the hardening list under Next moves.
 
 ## Live now (main)
 Everything up to Nov 16's "fixes-3":
@@ -14,7 +14,7 @@ Everything up to Nov 16's "fixes-3":
 - Gift exchange: who's in, never-draw pairs, rules, draws, matches by email, reminders
 - Hosts added to their own guest lists as going (new events, co-hosts, copies only)
 
-## Waiting for review (Nov 23, `photo-color-iphone`)
+## Went live Nov 23 (PR 12: `photo-color-iphone`)
 - **Photo colors on iPhone for saved photos** (Hudson: still no Contrast color on his phone as a co-host). An iPhone reuses the copy of the photo the page already shows, and that copy can't be read for color, so a saved photo (one you didn't just upload yourself, as on a co-host's phone) read as nothing. Photo colors are now read from chirk's own copy of the photo first, and straight from the link only if that fails. A photo that never loads stops waiting after 8 seconds.
 
 ## Went live Nov 23 (PR 11: `saved-photo-colors`)
@@ -166,6 +166,9 @@ For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe th
 - **Setup:** all Vercel settings are in place, including `CRON_SECRET`; the morning job ran at 9 am Nov 16 (200).
 
 ## Decisions made
+- **Keep the current look (Hudson, Nov 23):** system font, no display typeface, no spark motion. The Letterpress and Signal mockups are in the project's `design-exploration/` folder for later.
+- **How visual changes are made from now on:** phone-width mockups beside the current look before anything changes; try each change on one casual and one professional invite; any future motion plays once, respects reduced motion and stays away from the RSVP; vet a third-party design tool before using it (Anthropic's frontend-design guidance is the one worth referencing). Recorded in `docs/CHIRK_UI_PATTERNS.md`.
+- RSVP stays one page (a one-question-per-screen version was mocked Nov 23 and costs more taps).
 - Hosts RSVP automatically (Partiful-style): on the list as going, labeled Host, never counted as a reply.
 - Poker and gift exchange can both be on one event; templates and advanced options (roadmap 29, 35) will tidy the form.
 - Everyone on the list is in the gift exchange unless they can't make it or the host unticks them.
@@ -183,8 +186,9 @@ For Molly's brand (influencer) events, e.g. a brand ships each guest the shoe th
 - Neon can be slow to wake (a rare `CONNECT_TIMEOUT`); auto-retry is offered but not built.
 - Email greetings vary slightly ("Hi X," vs "Hi X!").
 
-## Next moves (suggested)
-1. Use chirk for Thanksgiving and watch what guests do.
-2. After Nov 26: a short retro.
-3. Phase 1 picks from ROADMAP.md: event tiles (37), Cash App button and payment links (33, 34), place autocomplete (14).
-4. Phase 2: Your people (12, 24) and the "join chirk" email.
+## Next moves (suggested, Nov 24)
+1. Thanksgiving (Nov 26): no new features; watch what guests do, then a short retro.
+2. Hardening from the Nov 23 audit (Drive: "Chirk — AI Handoff Notes"): confirm `AUTH_SECRET` is set on its own in Vercel; make the server photo fetch safe (block private addresses and redirects) or remove it; stop a forwarded email with no date from becoming "today"; a small GitHub check that runs `npm test`, lint and build.
+3. Use Hannah's first company event as the real host test; note confusion before building.
+4. Your people (12, 24) as the next real feature; tighten who can sign in before going beyond friends.
+5. Later, not started: email and invite tracking (opened, bounced, viewed but no reply); a welcome email to Hudson, Hannah and Molly.
